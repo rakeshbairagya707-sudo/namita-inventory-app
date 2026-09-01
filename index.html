@@ -16,51 +16,73 @@
                 <i class="fa-solid fa-store text-xl text-yellow-300"></i>
             </div>
             <div>
-                <h1 class="text-lg font-extrabold tracking-wider text-white">NAMITA STORE</h1>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-lg font-extrabold tracking-wider text-white">NAMITA STORE</h1>
+                    <!-- Secret Profit Toggle Button -->
+                    <button onclick="toggleSecretProfit()" title="Secret Profit Code" class="bg-indigo-900/60 hover:bg-indigo-900 text-amber-300 text-[10px] px-2 py-0.5 rounded border border-indigo-500 font-bold transition flex items-center gap-1">
+                        <i class="fa-solid fa-lock" id="profitLockIcon"></i> <span id="profitBtnText">Profit</span>
+                    </button>
+                </div>
                 <p class="text-xs text-indigo-200 font-medium">POS & Inventory Management System</p>
             </div>
         </div>
-        <div class="flex items-center gap-4">
-            <span class="bg-emerald-500 text-white text-xs px-3.5 py-1.5 rounded-full shadow flex items-center gap-1.5 font-bold">
-                <i class="fa-solid fa-circle text-white text-[9px] animate-pulse"></i> Live Counter Active
-            </span>
+
+        <div class="flex items-center gap-3">
+            <!-- Secret Profit Display Box (Hidden by default) -->
+            <div id="secretProfitBox" class="hidden bg-amber-400 text-slate-900 text-xs px-3 py-1.5 rounded-xl font-extrabold shadow-lg border border-amber-300 flex items-center gap-2 animate-pulse">
+                <i class="fa-solid fa-chart-line text-emerald-800"></i>
+                <span>Total Profit: <span id="totalProfitValue" class="text-emerald-900">₹0.00</span></span>
+            </div>
+
+            <!-- Sale / Return Mode Switcher Badge -->
+            <div id="modeBadge" class="bg-emerald-500 text-white text-xs px-3.5 py-1.5 rounded-full shadow flex items-center gap-1.5 font-bold transition-all">
+                <i class="fa-solid fa-cart-shopping text-white text-[10px]"></i> <span id="modeText">Normal Sale Mode</span>
+            </div>
         </div>
     </header>
 
     <!-- Main Content Area -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 h-[calc(100vh-76px)]">
         
-        <!-- Left Section: Product Search, Catalog & Cart Items (Takes 2 Columns) -->
-        <div class="md:col-span-2 bg-white p-4 rounded-2xl shadow-xl border-2 border-indigo-200 flex flex-col justify-between">
+        <!-- Left Section: Search, Mode Selector & Cart Items -->
+        <div class="md:col-span-2 bg-white p-4 rounded-2xl shadow-xl border-2 border-indigo-200 flex flex-col justify-between relative">
             <div>
-                <div class="flex items-center gap-2 mb-3">
-                    <div class="relative w-full">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-indigo-500">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </span>
-                        <input type="text" id="searchBox" oninput="filterProducts()" placeholder="Type Product Name or Barcode to search & add..." class="w-full pl-11 pr-4 py-3 bg-slate-50 border-2 border-indigo-300 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition shadow-inner font-medium">
+                <!-- Action Mode Bar (Sale vs Return/Exchange) -->
+                <div class="flex items-center justify-between mb-3 bg-slate-100 p-1.5 rounded-xl border border-slate-300">
+                    <div class="flex gap-2 w-full">
+                        <button onclick="setSaleMode('sale')" id="saleBtn" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-cash-register"></i> New Sale
+                        </button>
+                        <button onclick="setSaleMode('return')" id="returnBtn" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-200 transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-rotate-left text-rose-500"></i> Return / Exchange Item
+                        </button>
                     </div>
-                    <button onclick="openAddProductModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-md border border-indigo-500 transition flex items-center gap-2 whitespace-nowrap active:scale-95">
-                        <i class="fa-solid fa-plus-circle text-base"></i> Add Product
-                    </button>
                 </div>
 
-                <!-- Search Results Grid (Shows when searching) -->
-                <div id="searchResultsSection" class="mb-3 hidden">
-                    <div class="flex justify-between items-center mb-2 px-1">
-                        <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-barcode"></i> Search Results
-                        </h3>
-                        <span id="productCount" class="text-xs text-slate-500 font-semibold">0 found</span>
+                <!-- Search Box with Clean Dropdown Results -->
+                <div class="relative mb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="relative w-full">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-indigo-500">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </span>
+                            <input type="text" id="searchBox" oninput="filterProducts()" placeholder="Type Product Name or Barcode to search..." class="w-full pl-11 pr-4 py-3 bg-slate-50 border-2 border-indigo-300 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition shadow-inner font-medium" autocomplete="off">
+                        </div>
+                        <button onclick="openAddProductModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-md border border-indigo-500 transition flex items-center gap-2 whitespace-nowrap active:scale-95">
+                            <i class="fa-solid fa-plus-circle text-base"></i> Add Product
+                        </button>
                     </div>
-                    <div class="grid grid-cols-3 gap-2.5 max-h-40 overflow-y-auto pr-1" id="productList"></div>
+
+                    <!-- Clean Dropdown Search Results Box -->
+                    <div id="searchResultsDropdown" class="absolute left-0 right-28 mt-1 bg-white border-2 border-indigo-300 rounded-xl shadow-2xl max-h-60 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                    </div>
                 </div>
 
                 <!-- Main Cart Items List on Left Panel -->
-                <div class="border-t border-slate-200 pt-3">
+                <div class="pt-2">
                     <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-cart-shopping text-indigo-600"></i> Current Cart Items (Added Products)
+                        <h3 id="cartListTitle" class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-cart-shopping text-indigo-600"></i> Current Cart Items (MRP & Price)
                         </h3>
                         <span id="cartCountBadge" class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2.5 py-0.5 rounded-full">0 Items</span>
                     </div>
@@ -78,7 +100,7 @@
             </div>
         </div>
 
-        <!-- Right Section: Grand Total, Discount, Payment & Checkout (Takes 1 Column) -->
+        <!-- Right Section: Totals, MRP Summary, Cash Given & Checkout -->
         <div class="bg-white p-4 rounded-2xl shadow-xl border-2 border-purple-200 flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-center mb-4 border-b border-purple-100 pb-3">
@@ -93,35 +115,47 @@
 
             <!-- Billing Totals & Checkout Actions -->
             <div class="border-2 border-purple-200 bg-purple-50/50 p-4 rounded-2xl shadow-inner space-y-3">
-                <div class="space-y-2.5 text-sm text-slate-700">
-                    <div class="flex justify-between font-medium">
+                <div class="space-y-2 text-sm text-slate-700">
+                    <div class="flex justify-between font-medium text-xs bg-purple-100/60 p-2 rounded-lg">
+                        <span class="text-purple-900 font-bold">Total MRP:</span> 
+                        <span id="totalMrpLabel" class="font-bold text-purple-900">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between font-medium text-xs bg-emerald-50 p-2 rounded-lg">
+                        <span class="text-emerald-800 font-bold">Total Savings (Discount):</span> 
+                        <span id="totalSavingsLabel" class="font-bold text-emerald-700">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between font-medium pt-1">
                         <span class="text-slate-500">Subtotal:</span> 
                         <span id="subtotal" class="font-bold text-slate-800">₹0.00</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-slate-500">Discount (<i class="fa-solid fa-indian-rupee-sign text-xs"></i>):</span>
-                        <input type="number" id="discountInput" value="0" oninput="updateCartUI()" class="w-32 p-2 bg-white border-2 border-purple-300 rounded-xl text-right text-sm font-bold text-slate-800 focus:ring-2 focus:ring-purple-400 focus:outline-none shadow-sm">
+                        <span class="text-slate-500">Extra Discount (₹):</span>
+                        <input type="number" id="discountInput" value="0" oninput="updateCartUI()" class="w-32 p-1.5 bg-white border-2 border-purple-300 rounded-xl text-right text-sm font-bold text-slate-800 focus:ring-2 focus:ring-purple-400 focus:outline-none shadow-sm">
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-slate-500">Change / Return:</span> 
-                        <span id="changeReturn" class="font-bold text-amber-600">₹0.00</span>
+                        <span class="text-slate-500">Cash Given (₹):</span>
+                        <input type="number" id="cashGivenInput" value="0" oninput="updateCartUI()" class="w-32 p-1.5 bg-white border-2 border-purple-300 rounded-xl text-right text-sm font-bold text-slate-800 focus:ring-2 focus:ring-purple-400 focus:outline-none shadow-sm" placeholder="e.g. 500">
+                    </div>
+                    <div class="flex justify-between items-center bg-amber-50 p-2 rounded-xl border border-amber-200">
+                        <span class="text-amber-800 font-bold text-xs">Change / Return:</span> 
+                        <span id="changeReturn" class="font-extrabold text-amber-700 text-base">₹0.00</span>
                     </div>
                     <div class="flex justify-between font-extrabold text-lg text-slate-900 border-t border-purple-200 pt-3 mt-1">
-                        <span class="text-purple-900">Grand Total:</span> 
+                        <span class="text-purple-900" id="grandTotalLabel">Grand Total:</span> 
                         <span id="grandTotal" class="text-emerald-600 text-2xl drop-shadow-sm">₹0.00</span>
                     </div>
                 </div>
 
-                <div class="mt-3">
+                <div class="mt-2">
                     <label class="text-[11px] font-bold text-purple-900 uppercase tracking-wider block mb-1">Payment Method</label>
-                    <select id="paymentMethod" class="w-full p-3 bg-white border-2 border-purple-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-purple-400 focus:outline-none shadow-sm">
+                    <select id="paymentMethod" class="w-full p-2.5 bg-white border-2 border-purple-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-purple-400 focus:outline-none shadow-sm">
                         <option value="Cash">💵 Cash Payment</option>
                         <option value="UPI">📱 UPI / QR Code</option>
                         <option value="Card">💳 Credit / Debit Card</option>
                     </select>
                 </div>
 
-                <button onclick="completeCheckout()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-xl font-extrabold shadow-lg shadow-emerald-600/30 border border-emerald-500 transition flex items-center justify-center gap-2 active:scale-95 text-base">
+                <button onclick="completeCheckout()" id="checkoutBtn" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-extrabold shadow-lg shadow-emerald-600/30 border border-emerald-500 transition flex items-center justify-center gap-2 active:scale-95 text-base">
                     <i class="fa-solid fa-check-to-slot text-lg"></i> Complete Sale & Print
                 </button>
             </div>
@@ -131,79 +165,127 @@
     <!-- Script Area -->
     <script>
         let inventory = [
-            { id: 1, name: 'Namita Special Tea', price: 150, stock: 40, barcode: '890101' },
-            { id: 2, name: 'Premium Biscuit Pack', price: 60, stock: 120, barcode: '890102' },
-            { id: 3, name: 'Cooking Oil 1L', price: 145, stock: 25, barcode: '890103' },
-            { id: 4, name: 'Basmati Rice 5kg', price: 450, stock: 15, barcode: '890104' },
-            { id: 5, name: 'Sugar 1kg', price: 48, stock: 60, barcode: '890105' }
+            { id: 1, name: 'Namita Special Tea', costPrice: 110, mrp: 180, price: 150, stock: 40, barcode: '890101' },
+            { id: 2, name: 'Premium Biscuit Pack', costPrice: 40, mrp: 75, price: 60, stock: 120, barcode: '890102' },
+            { id: 3, name: 'Cooking Oil 1L', costPrice: 120, mrp: 165, price: 145, stock: 25, barcode: '890103' },
+            { id: 4, name: 'Basmati Rice 5kg', costPrice: 380, mrp: 520, price: 450, stock: 15, barcode: '890104' },
+            { id: 5, name: 'Sugar 1kg', costPrice: 38, mrp: 55, price: 48, stock: 60, barcode: '890105' }
         ];
 
         let cart = [];
+        let currentMode = 'sale'; // 'sale' or 'return'
+        let accumulatedProfit = 0; // Tracks total session profit
+
+        function toggleSecretProfit() {
+            const profitBox = document.getElementById('secretProfitBox');
+            const lockIcon = document.getElementById('profitLockIcon');
+            const btnText = document.getElementById('profitBtnText');
+
+            if (profitBox.classList.contains('hidden')) {
+                profitBox.classList.remove('hidden');
+                lockIcon.className = "fa-solid fa-lock-open text-emerald-900";
+                btnText.innerText = "Hide Profit";
+            } else {
+                profitBox.classList.add('hidden');
+                lockIcon.className = "fa-solid fa-lock";
+                btnText.innerText = "Profit";
+            }
+        }
+
+        function setSaleMode(mode) {
+            currentMode = mode;
+            const saleBtn = document.getElementById('saleBtn');
+            const returnBtn = document.getElementById('returnBtn');
+            const modeBadge = document.getElementById('modeBadge');
+            const modeText = document.getElementById('modeText');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            const cartListTitle = document.getElementById('cartListTitle');
+
+            if (mode === 'sale') {
+                saleBtn.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow transition flex items-center justify-center gap-1.5";
+                returnBtn.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-200 transition flex items-center justify-center gap-1.5";
+                modeBadge.className = "bg-emerald-500 text-white text-xs px-3.5 py-1.5 rounded-full shadow flex items-center gap-1.5 font-bold transition-all";
+                modeText.innerText = "Normal Sale Mode";
+                checkoutBtn.className = "w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-extrabold shadow-lg shadow-emerald-600/30 border border-emerald-500 transition flex items-center justify-center gap-2 active:scale-95 text-base";
+                checkoutBtn.innerHTML = `<i class="fa-solid fa-check-to-slot text-lg"></i> Complete Sale & Print`;
+                cartListTitle.innerHTML = `<i class="fa-solid fa-cart-shopping text-indigo-600"></i> Current Sale Cart Items (MRP & Price)`;
+            } else {
+                returnBtn.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-rose-600 text-white shadow transition flex items-center justify-center gap-1.5";
+                saleBtn.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-200 transition flex items-center justify-center gap-1.5";
+                modeBadge.className = "bg-rose-600 text-white text-xs px-3.5 py-1.5 rounded-full shadow flex items-center gap-1.5 font-bold transition-all";
+                modeText.innerText = "Return / Exchange Mode";
+                checkoutBtn.className = "w-full mt-2 bg-rose-600 hover:bg-rose-700 text-white py-3 rounded-xl font-extrabold shadow-lg shadow-rose-600/30 border border-rose-500 transition flex items-center justify-center gap-2 active:scale-95 text-base";
+                checkoutBtn.innerHTML = `<i class="fa-solid fa-rotate-left text-lg"></i> Process Return / Refund`;
+                cartListTitle.innerHTML = `<i class="fa-solid fa-rotate-left text-rose-600"></i> Return / Exchange Items`;
+            }
+            updateCartUI();
+        }
 
         function filterProducts() {
             const query = document.getElementById('searchBox').value.toLowerCase().trim();
-            const searchResultsSection = document.getElementById('searchResultsSection');
-            const productListEl = document.getElementById('productList');
-            const productCountEl = document.getElementById('productCount');
+            const dropdown = document.getElementById('searchResultsDropdown');
 
             if (query === '') {
-                searchResultsSection.classList.add('hidden');
+                dropdown.classList.add('hidden');
+                dropdown.innerHTML = '';
                 return;
             }
 
-            searchResultsSection.classList.remove('hidden');
             let filtered = inventory.filter(p => 
                 p.name.toLowerCase().includes(query) || p.barcode.includes(query)
             );
 
-            productCountEl.innerText = filtered.length + (filtered.length === 1 ? ' found' : ' found');
-
             if (filtered.length === 0) {
-                productListEl.innerHTML = `<div class="col-span-3 text-center py-4 text-xs text-rose-500 font-semibold bg-rose-50 rounded-lg border border-rose-200">No product found! Use 'Add Product' button.</div>`;
+                dropdown.classList.remove('hidden');
+                dropdown.innerHTML = `<div class="p-3 text-xs text-rose-500 font-semibold text-center">No product found! Click 'Add Product'.</div>`;
                 return;
             }
 
             let html = '';
             filtered.forEach(p => {
+                let actionText = currentMode === 'sale' ? 'Add +' : 'Return +';
+                let actionColor = currentMode === 'sale' ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50';
                 html += `
-                    <div onclick="addToCart('${p.name}', ${p.price})" class="border-2 border-indigo-200 bg-white p-2.5 rounded-xl cursor-pointer hover:shadow-md hover:border-indigo-500 transition group flex flex-col justify-between">
+                    <div onclick="addToCart('${p.name}', ${p.price}, ${p.mrp}, ${p.costPrice})" class="px-4 py-2.5 hover:bg-indigo-50 cursor-pointer flex justify-between items-center transition">
                         <div>
-                            <div class="flex justify-between items-start">
-                                <h4 class="font-bold text-xs text-slate-800 group-hover:text-indigo-600 truncate">${p.name}</h4>
-                                <span class="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">Stock:${p.stock}</span>
-                            </div>
-                            <p class="text-indigo-600 font-extrabold text-xs mt-1">₹${p.price.toFixed(2)}</p>
+                            <p class="font-bold text-xs text-slate-800">${p.name}</p>
+                            <p class="text-[10px] text-slate-400">Code: ${p.barcode} | MRP: ₹${p.mrp} | Stock: ${p.stock}</p>
                         </div>
-                        <div class="text-[10px] text-indigo-500 font-bold mt-1 text-right group-hover:underline">Click to Add +</div>
+                        <div class="text-right">
+                            <p class="text-indigo-600 font-extrabold text-xs">₹${p.price.toFixed(2)}</p>
+                            <span class="text-[10px] ${actionColor} font-bold px-1.5 py-0.5 rounded">${actionText}</span>
+                        </div>
                     </div>`;
             });
 
-            productListEl.innerHTML = html;
+            dropdown.classList.remove('hidden');
+            dropdown.innerHTML = html;
         }
 
         function openAddProductModal() {
             let name = prompt("Enter New Product Name:");
             if (!name) return;
-            let price = parseFloat(prompt("Enter Selling Price (₹):"));
-            if (isNaN(price)) return;
+            let mrp = parseFloat(prompt("Enter MRP (₹):")) || 100;
+            let price = parseFloat(prompt("Enter Selling Price (₹):")) || mrp;
+            let costPrice = parseFloat(prompt("Enter Purchase / Cost Price (₹):")) || (price * 0.8);
             let stock = parseInt(prompt("Enter Initial Stock Quantity:")) || 10;
             let barcode = prompt("Enter Barcode / Code:") || Math.floor(100000 + Math.random() * 900000).toString();
 
-            inventory.push({ id: inventory.length + 1, name, price, stock, barcode });
+            inventory.push({ id: inventory.length + 1, name, costPrice, mrp, price, stock, barcode });
             alert('Product added successfully to inventory database!');
             document.getElementById('searchBox').value = name;
             filterProducts();
         }
 
-        function addToCart(name, price) {
-            let existingItem = cart.find(item => item.name === name);
+        function addToCart(name, price, mrp, costPrice) {
+            let existingItem = cart.find(item => item.name === name && item.type === currentMode);
             if (existingItem) {
                 existingItem.qty += 1;
             } else {
-                cart.push({ name, price, qty: 1 });
+                cart.push({ name, price, mrp, costPrice, qty: 1, type: currentMode });
             }
             document.getElementById('searchBox').value = '';
-            document.getElementById('searchResultsSection').classList.add('hidden');
+            document.getElementById('searchResultsDropdown').classList.add('hidden');
             updateCartUI();
         }
 
@@ -215,6 +297,19 @@
             updateCartUI();
         }
 
+        function editItemPrice(index) {
+            let currentPrice = cart[index].price;
+            let newPriceStr = prompt(`Enter new selling price for "${cart[index].name}" (₹):`, currentPrice);
+            if (newPriceStr === null) return;
+            let newPrice = parseFloat(newPriceStr);
+            if (isNaN(newPrice) || newPrice < 0) {
+                alert('Please enter a valid price!');
+                return;
+            }
+            cart[index].price = newPrice;
+            updateCartUI();
+        }
+
         function removeItem(index) {
             cart.splice(index, 1);
             updateCartUI();
@@ -223,9 +318,14 @@
         function updateCartUI() {
             const cartContainer = document.getElementById('cartItems');
             const subtotalEl = document.getElementById('subtotal');
+            const totalMrpLabel = document.getElementById('totalMrpLabel');
+            const totalSavingsLabel = document.getElementById('totalSavingsLabel');
             const grandTotalEl = document.getElementById('grandTotal');
             const discountInput = document.getElementById('discountInput');
+            const cashGivenInput = document.getElementById('cashGivenInput');
+            const changeReturnEl = document.getElementById('changeReturn');
             const cartCountBadge = document.getElementById('cartCountBadge');
+            const totalProfitValue = document.getElementById('totalProfitValue');
             
             let totalItemsCount = cart.reduce((sum, item) => sum + item.qty, 0);
             cartCountBadge.innerText = totalItemsCount + (totalItemsCount === 1 ? ' Item' : ' Items');
@@ -240,20 +340,49 @@
                         <p class="text-xs text-slate-400 mt-1">Search product above and click to add items here</p>
                     </div>`;
                 subtotalEl.innerText = '₹0.00';
+                totalMrpLabel.innerText = '₹0.00';
+                totalSavingsLabel.innerText = '₹0.00';
                 grandTotalEl.innerText = '₹0.00';
+                changeReturnEl.innerText = '₹0.00';
                 return;
             }
 
             let html = '';
-            let subtotal = 0;
+            let netSubtotal = 0;
+            let totalMrpSum = 0;
+            let sessionProfit = 0;
             
             cart.forEach((item, index) => {
                 let itemTotal = item.price * item.qty;
-                subtotal += itemTotal;
-                html += `<div class="flex justify-between items-center bg-white p-3 rounded-xl text-sm border-2 border-indigo-100 shadow-sm hover:border-indigo-300 transition">
+                let itemMrpTotal = item.mrp * item.qty;
+
+                if (item.type === 'return') {
+                    netSubtotal -= itemTotal;
+                    totalMrpSum -= itemMrpTotal;
+                    sessionProfit -= (item.price - item.costPrice) * item.qty;
+                } else {
+                    netSubtotal += itemTotal;
+                    totalMrpSum += itemMrpTotal;
+                    sessionProfit += (item.price - item.costPrice) * item.qty;
+                }
+
+                let badgeHtml = item.type === 'return' 
+                    ? `<span class="bg-rose-100 text-rose-700 text-[9px] font-extrabold px-1.5 py-0.5 rounded ml-1">RETURN</span>` 
+                    : `<span class="bg-emerald-100 text-emerald-700 text-[9px] font-extrabold px-1.5 py-0.5 rounded ml-1">SALE</span>`;
+
+                let borderColor = item.type === 'return' ? 'border-rose-200 bg-rose-50/30' : 'border-indigo-100 bg-white';
+
+                html += `<div class="flex justify-between items-center ${borderColor} p-3 rounded-xl text-sm border-2 shadow-sm transition">
                     <div class="flex-1 pr-2">
-                        <p class="font-extrabold text-slate-800">${item.name}</p>
-                        <p class="text-xs text-slate-500">₹${item.price} × ${item.qty} = <b class="text-indigo-600">₹${itemTotal}</b></p>
+                        <div class="flex items-center">
+                            <p class="font-extrabold text-slate-800">${item.name}</p>
+                            ${badgeHtml}
+                        </div>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                            MRP: <span class="line-through text-slate-400">₹${item.mrp}</span> | 
+                            Sale Price: <span onclick="editItemPrice(${index})" class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded cursor-pointer hover:bg-amber-200 font-bold border border-amber-300" title="Click to change price">₹${item.price} <i class="fa-solid fa-pen text-[10px]"></i></span> × ${item.qty} = 
+                            <b class="${item.type === 'return' ? 'text-rose-600' : 'text-indigo-600'}">₹${itemTotal}</b>
+                        </p>
                     </div>
                     <div class="flex items-center gap-2">
                         <button onclick="changeQty(${index}, -1)" class="bg-slate-100 text-slate-700 border border-slate-300 w-7 h-7 rounded-lg flex items-center justify-center font-bold hover:bg-slate-200 transition">-</button>
@@ -265,12 +394,22 @@
             });
 
             let discount = parseFloat(discountInput.value) || 0;
-            let grandTotal = subtotal - discount;
-            if (grandTotal < 0) grandTotal = 0;
+            let grandTotal = netSubtotal - discount;
+            let totalSavings = totalMrpSum - netSubtotal + discount;
+
+            let cashGiven = parseFloat(cashGivenInput.value) || 0;
+            let changeReturn = cashGiven - grandTotal;
+            if (cashGiven === 0) changeReturn = 0;
+
+            totalMrpLabel.innerText = '₹' + totalMrpSum.toFixed(2);
+            totalSavingsLabel.innerText = '₹' + totalSavings.toFixed(2);
+            subtotalEl.innerText = '₹' + netSubtotal.toFixed(2);
+            grandTotalEl.innerText = '₹' + grandTotal.toFixed(2);
+            changeReturnEl.innerText = '₹' + changeReturn.toFixed(2);
+
+            totalProfitValue.innerText = '₹' + (accumulatedProfit + sessionProfit).toFixed(2);
 
             cartContainer.innerHTML = html;
-            subtotalEl.innerText = '₹' + subtotal.toFixed(2);
-            grandTotalEl.innerText = '₹' + grandTotal.toFixed(2);
         }
 
         function completeCheckout() {
@@ -278,9 +417,23 @@
                 alert('Cart is empty! Please add products first.');
                 return;
             }
-            alert('Sale completed successfully! Stock updated and receipt generated.');
+
+            let currentBillProfit = cart.reduce((sum, item) => {
+                let p = (item.price - item.costPrice) * item.qty;
+                return item.type === 'return' ? sum - p : sum + p;
+            }, 0);
+            
+            accumulatedProfit += currentBillProfit;
+
+            if(currentMode === 'return') {
+                alert('Return / Refund processed successfully! Inventory stock adjusted.');
+            } else {
+                alert('Sale completed successfully! Stock updated and receipt generated.');
+            }
+            
             cart = [];
             document.getElementById('discountInput').value = 0;
+            document.getElementById('cashGivenInput').value = 0;
             updateCartUI();
         }
     </script>
