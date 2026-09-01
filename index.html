@@ -6,7 +6,6 @@
     <title>NAMITA STORE - Enterprise POS & Barcode Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- JsBarcode for generating barcodes -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
     <style>
         @media print {
@@ -340,7 +339,7 @@
             </div>
 
             <div class="flex justify-end gap-2 pt-2">
-                <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg font-bold transition cursor-pointer"><i class="fa-solid fa-print"></i> Print Barcode Labels</button>
+                <button onclick="printGeneratedBarcodes()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg font-bold transition cursor-pointer"><i class="fa-solid fa-print"></i> Print Barcode Labels</button>
                 <button onclick="closeBarcodeModal()" class="bg-slate-900 hover:bg-slate-800 px-4 py-2.5 rounded-lg text-slate-300 font-bold transition cursor-pointer">Close</button>
             </div>
         </div>
@@ -451,8 +450,10 @@
         ];
         let purchases = JSON.parse(localStorage.getItem('namita_purchases')) || [];
         let salesHistory = JSON.parse(localStorage.getItem('namita_sales_history')) || [];
-        let cashInHand = parseFloat(localStorage.getItem('namita_cash_in_hand')) || 5000;
+        let cashInHand = parseFloat(localStorage.getItem('namita_cash_in_hand'));
+        if(isNaN(cashInHand)) cashInHand = 5000;
         let billCart = [];
+        let currentBarcodeData = null;
 
         window.onload = function() {
             updateDashboard();
@@ -472,10 +473,13 @@
                 el.classList.remove('bg-indigo-600', 'text-white', 'font-bold', 'shadow-lg', 'shadow-indigo-600/20');
                 el.classList.add('hover:bg-slate-900', 'text-slate-300');
             });
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            let targetTab = document.getElementById(`tab-${tabId}`);
+            if(targetTab) targetTab.classList.remove('hidden');
             let activeNav = document.getElementById(`nav-${tabId}`);
-            activeNav.classList.remove('hover:bg-slate-900', 'text-slate-300');
-            activeNav.classList.add('bg-indigo-600', 'text-white', 'font-bold', 'shadow-lg', 'shadow-indigo-600/20');
+            if(activeNav) {
+                activeNav.classList.remove('hover:bg-slate-900', 'text-slate-300');
+                activeNav.classList.add('bg-indigo-600', 'text-white', 'font-bold', 'shadow-lg', 'shadow-indigo-600/20');
+            }
         }
 
         function updateDashboard() {
@@ -508,9 +512,10 @@
         function renderCategories() {
             let html = '';
             categories.forEach((cat, idx) => {
-                html += `<tr class="border-b border-slate-800"><td class="p-3 font-bold text-white">${cat}</td><td class="p-3 text-right"><button onclick="deleteCategory(${idx})" class="text-rose-500"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+                html += `<tr class="border-b border-slate-800"><td class="p-3 font-bold text-white">${cat}</td><td class="p-3 text-right"><button onclick="deleteCategory(${idx})" class="text-rose-500 cursor-pointer"><i class="fa-solid fa-trash"></i></button></td></tr>`;
             });
-            document.getElementById('categoryTableBody').innerHTML = html;
+            let tbody = document.getElementById('categoryTableBody');
+            if(tbody) tbody.innerHTML = html;
         }
         function deleteCategory(idx) {
             categories.splice(idx, 1);
@@ -520,6 +525,7 @@
         }
         function populateCategoryDropdowns() {
             let select = document.getElementById('itemCategorySelect');
+            if(!select) return;
             let html = '';
             categories.forEach(cat => { html += `<option value="${cat}">${cat}</option>`; });
             select.innerHTML = html;
@@ -543,9 +549,10 @@
         function renderSuppliers() {
             let html = '';
             suppliers.forEach((s, idx) => {
-                html += `<tr class="border-b border-slate-800"><td class="p-3 font-bold text-white">${s.name}</td><td class="p-3 text-cyan-400">${s.phone}</td><td class="p-3 text-slate-300">${s.address || '-'}</td><td class="p-3 text-right"><button onclick="deleteSupplier(${idx})" class="text-rose-500"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+                html += `<tr class="border-b border-slate-800"><td class="p-3 font-bold text-white">${s.name}</td><td class="p-3 text-cyan-400">${s.phone}</td><td class="p-3 text-slate-300">${s.address || '-'}</td><td class="p-3 text-right"><button onclick="deleteSupplier(${idx})" class="text-rose-500 cursor-pointer"><i class="fa-solid fa-trash"></i></button></td></tr>`;
             });
-            document.getElementById('supplierTableBody').innerHTML = html || `<tr><td colspan="4" class="text-center py-8 text-slate-500">No suppliers found.</td></tr>`;
+            let tbody = document.getElementById('supplierTableBody');
+            if(tbody) tbody.innerHTML = html || `<tr><td colspan="4" class="text-center py-8 text-slate-500">No suppliers found.</td></tr>`;
         }
         function deleteSupplier(idx) {
             suppliers.splice(idx, 1);
@@ -555,6 +562,7 @@
         }
         function populateSupplierDropdowns() {
             let select = document.getElementById('pSuppSelect');
+            if(!select) return;
             let html = '';
             suppliers.forEach(s => { html += `<option value="${s.name}">${s.name} (${s.phone})</option>`; });
             select.innerHTML = html || `<option value="General">General Supplier</option>`;
@@ -563,7 +571,6 @@
         // Items & Auto Barcode
         function openItemModal() {
             document.getElementById('itemModal').classList.remove('hidden');
-            // Auto generate unique barcode number
             let autoCode = 'NS' + Math.floor(100000 + Math.random() * 900000);
             document.getElementById('itemBarcode').value = autoCode;
         }
@@ -594,10 +601,11 @@
                     <td class="p-3 text-slate-300">${i.unit}</td>
                     <td class="p-3 text-cyan-400 font-bold">₹${i.price}</td>
                     <td class="p-3 font-bold">${i.stock}</td>
-                    <td class="p-3 text-right"><button onclick="deleteItem(${idx})" class="text-rose-500"><i class="fa-solid fa-trash"></i></button></td>
+                    <td class="p-3 text-right"><button onclick="deleteItem(${idx})" class="text-rose-500 cursor-pointer"><i class="fa-solid fa-trash"></i></button></td>
                 </tr>`;
             });
-            document.getElementById('catalogTableBody').innerHTML = html;
+            let tbody = document.getElementById('catalogTableBody');
+            if(tbody) tbody.innerHTML = html;
         }
         function deleteItem(idx) {
             inventory.splice(idx, 1);
@@ -605,13 +613,12 @@
             renderCatalog();
         }
 
-        // POS Billing Logic (Barcode Scan & Search Support)
+        // POS Billing Logic
         function filterSalesItems() {
             let q = document.getElementById('salesSearch').value.toLowerCase().trim();
             let dd = document.getElementById('salesDropdown');
             if(!q) { dd.classList.add('hidden'); return; }
 
-            // Check if exact barcode matches
             let exactMatch = inventory.find(i => i.barcode.toLowerCase() === q);
             if(exactMatch) {
                 addToCart(exactMatch.name, exactMatch.category, exactMatch.price, exactMatch.cost, exactMatch.unit);
@@ -683,7 +690,7 @@
 
         // Purchases & Barcode Print Management
         function openPurchaseModal() { document.getElementById('purchaseModal').classList.remove('hidden'); }
-        function closePurchaseModal() { document.getElementById('purchaseModal'].classList.add('hidden'); }
+        function closePurchaseModal() { document.getElementById('purchaseModal').classList.add('hidden'); }
         function savePurchase() {
             let supp = document.getElementById('pSuppSelect').value;
             let item = document.getElementById('pItem').value;
@@ -710,11 +717,12 @@
                     <td class="p-3 text-orange-400 font-bold">₹${p.cost}</td>
                     <td class="p-3 text-right">
                         <button onclick="openBarcodePrintModal(${idx})" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded font-bold cursor-pointer"><i class="fa-solid fa-barcode"></i> Print Barcodes</button>
-                        <button onclick="deletePurchase(${idx})" class="text-rose-500 ml-2"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="deletePurchase(${idx})" class="text-rose-500 ml-2 cursor-pointer"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>`;
             });
-            document.getElementById('purchaseTableBody').innerHTML = html || `<tr><td colspan="5" class="text-center py-8 text-slate-500">No purchase history found.</td></tr>`;
+            let tbody = document.getElementById('purchaseTableBody');
+            if(tbody) tbody.innerHTML = html || `<tr><td colspan="5" class="text-center py-8 text-slate-500">No purchase history found.</td></tr>`;
         }
         function deletePurchase(idx) {
             purchases.splice(idx, 1);
@@ -726,14 +734,12 @@
         function openBarcodePrintModal(purchaseIdx) {
             let p = purchases[purchaseIdx];
             let modalList = document.getElementById('barcodePrintList');
-            let printableArea = document.getElementById('printableBarcodeArea');
-
-            // Find matching inventory item or generate barcode
             let matchedItem = inventory.find(i => i.name.toLowerCase() === p.item.toLowerCase());
             let barcodeVal = matchedItem ? matchedItem.barcode : ('NS' + Math.floor(100000 + Math.random() * 900000));
             let priceVal = matchedItem ? matchedItem.price : 100;
 
-            // Render interactive list where user can edit qty or delete rows
+            currentBarcodeData = { itemName: p.item, barcode: barcodeVal, price: priceVal };
+
             modalList.innerHTML = `
                 <div class="flex items-center justify-between bg-slate-950 p-3 rounded-lg border border-slate-800">
                     <div>
@@ -743,40 +749,63 @@
                     <div class="flex items-center gap-2">
                         <label class="text-slate-400">Print Qty:</label>
                         <input type="number" id="printQtyInput" value="${p.qty}" class="w-16 bg-slate-900 border border-slate-800 p-1 text-center text-white rounded">
-                        <button onclick="removeBarcodeRow(this)" class="text-rose-500 hover:text-rose-400 px-2"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="removeBarcodeRow(this)" class="text-rose-500 hover:text-rose-400 px-2 cursor-pointer"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>
             `;
-
-            // Prepare printable layout
-            window.generatePrintableLabels = function() {
-                let printQty = parseInt(document.getElementById('printQtyInput').value) || 1;
-                let printHtml = '<div style="display: flex; flex-wrap: wrap; gap: 10px; padding: 20px;">';
-                for(let i=0; i<printQty; i++) {
-                    let uniqueSvgId = 'bcode_' + Math.random().toString(36.substring(2));
-                    printHtml += `
-                        <div style="border: 1px dashed #333; padding: 10px; text-align: center; width: 180px; background: #fff; color: #000; border-radius: 4px;">
-                            <div style="font-weight: bold; font-size: 11px; margin-bottom: 2px;">NAMITA STORE</div>
-                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 4px;">${p.item}</div>
-                            <svg id="${uniqueSvgId}"></svg>
-                            <div style="font-size: 12px; font-weight: bold; margin-top: 2px;">MRP: ₹${priceVal}</div>
-                        </div>
-                    `;
-                }
-                printHtml += '</div>';
-                printableArea.innerHTML = printHtml;
-
-                // Render barcodes using JsBarcode library
-                for(let i=0; i<printQty; i++) {
-                    // Re-render logic inside window print hook if needed
-                }
-            };
-
             document.getElementById('barcodePrintModal').classList.remove('hidden');
         }
+
         function removeBarcodeRow(btn) {
-            btn.closest('div.flex').parentElement.remove();
+            let parentDiv = btn.closest('.flex.items-center.justify-between');
+            if(parentDiv) parentDiv.parentElement.innerHTML = '<p class="text-center text-slate-500 text-xs py-4">Item removed from print list.</p>';
+            currentBarcodeData = null;
         }
+
+        function printGeneratedBarcodes() {
+            if(!currentBarcodeData) {
+                alert('No item available to print!');
+                return;
+            }
+            let qtyInput = document.getElementById('printQtyInput');
+            let printQty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+            
+            let printableArea = document.getElementById('printableBarcodeArea');
+            let printHtml = '<div style="display: flex; flex-wrap: wrap; gap: 15px; padding: 20px; font-family: sans-serif;">';
+            
+            for(let i=0; i<printQty; i++) {
+                let uniqueSvgId = 'bcode_' + i + '_' + Math.floor(Math.random() * 10000);
+                printHtml += `
+                    <div style="border: 1px dashed #333; padding: 10px; text-align: center; width: 180px; background: #fff; color: #000; border-radius: 4px;">
+                        <div style="font-weight: bold; font-size: 11px; margin-bottom: 2px;">NAMITA STORE</div>
+                        <div style="font-size: 12px; font-weight: bold; margin-bottom: 4px;">${currentBarcodeData.itemName}</div>
+                        <svg id="${uniqueSvgId}"></svg>
+                        <div style="font-size: 12px; font-weight: bold; margin-top: 2px;">MRP: ₹${currentBarcodeData.price}</div>
+                    </div>
+                `;
+            }
+            printHtml += '</div>';
+            printableArea.innerHTML = printHtml;
+
+            // Generate SVGs via JsBarcode
+            for(let i=0; i<printQty; i++) {
+                let uniqueSvgId = 'bcode_' + i + '_' + Math.floor(Math.random() * 10000);
+                // Re-generate matching IDs safely
+            }
+            
+            // Simpler approach for bulk SVG generation in print
+            setTimeout(() => {
+                let container = document.getElementById('printableBarcodeArea');
+                let svgs = container.querySelectorAll('svg');
+                svgs.forEach(svg => {
+                    try {
+                        JsBarcode(svg, currentBarcodeData.barcode, { format: "CODE128", width: 1.5, height: 40, displayValue: true, fontSize: 12 });
+                    } catch(e) {}
+                });
+                window.print();
+            }, 100);
+        }
+
         function closeBarcodeModal() {
             document.getElementById('barcodePrintModal').classList.add('hidden');
         }
@@ -800,7 +829,8 @@
             customers.forEach(c => {
                 html += `<tr class="border-b border-slate-800"><td class="p-3 font-bold text-white">${c.name}</td><td class="p-3 text-cyan-400">${c.phone}</td><td class="p-3 text-slate-400">${c.address || '-'}</td><td class="p-3 text-right text-indigo-400">Active</td></tr>`;
             });
-            document.getElementById('customerTableBody').innerHTML = html;
+            let tbody = document.getElementById('customerTableBody');
+            if(tbody) tbody.innerHTML = html;
         }
 
         // Reports
@@ -812,10 +842,14 @@
                 else if(s.payMode === 'Due') dueSales += s.grandTotal;
                 netProfit += s.totalProfit;
             });
-            document.getElementById('repCashSales').innerText = '₹' + cashSales;
-            document.getElementById('repOnlineSales').innerText = '₹' + onlineSales;
-            document.getElementById('repDueSales').innerText = '₹' + dueSales;
-            document.getElementById('repNetProfit').innerText = '₹' + netProfit;
+            let el1 = document.getElementById('repCashSales');
+            let el2 = document.getElementById('repOnlineSales');
+            let el3 = document.getElementById('repDueSales');
+            let el4 = document.getElementById('repNetProfit');
+            if(el1) el1.innerText = '₹' + cashSales;
+            if(el2) el2.innerText = '₹' + onlineSales;
+            if(el3) el3.innerText = '₹' + dueSales;
+            if(el4) el4.innerText = '₹' + netProfit;
         }
     </script>
 </body>
