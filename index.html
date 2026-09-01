@@ -1,1338 +1,3306 @@
-START OF PROMPT
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAMITA STORE - POS & Inventory</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+    color:#222;
+}
+
+button,input,select,textarea{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+.app{
+    display:flex;
+    min-height:100vh;
+}
+
+/* SIDEBAR */
+.sidebar{
+    width:245px;
+    background:#171b2d;
+    color:white;
+    padding:20px 12px;
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    overflow-y:auto;
+    z-index:10;
+}
+
+.logo{
+    text-align:center;
+    padding:10px 5px 25px;
+    border-bottom:1px solid #33384d;
+    margin-bottom:15px;
+}
+
+.logo h2{
+    color:#fff;
+    font-size:22px;
+}
+
+.logo small{
+    color:#aeb5ca;
+}
+
+.menu{
+    list-style:none;
+}
+
+.menu li{
+    margin:5px 0;
+}
+
+.menu button{
+    width:100%;
+    border:0;
+    background:transparent;
+    color:#dce1ef;
+    padding:13px 15px;
+    text-align:left;
+    border-radius:8px;
+    transition:.2s;
+}
+
+.menu button:hover,
+.menu button.active{
+    background:#5865f2;
+    color:#fff;
+}
+
+/* MAIN */
+.main{
+    margin-left:245px;
+    width:calc(100% - 245px);
+    min-height:100vh;
+}
+
+.topbar{
+    height:65px;
+    background:white;
+    border-bottom:1px solid #ddd;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 25px;
+    position:sticky;
+    top:0;
+    z-index:5;
+}
+
+.topbar h3{
+    color:#222;
+}
+
+.store-status{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#555;
+}
+
+.dot{
+    width:10px;
+    height:10px;
+    background:#20b26b;
+    border-radius:50%;
+}
+
+.content{
+    padding:25px;
+}
+
+.page{
+    display:none;
+}
+
+.page.active{
+    display:block;
+}
+
+/* DASHBOARD */
+.cards{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+    margin:20px 0;
+}
+
+.card{
+    background:white;
+    border-radius:12px;
+    padding:20px;
+    box-shadow:0 2px 10px rgba(0,0,0,.06);
+}
+
+.card .label{
+    color:#777;
+    font-size:14px;
+}
+
+.card .value{
+    font-size:28px;
+    font-weight:bold;
+    margin-top:8px;
+}
+
+.card.blue{border-left:5px solid #5865f2;}
+.card.green{border-left:5px solid #16a673;}
+.card.orange{border-left:5px solid #f39c12;}
+.card.red{border-left:5px solid #e74c3c;}
+
+.grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.panel{
+    background:white;
+    border-radius:12px;
+    padding:20px;
+    box-shadow:0 2px 10px rgba(0,0,0,.06);
+    margin-bottom:20px;
+}
+
+.panel h3{
+    margin-bottom:15px;
+}
+
+/* BUTTONS */
+.btn{
+    border:0;
+    border-radius:7px;
+    padding:10px 15px;
+    color:white;
+    background:#5865f2;
+}
+
+.btn:hover{
+    opacity:.9;
+}
+
+.btn.green{background:#16a673;}
+.btn.red{background:#e74c3c;}
+.btn.orange{background:#f39c12;}
+.btn.dark{background:#333;}
+.btn.light{
+    background:#edf0f5;
+    color:#333;
+}
+
+.actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+/* FORMS */
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.form-group label{
+    font-size:13px;
+    color:#555;
+    font-weight:bold;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea,
+.search{
+    border:1px solid #d6d9e0;
+    border-radius:7px;
+    padding:10px;
+    outline:none;
+    background:white;
+}
+
+.form-group input:focus,
+.form-group select:focus{
+    border-color:#5865f2;
+}
+
+/* TABLE */
+.table-wrap{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    padding:11px 10px;
+    border-bottom:1px solid #eee;
+    text-align:left;
+    font-size:14px;
+}
+
+th{
+    background:#f7f8fb;
+    color:#555;
+}
+
+.badge{
+    display:inline-block;
+    padding:5px 8px;
+    border-radius:20px;
+    font-size:12px;
+}
+
+.badge.green{
+    background:#dff7ec;
+    color:#087f4d;
+}
+
+.badge.red{
+    background:#fde2e2;
+    color:#b42318;
+}
+
+.badge.orange{
+    background:#fff0d5;
+    color:#9a6200;
+}
+
+/* POS */
+.pos-layout{
+    display:grid;
+    grid-template-columns:1.7fr 1fr;
+    gap:20px;
+}
+
+.pos-search{
+    display:flex;
+    gap:8px;
+    margin-bottom:15px;
+}
+
+.pos-search input{
+    flex:1;
+    padding:13px;
+    border:1px solid #ddd;
+    border-radius:7px;
+}
+
+.product-results{
+    max-height:300px;
+    overflow:auto;
+    border:1px solid #eee;
+}
+
+.product-item{
+    padding:12px;
+    border-bottom:1px solid #eee;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.product-item:hover{
+    background:#f7f8ff;
+}
+
+.cart{
+    min-height:250px;
+}
+
+.cart-row{
+    display:grid;
+    grid-template-columns:1fr 70px 80px 35px;
+    gap:5px;
+    align-items:center;
+    border-bottom:1px solid #eee;
+    padding:10px 0;
+    font-size:13px;
+}
+
+.qty-control{
+    display:flex;
+    gap:3px;
+    align-items:center;
+}
+
+.qty-control button{
+    width:24px;
+    height:24px;
+    border:0;
+    background:#edf0f5;
+    border-radius:4px;
+}
+
+.pos-total{
+    border-top:2px solid #eee;
+    margin-top:15px;
+    padding-top:15px;
+}
+
+.total-row{
+    display:flex;
+    justify-content:space-between;
+    margin:8px 0;
+}
+
+.grand-total{
+    font-size:22px;
+    font-weight:bold;
+}
+
+/* BARCODE */
+.barcode-box{
+    background:white;
+    padding:15px;
+    border:1px dashed #aaa;
+    text-align:center;
+    display:inline-block;
+    min-width:280px;
+}
+
+.barcode-lines{
+    font-family:"Libre Barcode 39",monospace;
+    font-size:48px;
+    letter-spacing:2px;
+    margin:10px;
+}
+
+/* MODAL */
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-box{
+    width:min(700px,95%);
+    max-height:90vh;
+    overflow:auto;
+    background:white;
+    border-radius:12px;
+    padding:25px;
+}
+
+.modal-head{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:20px;
+}
+
+.close{
+    border:0;
+    background:#eee;
+    width:32px;
+    height:32px;
+    border-radius:50%;
+}
+
+/* TOAST */
+.toast{
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    background:#222;
+    color:white;
+    padding:13px 18px;
+    border-radius:8px;
+    display:none;
+    z-index:200;
+}
+
+.toast.show{
+    display:block;
+}
+
+/* RESPONSIVE */
+@media(max-width:1000px){
+    .cards{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .grid2,
+    .pos-layout{
+        grid-template-columns:1fr;
+    }
+
+    .form-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:700px){
+    .sidebar{
+        width:70px;
+        padding:10px 7px;
+    }
+
+    .logo h2{
+        font-size:12px;
+    }
+
+    .logo small{
+        display:none;
+    }
+
+    .menu button{
+        text-align:center;
+        padding:12px 4px;
+        font-size:0;
+    }
+
+    .menu button::first-letter{
+        font-size:20px;
+    }
+
+    .main{
+        margin-left:70px;
+        width:calc(100% - 70px);
+    }
+
+    .content{
+        padding:12px;
+    }
+
+    .cards{
+        grid-template-columns:1fr;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .topbar{
+        padding:0 12px;
+    }
+}
+
+/* PRINT */
+@media print{
+    body *{
+        visibility:hidden;
+    }
+
+    #printArea,
+    #printArea *{
+        visibility:visible;
+    }
+
+    #printArea{
+        position:absolute;
+        left:0;
+        top:0;
+        width:100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+
+<div class="logo">
+    <h2>NAMITA STORE</h2>
+    <small>POS & Inventory</small>
+</div>
+
+<ul class="menu">
+
+<li><button class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</button></li>
+<li><button onclick="showPage('pos',this)">🛒 POS Billing</button></li>
+<li><button onclick="showPage('products',this)">📦 Products</button></li>
+<li><button onclick="showPage('purchase',this)">🚚 Purchase</button></li>
+<li><button onclick="showPage('inventory',this)">📊 Inventory</button></li>
+<li><button onclick="showPage('customers',this)">👥 Customers</button></li>
+<li><button onclick="showPage('suppliers',this)">🏭 Suppliers</button></li>
+<li><button onclick="showPage('barcode',this)">🏷️ Barcode</button></li>
+<li><button onclick="showPage('reports',this)">📈 Reports</button></li>
+<li><button onclick="showPage('settings',this)">⚙️ Settings</button></li>
+
+</ul>
+</aside>
+
+
+<!-- MAIN -->
+<main class="main">
+
+<header class="topbar">
+
+<h3 id="pageTitle">Dashboard</h3>
+
+<div class="store-status">
+<span class="dot"></span>
+<span>System Online</span>
+</div>
+
+</header>
+
+
+<div class="content">
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="page active">
+
+<h2>Dashboard</h2>
+<p style="color:#777;margin-top:5px;">NAMITA STORE Business Management System</p>
+
+<div class="cards">
+
+<div class="card blue">
+<div class="label">Today's Sales</div>
+<div class="value" id="todaySales">₹0</div>
+</div>
+
+<div class="card green">
+<div class="label">Total Products</div>
+<div class="value" id="totalProducts">0</div>
+</div>
+
+<div class="card orange">
+<div class="label">Stock Items</div>
+<div class="value" id="stockItems">0</div>
+</div>
+
+<div class="card red">
+<div class="label">Low Stock</div>
+<div class="value" id="lowStock">0</div>
+</div>
+
+</div>
+
+
+<div class="grid2">
+
+<div class="panel">
+<h3>Quick Actions</h3>
+
+<div class="actions">
+<button class="btn" onclick="showPage('pos')">➕ New Sale</button>
+<button class="btn green" onclick="openProductModal()">➕ Add Product</button>
+<button class="btn orange" onclick="showPage('purchase')">📥 Purchase Entry</button>
+<button class="btn dark" onclick="showPage('barcode')">🏷️ Barcode</button>
+</div>
+
+</div>
+
+<div class="panel">
+
+<h3>Low Stock Products</h3>
+
+<div id="dashboardLowStock"></div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- POS -->
+<section id="pos" class="page">
+
+<h2>POS Billing</h2>
+
+<div class="pos-layout">
+
+<div class="panel">
+
+<div class="pos-search">
+
+<input id="posSearch"
+placeholder="Scan barcode or search product..."
+oninput="searchPOS()">
+
+<button class="btn" onclick="searchPOS()">Search</button>
+
+</div>
+
+<div id="posResults" class="product-results"></div>
+
+</div>
+
+
+<div class="panel">
+
+<h3>Current Cart</h3>
+
+<div id="cart" class="cart"></div>
+
+<div class="pos-total">
+
+<div class="total-row">
+<span>Subtotal</span>
+<strong id="subtotal">₹0</strong>
+</div>
+
+<div class="total-row">
+<span>Discount</span>
+<input id="discount"
+type="number"
+value="0"
+min="0"
+style="width:90px;padding:5px"
+oninput="renderCart()">
+</div>
+
+<div class="total-row">
+<span>GST %</span>
+<input id="gst"
+type="number"
+value="0"
+min="0"
+style="width:90px;padding:5px"
+oninput="renderCart()">
+</div>
+
+<div class="total-row">
+<span>GST Amount</span>
+<strong id="gstAmount">₹0</strong>
+</div>
+
+<div class="total-row grand-total">
+<span>Total</span>
+<strong id="grandTotal">₹0</strong>
+</div>
+
+<div class="form-group" style="margin-top:15px;">
+<label>Payment Method</label>
+
+<select id="paymentMethod">
+<option>Cash</option>
+<option>UPI</option>
+<option>Card</option>
+<option>Credit</option>
+</select>
+
+</div>
+
+<button class="btn green"
+style="width:100%;margin-top:15px;padding:13px;"
+onclick="completeSale()">
+💰 Complete Sale
+</button>
+
+<button class="btn light"
+style="width:100%;margin-top:8px;"
+onclick="clearCart()">
+Clear Cart
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- PRODUCTS -->
+<section id="products" class="page">
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;gap:10px;flex-wrap:wrap;">
+
+<div>
+<h2>Product Management</h2>
+<p style="color:#777;">Manage products, prices, barcode and stock</p>
+</div>
+
+<button class="btn green" onclick="openProductModal()">
+➕ Add Product
+</button>
+
+</div>
+
+
+<div class="panel">
+
+<input class="search"
+style="width:100%;margin-bottom:15px;"
+placeholder="Search product..."
+oninput="renderProducts(this.value)">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>Barcode</th>
+<th>Product</th>
+<th>Category</th>
+<th>Purchase</th>
+<th>Sale Price</th>
+<th>MRP</th>
+<th>Stock</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="productTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- PURCHASE -->
+<section id="purchase" class="page">
+
+<h2>Purchase Entry</h2>
+
+<div class="panel">
+
+<div class="form-grid">
+
+<div class="form-group">
+<label>Product</label>
+<select id="purchaseProduct"></select>
+</div>
+
+<div class="form-group">
+<label>Quantity</label>
+<input id="purchaseQty" type="number" min="1" value="1">
+</div>
+
+<div class="form-group">
+<label>Purchase Price</label>
+<input id="purchasePrice" type="number" min="0">
+</div>
+
+<div class="form-group">
+<label>Supplier</label>
+<select id="purchaseSupplier"></select>
+</div>
+
+</div>
+
+<button class="btn green" style="margin-top:15px;" onclick="addPurchase()">
+📥 Save Purchase
+</button>
+
+</div>
+
+
+<div class="panel">
+
+<h3>Purchase History</h3>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>Date</th>
+<th>Product</th>
+<th>Quantity</th>
+<th>Price</th>
+<th>Total</th>
+<th>Supplier</th>
+</tr>
+</thead>
+
+<tbody id="purchaseTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- INVENTORY -->
+<section id="inventory" class="page">
+
+<h2>Inventory / Stock</h2>
+
+<div class="panel">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>Barcode</th>
+<th>Product</th>
+<th>Category</th>
+<th>Stock</th>
+<th>Minimum</th>
+<th>Status</th>
+</tr>
+</thead>
 
-I am building a production-ready business management software called:
+<tbody id="inventoryTable"></tbody>
 
-NAMITA STORE
-Enterprise POS + Inventory + Billing + Barcode + Purchase + Customer/Supplier + E-commerce Management System
-
-IMPORTANT:
-Do NOT create a simple demo or mockup.
-Do NOT remove existing working features.
-Upgrade and rebuild the current application into a complete, reliable, production-ready business management system.
-
-Use the existing NAMITA STORE interface/design as the visual foundation, but improve the architecture, database handling, validation, calculations, responsiveness, security and functionality.
-
-The application must be suitable for a real retail store selling imitation jewellery, cosmetics, grocery and other products.
-
-==================================================
-1. TECHNOLOGY / ARCHITECTURE
-==================================================
-
-Build this as a real web application.
-
-Use:
-
-- React / Next.js or the existing framework of the project
-- TypeScript where possible
-- Tailwind CSS
-- PostgreSQL/Supabase or the project's existing production database
-- Proper authentication
-- Server-side database operations
-- API routes/server actions for all important database mutations
-- Responsive desktop/tablet/mobile UI
-
-DO NOT use localStorage as the primary database.
-
-localStorage may only be used for:
-- temporary POS cart
-- UI preferences
-- non-critical cached settings
-
-All business data must be stored in the database.
-
-Every database operation must be safe against duplicate submissions and accidental data loss.
-
-==================================================
-2. AUTHENTICATION & USER ROLES
-==================================================
-
-Create a secure login system.
-
-Roles:
-
-1. Owner / Admin
-2. Manager
-3. Cashier / Seller
-
-Admin can:
-- manage everything
-- view all reports
-- manage users
-- change settings
-- edit/delete transactions
-- manage database backup
-- manage e-commerce settings
-
-Manager can:
-- manage products
-- purchases
-- customers
-- suppliers
-- sales
-- reports
-
-Cashier can:
-- use POS
-- create sales
-- search products
-- add customers
-- print bills
-- process allowed returns
-
-Cashier must NOT be allowed to:
-- delete products
-- delete purchases
-- change historical transactions
-- modify financial settings
-- access sensitive admin settings
-
-Keep an audit log of important actions.
-
-==================================================
-3. DASHBOARD
-==================================================
-
-Create a professional real-time dashboard.
-
-Show:
-
-- Today's Sales
-- Today's Profit
-- Today's Purchase
-- Today's Expenses
-- Today's Cash Sales
-- Today's UPI/Online Sales
-- Today's Credit/Due Sales
-- Total Customers
-- Total Suppliers
-- Total Products
-- Low Stock Products
-- Out of Stock Products
-- Pending Customer Due
-- Supplier Due
-- Total Inventory Value
-- Total Sales
-- Total Profit
-
-Add date filters:
-
-- Today
-- Yesterday
-- This Week
-- This Month
-- Last Month
-- Custom Date Range
-
-Add charts:
-
-- Daily Sales
-- Daily Profit
-- Payment Method
-- Top Selling Products
-- Category Sales
-
-Dashboard must update automatically after:
-- sale
-- purchase
-- return
-- expense
-- payment collection
-- online order
-
-==================================================
-4. PRODUCT / ITEM MASTER
-==================================================
-
-Create a complete Product Master.
-
-Fields:
-
-- Product ID
-- Product Name
-- SKU
-- Barcode
-- Category
-- Sub-category
-- Brand
-- Product Image
-- Unit
-- HSN Code
-- GST %
-- Purchase Price
-- Selling Price
-- MRP
-- Wholesale Price
-- Minimum Selling Price
-- Opening Stock
-- Current Stock
-- Minimum Stock Alert
-- Maximum Stock
-- Supplier
-- Product Description
-- Status
-- Created Date
-- Updated Date
-
-Units:
-
-- Pcs
-- Kg
-- Gram
-- Packet
-- Box
-- Pair
-- Set
-- Dozen
-- Meter
-- Other
-
-Support product variations where required.
-
-Example:
-Product:
-Earring
-
-Variation:
-Gold
-Silver
-Red
-Blue
-
-Each variation can have:
-- separate SKU
-- separate barcode
-- separate price
-- separate stock
-
-==================================================
-5. BARCODE SYSTEM
-==================================================
-
-Create a complete barcode management system.
-
-Support:
-
-- Auto barcode generation
-- Manual barcode entry
-- CODE128
-- EAN-13 where applicable
-- UPC where applicable
-- QR Code
-- SKU barcode
-
-Barcode must be unique.
-
-Prevent duplicate barcode creation.
-
-Barcode search must work instantly in POS.
-
-Barcode scanner input should automatically add product to cart.
-
-Support USB/Bluetooth barcode scanner keyboard input.
-
-Add barcode label printing.
-
-Required label templates:
-
-1. 15mm x 25mm
-2. 25mm x 38mm
-3. 30mm x 50mm
-4. Custom Size
-
-Allow user to set:
-
-- label width
-- label height
-- margin
-- number of columns
-- number of rows
-- gap
-- font size
-- barcode height
-- product name visibility
-- price visibility
-- SKU visibility
-- barcode number visibility
-- store name visibility
-
-Barcode label example:
-
-NAMITA STORE
-Product Name
-MRP ₹250
-[BARCODE]
-NS100001
-
-Allow:
-- print one barcode
-- print selected quantity
-- print complete purchase batch
-- reprint old barcode
-- bulk barcode generation
-
-Make print layout compatible with normal A4 printers and label printers.
-
-==================================================
-6. POS BILLING SYSTEM
-==================================================
-
-Create a fast professional seller POS.
-
-POS must support:
-
-- barcode scanner
-- product name search
-- SKU search
-- category search
-- product image
-- keyboard shortcuts
-- quick product buttons
-- customer selection
-- new customer
-- customer phone search
-
-Cart fields:
-
-- Product
-- Barcode
-- Price
-- Quantity
-- Discount
-- Tax
-- Total
-
-Allow quantity increase/decrease.
-
-Prevent selling more than available stock unless Admin allows negative stock.
-
-Show:
-
-Subtotal
-Discount
-Tax
-Round Off
-Grand Total
-
-Discount must support:
-
-- fixed amount
-- percentage
-
-Allow item-level discount and bill-level discount.
-
-Payment modes:
-
-- Cash
-- UPI
-- Online
-- Card
-- Credit / Due
-- Mixed Payment
-
-Mixed payment example:
-
-Cash ₹500
-UPI ₹300
-Due ₹200
-
-Calculate automatically.
-
-Cash received:
-- amount received
-- change to return
-
-==================================================
-7. TAX / GST
-==================================================
-
-Create configurable tax system.
-
-Support:
-
-- GST
-- CGST
-- SGST
-- IGST
-- Tax inclusive price
-- Tax exclusive price
-- No Tax
-
-Allow GST percentage per product.
-
-Invoice must calculate tax correctly.
-
-==================================================
-8. INVOICE / BILL
-==================================================
-
-Generate professional invoice.
-
-Invoice fields:
-
-NAMITA STORE
-Store address
-Phone
-GSTIN if configured
-
-Invoice Number
-Date
-Time
-Cashier
-Customer Name
-Customer Phone
-
-Product
-Qty
-Rate
-Discount
-Tax
-Amount
-
-Subtotal
-Discount
-Tax
-Round Off
-Grand Total
-
-Payment Method
-
-Amount Received
-Change
-
-For due sale:
-
-Total Due
-Previous Due
-Current Due
-Total Outstanding
-
-Add:
-
-"Thank you for shopping with us!"
-
-Invoice numbering must be sequential and configurable.
-
-Example:
-
-INV-1001
-INV-1002
-INV-1003
-
-Do not generate duplicate invoice numbers.
-
-==================================================
-9. THERMAL PRINTER
-==================================================
-
-Support:
-
-- 58mm thermal printer
-- 80mm thermal printer
-- A4 printer
-
-Provide print settings.
-
-Receipt should be properly formatted for thermal printers.
-
-Add:
-
-Print Bill
-Reprint Bill
-Download PDF
-Print Preview
-
-==================================================
-10. CUSTOMER MANAGEMENT
-==================================================
-
-Create complete Customer Directory.
-
-Fields:
-
-- Customer ID
-- Name
-- Phone
-- WhatsApp Number
-- Address
-- Email
-- Opening Due
-- Current Due
-- Total Purchase
-- Total Paid
-- Last Purchase
-- Notes
-
-Customer profile should show:
-
-- purchase history
-- invoices
-- returns
-- payments
-- due history
-
-Allow:
-
-- Add Customer
-- Edit Customer
-- Search Customer
-- Delete only with permission
-- Collect Due Payment
-- Print customer statement
-
-==================================================
-11. CUSTOMER DUE / LEDGER
-==================================================
-
-Create proper accounting ledger.
-
-For every customer maintain:
-
-Debit:
-Sale / Due
-
-Credit:
-Payment received
-
-Show:
+</table>
 
-Opening Balance
-Total Debit
-Total Credit
-Closing Balance
+</div>
 
-Allow payment collection.
+</div>
 
-Payment methods:
-
-- Cash
-- UPI
-- Bank
-- Other
+</section>
 
-Generate customer statement.
 
-==================================================
-12. SUPPLIER MANAGEMENT
-==================================================
+<!-- CUSTOMERS -->
+<section id="customers" class="page">
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+
+<h2>Customers</h2>
+
+<button class="btn green" onclick="openCustomerModal()">
+➕ Add Customer
+</button>
+
+</div>
+
+<div class="panel">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Phone</th>
+<th>Address</th>
+<th>Credit</th>
+<th>Action</th>
+</tr>
+</thead>
 
-Create Supplier Master.
+<tbody id="customerTable"></tbody>
 
-Fields:
+</table>
 
-- Supplier Name
-- Phone
-- WhatsApp
-- Address
-- GSTIN
-- Email
-- Opening Due
-- Current Due
-- Total Purchase
-- Total Paid
+</div>
 
-Supplier profile:
+</div>
 
-- purchase history
-- payment history
-- due balance
-- statements
+</section>
 
-==================================================
-13. PURCHASE ENTRY
-==================================================
 
-Create professional purchase entry.
+<!-- SUPPLIERS -->
+<section id="suppliers" class="page">
 
-Fields:
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
 
-- Purchase Number
-- Supplier
-- Purchase Date
-- Invoice Number
-- Product
-- Barcode
-- Quantity
-- Purchase Cost
-- Selling Price
-- MRP
-- GST
-- Discount
-- Total
+<h2>Suppliers</h2>
 
-Support multiple products in one purchase.
+<button class="btn green" onclick="openSupplierModal()">
+➕ Add Supplier
+</button>
 
-Excel-style bulk entry.
+</div>
 
-Buttons:
+<div class="panel">
 
-+ Add Row
-Duplicate Row
-Delete Row
-Import Excel/CSV
-Save Purchase
+<div class="table-wrap">
 
-When purchase is saved:
+<table>
 
-1. Inventory increases
-2. Purchase record is created
-3. Supplier ledger is updated
-4. Cash/bank balance is updated if paid
-5. Supplier due is updated if credit
-6. Barcode printing option appears
+<thead>
+<tr>
+<th>Name</th>
+<th>Phone</th>
+<th>Address</th>
+<th>Due</th>
+<th>Action</th>
+</tr>
+</thead>
 
-All operations must happen transactionally.
+<tbody id="supplierTable"></tbody>
 
-==================================================
-14. PURCHASE BARCODE GENERATION
-==================================================
+</table>
 
-After purchase entry:
+</div>
 
-Show:
+</div>
 
-Purchase Saved Successfully
+</section>
 
-Then:
 
-Generate Barcode Labels
+<!-- BARCODE -->
+<section id="barcode" class="page">
 
-For each product show:
+<h2>Barcode Generator & Printing</h2>
 
-Product
-Barcode
-Quantity
-MRP
-Selling Price
+<div class="panel">
 
-Allow changing print quantity.
+<div class="form-grid">
 
-Allow:
-- Print All
-- Print Selected
-- Cancel
+<div class="form-group">
+<label>Select Product</label>
+<select id="barcodeProduct" onchange="generateBarcodePreview()"></select>
+</div>
 
-==================================================
-15. INVENTORY MANAGEMENT
-==================================================
+<div class="form-group">
+<label>Barcode Type</label>
+<select id="barcodeType">
+<option>CODE128</option>
+<option>EAN-13</option>
+<option>QR CODE</option>
+</select>
+</div>
 
-Inventory must automatically change.
+<div class="form-group">
+<label>Label Size</label>
+<select id="barcodeSize">
+<option>15 × 25 mm</option>
+<option>20 × 30 mm</option>
+<option>25 × 38 mm</option>
+<option>Custom</option>
+</select>
+</div>
 
-Sale:
-Stock - Quantity Sold
+</div>
 
-Purchase:
-Stock + Quantity Purchased
+<div style="margin-top:25px;text-align:center;">
 
-Customer Return:
-Stock + Returned Quantity
+<div id="barcodePreview" class="barcode-box">
 
-Supplier Return:
-Stock - Returned Quantity
+<div>NAMITA STORE</div>
+<div id="barcodeVisual" class="barcode-lines">
+|||||||||||||||||||||||||
+</div>
 
-Stock Adjustment:
-Admin only
+<div id="barcodeNumber">000000000000</div>
 
-Show:
+</div>
 
-Current Stock
-Reserved Stock
-Available Stock
-Minimum Stock
-Stock Value
+<br><br>
 
-Low stock warning.
+<button class="btn" onclick="printBarcode()">
+🖨️ Print Barcode
+</button>
 
-Out of stock warning.
+<button class="btn green" onclick="generateNewBarcode()">
+🔄 Generate New Barcode
+</button>
 
-Stock movement history:
+</div>
 
-Date
-Reference
-Type
-Qty In
-Qty Out
-Balance
+</div>
 
-==================================================
-16. ONLINE / E-COMMERCE ORDERS
-==================================================
+</section>
 
-Create an Online Orders module.
 
-Orders can come from:
+<!-- REPORTS -->
+<section id="reports" class="page">
 
-- Website
-- E-commerce store
-- API
-- Manual order entry
-- CSV import
+<h2>Reports</h2>
 
-Order statuses:
+<div class="cards">
 
-Pending
-Confirmed
-Processing
-Packed
-Shipped
-Delivered
-Cancelled
-Returned
+<div class="card blue">
+<div class="label">Total Sales</div>
+<div class="value" id="reportSales">₹0</div>
+</div>
 
-VERY IMPORTANT:
+<div class="card green">
+<div class="label">Total Purchases</div>
+<div class="value" id="reportPurchases">₹0</div>
+</div>
 
-When an online order is confirmed/paid according to configured rules:
+<div class="card orange">
+<div class="label">Transactions</div>
+<div class="value" id="reportTransactions">0</div>
+</div>
 
-Automatically reduce inventory.
+<div class="card red">
+<div class="label">Estimated Profit</div>
+<div class="value" id="reportProfit">₹0</div>
+</div>
 
-Do NOT reduce stock twice.
+</div>
 
-Use unique external order ID to prevent duplicate orders.
 
-Example:
+<div class="panel">
 
-Website Order #WEB1001
-Product A
-Qty 2
+<div class="actions">
 
-Inventory:
+<button class="btn" onclick="exportData()">
+⬇️ Export Data
+</button>
 
-Before = 10
-After = 8
+<button class="btn green" onclick="document.getElementById('importFile').click()">
+⬆️ Import Data
+</button>
 
-If the same order is synced again, inventory must NOT become 6.
+<input
+type="file"
+id="importFile"
+accept=".json"
+style="display:none"
+onchange="importData(event)">
 
-Create stock reservation support if possible.
+<button class="btn orange" onclick="printSalesReport()">
+🖨️ Print Report
+</button>
 
-==================================================
-17. E-COMMERCE SYNC
-==================================================
+</div>
 
-Create an E-commerce Integration Settings page.
+</div>
 
-Fields:
+</section>
 
-Platform Name
-API URL
-API Key
-Secret
-Webhook URL
-Store URL
-Sync Status
 
-Support generic API integration architecture.
+<!-- SETTINGS -->
+<section id="settings" class="page">
 
-Create:
+<h2>Settings</h2>
 
-Sync Products
-Sync Stock
-Import Orders
-Update Order Status
+<div class="panel">
 
-Stock changes in POS must be able to sync to the online store.
+<h3>Store Information</h3>
 
-Online sale must update local inventory.
+<div class="form-grid">
 
-IMPORTANT:
+<div class="form-group">
+<label>Store Name</label>
+<input id="settingStore" value="NAMITA STORE">
+</div>
 
-Do not hard-code fake API credentials.
+<div class="form-group">
+<label>Phone</label>
+<input id="settingPhone">
+</div>
 
-If an external platform API is not configured, clearly show:
+<div class="form-group">
+<label>Address</label>
+<input id="settingAddress">
+</div>
 
-"Integration not configured"
+</div>
 
-Never pretend that an online sync succeeded when it did not.
+<button class="btn green" style="margin-top:15px;" onclick="saveSettings()">
+Save Settings
+</button>
 
-==================================================
-18. RETURN / EXCHANGE
-==================================================
+</div>
 
-Do NOT delete the original invoice when processing a return.
 
-This is very important.
+<div class="panel">
 
-Create a separate Return/Exchange transaction.
+<h3>Database</h3>
 
-Search invoice:
+<p style="color:#777;margin-bottom:15px;">
+Data is stored locally in this browser.
+</p>
 
-INV-1001
+<div class="actions">
 
-Show original items.
+<button class="btn" onclick="exportData()">Backup Data</button>
 
-Allow selecting:
+<button class="btn red" onclick="clearAllData()">
+⚠️ Clear All Data
+</button>
 
-- full return
-- partial return
-- exchange
+</div>
 
-Return fields:
+</div>
 
-Return Number
-Original Invoice
-Product
-Qty
-Return Reason
-Refund Amount
-Date
-Customer
+</section>
 
-When returned:
+</div>
+</main>
 
-Inventory increases.
+</div>
 
-Refund:
 
-Cash refund
-UPI refund
-Credit adjustment
+<!-- PRODUCT MODAL -->
+<div class="modal" id="productModal">
 
-Original invoice remains permanently in history.
+<div class="modal-box">
 
-Create return report.
+<div class="modal-head">
 
-==================================================
-19. EXPENSE MANAGEMENT
-==================================================
+<h3>Add Product</h3>
 
-Create Expense module.
+<button class="close" onclick="closeModal('productModal')">×</button>
 
-Fields:
+</div>
 
-- Expense ID
-- Date
-- Category
-- Description
-- Amount
-- Payment Method
-- Notes
+<div class="form-grid">
 
-Expense categories:
+<div class="form-group">
+<label>Product Name *</label>
+<input id="productName">
+</div>
 
-- Rent
-- Electricity
-- Salary
-- Transport
-- Packaging
-- Internet
-- Marketing
-- Maintenance
-- Other
+<div class="form-group">
+<label>SKU</label>
+<input id="productSku">
+</div>
 
-Cash expense must reduce cash balance.
+<div class="form-group">
+<label>Barcode</label>
+<input id="productBarcode">
+</div>
 
-Reports must include expenses.
+<div class="form-group">
+<label>Category</label>
+<input id="productCategory" placeholder="Jewellery / Cosmetics / Grocery">
+</div>
 
-==================================================
-20. CASH MANAGEMENT
-==================================================
+<div class="form-group">
+<label>Purchase Price</label>
+<input id="productPurchase" type="number" min="0">
+</div>
 
-Create Cash Drawer module.
+<div class="form-group">
+<label>Selling Price</label>
+<input id="productSale" type="number" min="0">
+</div>
 
-Show:
+<div class="form-group">
+<label>MRP</label>
+<input id="productMrp" type="number" min="0">
+</div>
 
-Opening Cash
-Cash Sales
-Cash Purchases
-Cash Expenses
-Cash Refunds
-Customer Payments
-Supplier Payments
-Cash Adjustment
-Closing Cash
+<div class="form-group">
+<label>Opening Stock</label>
+<input id="productStock" type="number" min="0">
+</div>
 
-Allow:
+<div class="form-group">
+<label>Minimum Stock</label>
+<input id="productMinStock" type="number" min="0" value="5">
+</div>
 
-Cash In
-Cash Out
+<div class="form-group">
+<label>GST %</label>
+<input id="productGst" type="number" min="0" value="0">
+</div>
 
-Every cash movement must create a transaction record.
+<div class="form-group">
+<label>HSN Code</label>
+<input id="productHsn">
+</div>
 
-==================================================
-21. REPORTS
-==================================================
+</div>
 
-Create professional reports.
+<div style="margin-top:20px;text-align:right;">
 
-Reports:
-
-1. Sales Report
-2. Purchase Report
-3. Profit Report
-4. Stock Report
-5. Stock Movement
-6. Product Sales
-7. Category Sales
-8. Customer Report
-9. Customer Due Report
-10. Supplier Report
-11. Supplier Due Report
-12. Expense Report
-13. Cash Report
-14. UPI/Online Report
-15. Tax/GST Report
-16. Return Report
-17. Exchange Report
-18. E-commerce Order Report
-19. Barcode Report
-20. Daily Closing Report
-
-Every report must have:
-
-From Date
-To Date
-Search
-Filter
-Print
-PDF
-CSV/Excel Export
-
-==================================================
-22. PROFIT CALCULATION
-==================================================
-
-Profit must NOT simply be:
-
-Selling Price - total invoice cost
-
-Calculate correctly.
-
-For each sold product:
-
-Revenue
-- Discount
-- Cost of Goods Sold
-= Gross Profit
-
-Then:
-
-Gross Profit
-- Expenses
-= Net Profit
-
-Returns must reverse the corresponding revenue/profit.
-
-==================================================
-23. SEARCH & FILTER
-==================================================
-
-All tables must have:
-
-- search
-- pagination
-- sorting
-- date filter
-- category filter
-- status filter where relevant
-
-POS search must be extremely fast.
-
-Barcode search must be exact and prioritized.
-
-==================================================
-24. IMPORT / EXPORT
-==================================================
-
-Create:
-
-Import Products from CSV/Excel
-Export Products
-Import Customers
-Export Customers
-Import Suppliers
-Export Suppliers
-Export Sales
-Export Purchases
-Export Inventory
-
-Validate imported data before saving.
-
-Show errors row-by-row.
-
-Do not partially corrupt the database.
-
-==================================================
-25. BACKUP & RESTORE
-==================================================
-
-Create Backup & Restore.
-
-Admin only.
-
-Support:
-
-- Full database backup
-- Export JSON
-- Export CSV
-- Restore backup
-
-Before restore:
-
-Show confirmation.
-
-Never silently overwrite existing data.
-
-Add automatic backup architecture if backend supports scheduled jobs.
-
-==================================================
-26. WHATSAPP / SHARE
-==================================================
-
-After billing show:
-
-Print
-Download PDF
-Share
-WhatsApp
-
-WhatsApp should prepare a message containing:
-
-Invoice Number
-Customer Name
-Grand Total
-Payment Status
-
-Do not pretend a message was sent if the system only opened WhatsApp.
-
-==================================================
-27. SETTINGS
-==================================================
-
-Create Settings page.
-
-Store settings:
-
-Store Name
-Logo
-Address
-Phone
-Email
-GSTIN
-Invoice Prefix
-Invoice Starting Number
-Currency
-Tax Mode
-Thermal Printer Width
-Barcode Label Size
-Default Discount
-Default Payment Mode
-
-Barcode templates:
-
-15x25
-25x38
-30x50
-Custom
-
-Invoice templates:
-
-Thermal 58mm
-Thermal 80mm
-A4
-
-==================================================
-28. UI / DESIGN
-==================================================
-
-Keep the current NAMITA STORE professional dark dashboard style.
-
-Use:
-
-Dark navy/slate background
-Indigo
-Pink
-Cyan
-Emerald
-Amber
-
-But improve usability.
-
-Sidebar:
-
-Dashboard
-POS & Billing
-Products & Barcodes
-Categories
-Suppliers
-Purchases
-Inventory
-Customers
-Online Orders
-Returns / Exchange
-Expenses
-Cash Management
-Reports
-Barcode Printing
-Settings
-Backup
-
-Top bar:
-
-NAMITA STORE
-Current User
-Current Counter
-Cash in Hand
-Notifications
-Logout
-
-Make the application responsive.
-
-Desktop POS should be optimized for 1366x768 and larger monitors.
-
-Mobile should also work.
-
-==================================================
-29. DATA VALIDATION
-==================================================
-
-Implement strict validation.
-
-Examples:
-
-Product name required.
-Barcode must be unique.
-SKU must be unique.
-Price cannot be negative.
-Quantity cannot be negative.
-Payment amount cannot be negative.
-Customer phone validation.
-Supplier phone validation.
-Invoice number unique.
-External e-commerce order ID unique.
-
-Show user-friendly error messages.
-
-Never silently fail.
-
-==================================================
-30. SECURITY
-==================================================
-
-Do not expose secret API keys in frontend code.
-
-Use server-side environment variables.
-
-Use authentication.
-
-Use authorization.
-
-Validate all server requests.
-
-Prevent duplicate form submissions.
-
-Use database transactions for:
-
-Sale
-Purchase
-Return
-Payment
-Stock adjustment
-
-Maintain audit logs.
-
-==================================================
-31. IMPORTANT STOCK RULES
-==================================================
-
-Implement centralized stock transaction logic.
-
-Never modify stock directly from random UI components.
-
-Every stock change must have:
-
-Product ID
-Reference Type
-Reference ID
-Qty In
-Qty Out
-Previous Stock
-New Stock
-User
-Date/Time
-
-Reference types:
-
-PURCHASE
-SALE
-CUSTOMER_RETURN
-SUPPLIER_RETURN
-ADJUSTMENT
-ONLINE_ORDER
-CANCELLATION
-EXCHANGE
-
-This is mandatory.
-
-==================================================
-32. IMPORTANT ACCOUNTING RULES
-==================================================
-
-Never delete financial transactions permanently.
-
-Use:
-
-Void
+<button class="btn light" onclick="closeModal('productModal')">
 Cancel
-Reverse
-Return
+</button>
 
-instead of deleting historical financial data.
+<button class="btn green" onclick="saveProduct()">
+Save Product
+</button>
 
-Keep complete transaction history.
+</div>
 
-==================================================
-33. POS KEYBOARD SHORTCUTS
-==================================================
+</div>
 
-Add keyboard shortcuts:
+</div>
 
-F2 = Product Search
-F4 = Customer
-F6 = Discount
-F8 = Payment
-F9 = Complete Sale
-ESC = Close Modal
 
-Barcode scanner should work without requiring mouse interaction.
+<!-- CUSTOMER MODAL -->
+<div class="modal" id="customerModal">
 
-==================================================
-34. LOW STOCK ALERT
-==================================================
+<div class="modal-box">
 
-When stock <= minimum stock:
+<div class="modal-head">
 
-Show alert.
+<h3>Add Customer</h3>
 
-Dashboard:
-"Low Stock: X Products"
+<button class="close" onclick="closeModal('customerModal')">×</button>
 
-Allow clicking to open filtered inventory.
+</div>
 
-==================================================
-35. NOTIFICATION SYSTEM
-==================================================
+<div class="form-grid">
 
-Create notification center.
+<div class="form-group">
+<label>Name *</label>
+<input id="customerName">
+</div>
 
-Notifications:
+<div class="form-group">
+<label>Phone</label>
+<input id="customerPhone">
+</div>
 
-Low stock
-Out of stock
-Pending online order
-Customer due
-Supplier due
-Failed sync
-Backup reminder
+<div class="form-group">
+<label>Address</label>
+<input id="customerAddress">
+</div>
 
-==================================================
-36. AUDIT LOG
-==================================================
+</div>
 
-Track:
+<div style="margin-top:20px;text-align:right;">
 
-Login
-Logout
-Product created
-Product edited
-Product deleted/archived
-Purchase created
-Sale created
-Return created
-Payment received
-Expense created
-Stock adjusted
-Settings changed
+<button class="btn green" onclick="saveCustomer()">
+Save Customer
+</button>
 
-Show:
+</div>
 
-User
-Action
-Date
-Time
-Reference
+</div>
 
-==================================================
-37. DATABASE REQUIREMENTS
-==================================================
+</div>
 
-Create proper relational tables for:
 
-users
-roles
-stores
-counters
-products
-product_variants
-categories
-brands
-suppliers
-supplier_transactions
-customers
-customer_transactions
-purchases
-purchase_items
-sales
-sale_items
-sale_payments
-returns
-return_items
-expenses
-cash_transactions
-stock_movements
-online_orders
-online_order_items
-barcode_templates
-settings
-audit_logs
+<!-- SUPPLIER MODAL -->
+<div class="modal" id="supplierModal">
 
-Use foreign keys.
+<div class="modal-box">
 
-Use indexes on:
+<div class="modal-head">
 
-barcode
-SKU
-phone
-invoice_number
-external_order_id
-created_at
-product_id
+<h3>Add Supplier</h3>
 
-==================================================
-38. TRANSACTION SAFETY
-==================================================
+<button class="close" onclick="closeModal('supplierModal')">×</button>
 
-Sale creation must be atomic.
+</div>
 
-Example:
+<div class="form-grid">
 
-If sale contains 5 products:
+<div class="form-group">
+<label>Name *</label>
+<input id="supplierName">
+</div>
 
-Either:
+<div class="form-group">
+<label>Phone</label>
+<input id="supplierPhone">
+</div>
 
-- invoice saved
-- payment saved
-- stock reduced
-- stock movement created
+<div class="form-group">
+<label>Address</label>
+<input id="supplierAddress">
+</div>
 
-ALL succeed.
+</div>
 
-OR:
+<div style="margin-top:20px;text-align:right;">
 
-NONE should be saved.
+<button class="btn green" onclick="saveSupplier()">
+Save Supplier
+</button>
 
-Same for purchase and return.
+</div>
 
-==================================================
-39. CURRENT CODE BUG FIXES
-==================================================
+</div>
 
-The existing code has several problems.
+</div>
 
-Fix all of them.
 
-Examples:
+<!-- PRINT AREA -->
+<div id="printArea"></div>
 
-1. Discount currently claims ₹ or %, but only fixed amount is actually calculated.
-Implement both.
+<div class="toast" id="toast"></div>
 
-2. Return currently deletes the complete invoice.
-DO NOT delete invoice.
-Create
+
+<script>
+
+/* =========================================================
+   NAMITA STORE POS + INVENTORY
+   SINGLE FILE APPLICATION
+   ========================================================= */
+
+
+/* DATABASE */
+
+let products =
+JSON.parse(localStorage.getItem("ns_products") || "[]");
+
+let customers =
+JSON.parse(localStorage.getItem("ns_customers") || "[]");
+
+let suppliers =
+JSON.parse(localStorage.getItem("ns_suppliers") || "[]");
+
+let purchases =
+JSON.parse(localStorage.getItem("ns_purchases") || "[]");
+
+let sales =
+JSON.parse(localStorage.getItem("ns_sales") || "[]");
+
+let settings =
+JSON.parse(localStorage.getItem("ns_settings") || "{}");
+
+let cart = [];
+
+
+/* SAVE DATABASE */
+
+function saveDB(){
+
+    localStorage.setItem(
+        "ns_products",
+        JSON.stringify(products)
+    );
+
+    localStorage.setItem(
+        "ns_customers",
+        JSON.stringify(customers)
+    );
+
+    localStorage.setItem(
+        "ns_suppliers",
+        JSON.stringify(suppliers)
+    );
+
+    localStorage.setItem(
+        "ns_purchases",
+        JSON.stringify(purchases)
+    );
+
+    localStorage.setItem(
+        "ns_sales",
+        JSON.stringify(sales)
+    );
+
+    localStorage.setItem(
+        "ns_settings",
+        JSON.stringify(settings)
+    );
+}
+
+
+/* ID */
+
+function id(){
+
+    return Date.now().toString() +
+           Math.random().toString(36).substring(2,7);
+
+}
+
+
+/* CURRENCY */
+
+function money(value){
+
+    return "₹" +
+        Number(value || 0).toLocaleString(
+            "en-IN",
+            {
+                minimumFractionDigits:2,
+                maximumFractionDigits:2
+            }
+        );
+
+}
+
+
+/* TOAST */
+
+function toast(message){
+
+    const el =
+        document.getElementById("toast");
+
+    el.textContent = message;
+
+    el.classList.add("show");
+
+    setTimeout(()=>{
+        el.classList.remove("show");
+    },2500);
+
+}
+
+
+/* NAVIGATION */
+
+function showPage(page, button){
+
+    document
+        .querySelectorAll(".page")
+        .forEach(p=>p.classList.remove("active"));
+
+    const selected =
+        document.getElementById(page);
+
+    if(selected)
+        selected.classList.add("active");
+
+    document
+        .querySelectorAll(".menu button")
+        .forEach(b=>b.classList.remove("active"));
+
+    if(button)
+        button.classList.add("active");
+
+    const titles = {
+
+        dashboard:"Dashboard",
+        pos:"POS Billing",
+        products:"Products",
+        purchase:"Purchase Entry",
+        inventory:"Inventory",
+        customers:"Customers",
+        suppliers:"Suppliers",
+        barcode:"Barcode",
+        reports:"Reports",
+        settings:"Settings"
+
+    };
+
+    document.getElementById("pageTitle")
+        .textContent = titles[page] || page;
+
+    refreshAll();
+
+}
+
+
+/* MODAL */
+
+function openModal(id){
+
+    document
+        .getElementById(id)
+        .classList.add("show");
+
+}
+
+function closeModal(id){
+
+    document
+        .getElementById(id)
+        .classList.remove("show");
+
+}
+
+function openProductModal(){
+
+    document.getElementById("productName").value="";
+    document.getElementById("productSku").value="";
+    document.getElementById("productBarcode").value=
+        generateBarcodeNumber();
+
+    document.getElementById("productCategory").value="";
+    document.getElementById("productPurchase").value="";
+    document.getElementById("productSale").value="";
+    document.getElementById("productMrp").value="";
+    document.getElementById("productStock").value="0";
+    document.getElementById("productMinStock").value="5";
+    document.getElementById("productGst").value="0";
+    document.getElementById("productHsn").value="";
+
+    openModal("productModal");
+
+}
+
+
+/* BARCODE NUMBER */
+
+function generateBarcodeNumber(){
+
+    let number="";
+
+    for(let i=0;i<12;i++){
+
+        number +=
+            Math.floor(Math.random()*10);
+
+    }
+
+    return number;
+
+}
+
+
+/* SAVE PRODUCT */
+
+function saveProduct(){
+
+    const name =
+        document.getElementById("productName").value.trim();
+
+    if(!name){
+
+        alert("Product name is required.");
+
+        return;
+
+    }
+
+    const product = {
+
+        id:id(),
+
+        name:name,
+
+        sku:
+            document.getElementById("productSku").value.trim(),
+
+        barcode:
+            document.getElementById("productBarcode").value.trim()
+            || generateBarcodeNumber(),
+
+        category:
+            document.getElementById("productCategory").value.trim()
+            || "General",
+
+        purchase:
+            Number(document.getElementById("productPurchase").value || 0),
+
+        sale:
+            Number(document.getElementById("productSale").value || 0),
+
+        mrp:
+            Number(document.getElementById("productMrp").value || 0),
+
+        stock:
+            Number(document.getElementById("productStock").value || 0),
+
+        minStock:
+            Number(document.getElementById("productMinStock").value || 5),
+
+        gst:
+            Number(document.getElementById("productGst").value || 0),
+
+        hsn:
+            document.getElementById("productHsn").value.trim(),
+
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+    products.push(product);
+
+    saveDB();
+
+    closeModal("productModal");
+
+    refreshAll();
+
+    toast("Product saved successfully.");
+
+}
+
+
+/* PRODUCTS TABLE */
+
+function renderProducts(filter=""){
+
+    const tbody =
+        document.getElementById("productTable");
+
+    const query =
+        filter.toLowerCase();
+
+    const list =
+        products.filter(p=>
+            p.name.toLowerCase().includes(query) ||
+            String(p.barcode).includes(query) ||
+            String(p.sku).toLowerCase().includes(query)
+        );
+
+    tbody.innerHTML =
+        list.map(p=>`
+
+        <tr>
+
+        <td>${escapeHtml(p.barcode)}</td>
+
+        <td>
+        <strong>${escapeHtml(p.name)}</strong>
+        </td>
+
+        <td>${escapeHtml(p.category)}</td>
+
+        <td>${money(p.purchase)}</td>
+
+        <td>${money(p.sale)}</td>
+
+        <td>${money(p.mrp)}</td>
+
+        <td>
+        ${p.stock}
+        </td>
+
+        <td>
+
+        <button
+        class="btn red"
+        style="padding:6px 9px;"
+        onclick="deleteProduct('${p.id}')">
+        Delete
+        </button>
+
+        </td>
+
+        </tr>
+
+        `).join("");
+
+}
+
+
+/* DELETE PRODUCT */
+
+function deleteProduct(productId){
+
+    if(!confirm("Delete this product?"))
+        return;
+
+    products =
+        products.filter(p=>p.id!==productId);
+
+    saveDB();
+
+    refreshAll();
+
+    toast("Product deleted.");
+
+}
+
+
+/* POS SEARCH */
+
+function searchPOS(){
+
+    const query =
+        document.getElementById("posSearch")
+        .value
+        .trim()
+        .toLowerCase();
+
+    const results =
+        products.filter(p=>
+            p.name.toLowerCase().includes(query) ||
+            String(p.barcode).includes(query) ||
+            String(p.sku).toLowerCase().includes(query)
+        );
+
+    document.getElementById("posResults").innerHTML =
+
+        results.length ?
+
+        results.map(p=>`
+
+        <div class="product-item">
+
+        <div>
+        <strong>${escapeHtml(p.name)}</strong>
+        <br>
+        <small>
+        Barcode: ${escapeHtml(p.barcode)}
+        | Stock: ${p.stock}
+        </small>
+        </div>
+
+        <div>
+        <strong>${money(p.sale)}</strong>
+        <br>
+
+        <button
+        class="btn"
+        style="padding:6px 10px;"
+        onclick="addToCart('${p.id}')">
+        Add
+        </button>
+
+        </div>
+
+        </div>
+
+        `).join("")
+
+        :
+
+        `<div style="padding:20px;text-align:center;color:#777;">
+        No product found
+        </div>`;
+
+}
+
+
+/* ADD TO CART */
+
+function addToCart(productId){
+
+    const product =
+        products.find(p=>p.id===productId);
+
+    if(!product)
+        return;
+
+    if(product.stock <= 0){
+
+        toast("Product is out of stock.");
+
+        return;
+
+    }
+
+    const existing =
+        cart.find(c=>c.productId===productId);
+
+    if(existing){
+
+        if(existing.qty >= product.stock){
+
+            toast("Available stock limit reached.");
+
+            return;
+
+        }
+
+        existing.qty++;
+
+    }else{
+
+        cart.push({
+
+            productId:productId,
+
+            qty:1
+
+        });
+
+    }
+
+    renderCart();
+
+}
+
+
+/* CART */
+
+function renderCart(){
+
+    const cartEl =
+        document.getElementById("cart");
+
+    if(!cart.length){
+
+        cartEl.innerHTML =
+            `<div style="text-align:center;color:#777;padding:50px 10px;">
+            Cart is empty
+            </div>`;
+
+        updateTotals();
+
+        return;
+
+    }
+
+    cartEl.innerHTML =
+
+        cart.map(item=>{
+
+            const p =
+                products.find(
+                    x=>x.id===item.productId
+                );
+
+            if(!p)
+                return "";
+
+            return `
+
+            <div class="cart-row">
+
+            <div>
+            <strong>${escapeHtml(p.name)}</strong>
+            <br>
+            <small>${money(p.sale)}</small>
+            </div>
+
+            <div class="qty-control">
+
+            <button
+            onclick="changeQty('${p.id}',-1)">
+            -
+            </button>
+
+            <span>${item.qty}</span>
+
+            <button
+            onclick="changeQty('${p.id}',1)">
+            +
+            </button>
+
+            </div>
+
+            <strong>
+            ${money(p.sale*item.qty)}
+            </strong>
+
+            <button
+            class="btn red"
+            style="padding:4px 7px;"
+            onclick="removeCart('${p.id}')">
+            ×
+            </button>
+
+            </div>
+
+            `;
+
+        }).join("");
+
+    updateTotals();
+
+}
+
+
+/* CHANGE QTY */
+
+function changeQty(productId,amount){
+
+    const item =
+        cart.find(c=>c.productId===productId);
+
+    const product =
+        products.find(p=>p.id===productId);
+
+    if(!item || !product)
+        return;
+
+    const newQty =
+        item.qty + amount;
+
+    if(newQty <= 0){
+
+        removeCart(productId);
+
+        return;
+
+    }
+
+    if(newQty > product.stock){
+
+        toast("Not enough stock.");
+
+        return;
+
+    }
+
+    item.qty = newQty;
+
+    renderCart();
+
+}
+
+
+/* REMOVE CART */
+
+function removeCart(productId){
+
+    cart =
+        cart.filter(c=>c.productId!==productId);
+
+    renderCart();
+
+}
+
+
+/* CLEAR CART */
+
+function clearCart(){
+
+    cart=[];
+
+    renderCart();
+
+}
+
+
+/* TOTALS */
+
+function calculateTotals(){
+
+    let subtotal=0;
+
+    cart.forEach(item=>{
+
+        const p =
+            products.find(x=>x.id===item.productId);
+
+        if(p)
+            subtotal += p.sale * item.qty;
+
+    });
+
+    const discount =
+        Number(
+            document.getElementById("discount").value || 0
+        );
+
+    const taxable =
+        Math.max(0,subtotal-discount);
+
+    const gstPercent =
+        Number(
+            document.getElementById("gst").value || 0
+        );
+
+    const gstAmount =
+        taxable * gstPercent / 100;
+
+    const total =
+        taxable + gstAmount;
+
+    return {
+
+        subtotal,
+        discount,
+        taxable,
+        gstPercent,
+        gstAmount,
+        total
+
+    };
+
+}
+
+
+function updateTotals(){
+
+    const t =
+        calculateTotals();
+
+    document.getElementById("subtotal")
+        .textContent=money(t.subtotal);
+
+    document.getElementById("gstAmount")
+        .textContent=money(t.gstAmount);
+
+    document.getElementById("grandTotal")
+        .textContent=money(t.total);
+
+}
+
+
+/* COMPLETE SALE */
+
+function completeSale(){
+
+    if(!cart.length){
+
+        toast("Cart is empty.");
+
+        return;
+
+    }
+
+    for(const item of cart){
+
+        const p =
+            products.find(x=>x.id===item.productId);
+
+        if(!p || item.qty > p.stock){
+
+            toast("Stock unavailable.");
+
+            return;
+
+        }
+
+    }
+
+    const totals =
+        calculateTotals();
+
+    const sale = {
+
+        id:id(),
+
+        invoice:
+            "NS-" +
+            new Date().getTime(),
+
+        date:
+            new Date().toISOString(),
+
+        items:
+            cart.map(item=>{
+
+                const p =
+                    products.find(
+                        x=>x.id===item.productId
+                    );
+
+                return {
+
+                    productId:p.id,
+
+                    name:p.name,
+
+                    barcode:p.barcode,
+
+                    qty:item.qty,
+
+                    purchase:p.purchase,
+
+                    sale:p.sale,
+
+                    total:p.sale*item.qty
+
+                };
+
+            }),
+
+        subtotal:totals.subtotal,
+
+        discount:totals.discount,
+
+        gst:totals.gstAmount,
+
+        total:totals.total,
+
+        payment:
+            document.getElementById("paymentMethod").value
+
+    };
+
+    /* REDUCE STOCK */
+
+    cart.forEach(item=>{
+
+        const p =
+            products.find(
+                x=>x.id===item.productId
+            );
+
+        if(p)
+            p.stock -= item.qty;
+
+    });
+
+    sales.push(sale);
+
+    saveDB();
+
+    cart=[];
+
+    document.getElementById("discount").value=0;
+    document.getElementById("gst").value=0;
+
+    renderCart();
+
+    refreshAll();
+
+    toast(
+        "Sale completed. Invoice " +
+        sale.invoice
+    );
+
+    printInvoice(sale);
+
+}
+
+
+/* PURCHASE DROPDOWN */
+
+function renderPurchaseDropdowns(){
+
+    const productSelect =
+        document.getElementById("purchaseProduct");
+
+    const supplierSelect =
+        document.getElementById("purchaseSupplier");
+
+    productSelect.innerHTML =
+        `<option value="">Select Product</option>` +
+
+        products.map(p=>
+            `<option value="${p.id}">
+            ${escapeHtml(p.name)} - ${escapeHtml(p.barcode)}
+            </option>`
+        ).join("");
+
+    supplierSelect.innerHTML =
+        `<option value="">Select Supplier</option>` +
+
+        suppliers.map(s=>
+            `<option value="${s.id}">
+            ${escapeHtml(s.name)}
+            </option>`
+        ).join("");
+
+}
+
+
+/* PURCHASE */
+
+function addPurchase(){
+
+    const productId =
+        document.getElementById("purchaseProduct").value;
+
+    const qty =
+        Number(
+            document.getElementById("purchaseQty").value || 0
+        );
+
+    const price =
+        Number(
+            document.getElementById("purchasePrice").value || 0
+        );
+
+    const supplierId =
+        document.getElementById("purchaseSupplier").value;
+
+    if(!productId || qty<=0){
+
+        toast("Select product and quantity.");
+
+        return;
+
+    }
+
+    const product =
+        products.find(p=>p.id===productId);
+
+    if(!product)
+        return;
+
+    product.stock += qty;
+
+    if(price>0)
+        product.purchase=price;
+
+    const supplier =
+        suppliers.find(s=>s.id===supplierId);
+
+    purchases.push({
+
+        id:id(),
+
+        date:new Date().toISOString(),
+
+        productId:product.id,
+
+        product:product.name,
+
+        qty:qty,
+
+        price:price || product.purchase,
+
+        total:
+            qty*(price || product.purchase),
+
+        supplier:
+            supplier ? supplier.name : ""
+
+    });
+
+    saveDB();
+
+    refreshAll();
+
+    toast("Purchase saved successfully.");
+
+}
+
+
+/* PURCHASE TABLE */
+
+function renderPurchases(){
+
+    document.getElementById("purchaseTable").innerHTML =
+
+        purchases
+        .slice()
+        .reverse()
+        .map(p=>`
+
+        <tr>
+
+        <td>${formatDate(p.date)}</td>
+
+        <td>${escapeHtml(p.product)}</td>
+
+        <td>${p.qty}</td>
+
+        <td>${money(p.price)}</td>
+
+        <td>${money(p.total)}</td>
+
+        <td>${escapeHtml(p.supplier || "-")}</td>
+
+        </tr>
+
+        `).join("");
+
+}
+
+
+/* INVENTORY */
+
+function renderInventory(){
+
+    document.getElementById("inventoryTable").innerHTML =
+
+        products.map(p=>{
+
+            let status="In Stock";
+            let cls="green";
+
+            if(p.stock<=0){
+
+                status="Out of Stock";
+                cls="red";
+
+            }else if(p.stock<=p.minStock){
+
+                status="Low Stock";
+                cls="orange";
+
+            }
+
+            return `
+
+            <tr>
+
+            <td>${escapeHtml(p.barcode)}</td>
+
+            <td>${escapeHtml(p.name)}</td>
+
+            <td>${escapeHtml(p.category)}</td>
+
+            <td><strong>${p.stock}</strong></td>
+
+            <td>${p.minStock}</td>
+
+            <td>
+            <span class="badge ${cls}">
+            ${status}
+            </span>
+            </td>
+
+            </tr>
+
+            `;
+
+        }).join("");
+
+}
+
+
+/* CUSTOMERS */
+
+function openCustomerModal(){
+
+    document.getElementById("customerName").value="";
+    document.getElementById("customerPhone").value="";
+    document.getElementById("customerAddress").value="";
+
+    openModal("customerModal");
+
+}
+
+
+function saveCustomer(){
+
+    const name =
+        document.getElementById("customerName")
+        .value.trim();
+
+    if(!name){
+
+        toast("Customer name required.");
+
+        return;
+
+    }
+
+    customers.push({
+
+        id:id(),
+
+        name:name,
+
+        phone:
+            document.getElementById("customerPhone").value,
+
+        address:
+            document.getElementById("customerAddress").value,
+
+        credit:0
+
+    });
+
+    saveDB();
+
+    closeModal("customerModal");
+
+    refreshAll();
+
+    toast("Customer added.");
+
+}
+
+
+function renderCustomers(){
+
+    document.getElementById("customerTable").innerHTML =
+
+        customers.map(c=>`
+
+        <tr>
+
+        <td>${escapeHtml(c.name)}</td>
+
+        <td>${escapeHtml(c.phone || "-")}</td>
+
+        <td>${escapeHtml(c.address || "-")}</td>
+
+        <td>${money(c.credit)}</td>
+
+        <td>
+
+        <button
+        class="btn red"
+        style="padding:6px;"
+        onclick="deleteCustomer('${c.id}')">
+        Delete
+        </button>
+
+        </td>
+
+        </tr>
+
+        `).join("");
+
+}
+
+
+function deleteCustomer(customerId){
+
+    if(!confirm("Delete customer?"))
+        return;
+
+    customers =
+        customers.filter(c=>c.id!==customerId);
+
+    saveDB();
+
+    refreshAll();
+
+}
+
+
+/* SUPPLIERS */
+
+function openSupplierModal(){
+
+    document.getElementById("supplierName").value="";
+    document.getElementById("supplierPhone").value="";
+    document.getElementById("supplierAddress").value="";
+
+    openModal("supplierModal");
+
+}
+
+
+function saveSupplier(){
+
+    const name =
+        document.getElementById("supplierName")
+        .value.trim();
+
+    if(!name){
+
+        toast("Supplier name required.");
+
+        return;
+
+    }
+
+    suppliers.push({
+
+        id:id(),
+
+        name:name,
+
+        phone:
+            document.getElementById("supplierPhone").value,
+
+        address:
+            document.getElementById("supplierAddress").value,
+
+        due:0
+
+    });
+
+    saveDB();
+
+    closeModal("supplierModal");
+
+    refreshAll();
+
+    toast("Supplier added.");
+
+}
+
+
+function renderSuppliers(){
+
+    document.getElementById("supplierTable").innerHTML =
+
+        suppliers.map(s=>`
+
+        <tr>
+
+        <td>${escapeHtml(s.name)}</td>
+
+        <td>${escapeHtml(s.phone || "-")}</td>
+
+        <td>${escapeHtml(s.address || "-")}</td>
+
+        <td>${money(s.due)}</td>
+
+        <td>
+
+        <button
+        class="btn red"
+        style="padding:6px;"
+        onclick="deleteSupplier('${s.id}')">
+        Delete
+        </button>
+
+        </td>
+
+        </tr>
+
+        `).join("");
+
+}
+
+
+function deleteSupplier(supplierId){
+
+    if(!confirm("Delete supplier?"))
+        return;
+
+    suppliers =
+        suppliers.filter(s=>s.id!==supplierId);
+
+    saveDB();
+
+    refreshAll();
+
+}
+
+
+/* BARCODE */
+
+function renderBarcodeDropdown(){
+
+    const select =
+        document.getElementById("barcodeProduct");
+
+    select.innerHTML =
+        `<option value="">Select Product</option>` +
+
+        products.map(p=>
+            `<option value="${p.id}">
+            ${escapeHtml(p.name)}
+            </option>`
+        ).join("");
+
+}
+
+
+function generateBarcodePreview(){
+
+    const productId =
+        document.getElementById("barcodeProduct").value;
+
+    const product =
+        products.find(p=>p.id===productId);
+
+    if(!product){
+
+        document.getElementById("barcodeNumber")
+            .textContent="000000000000";
+
+        return;
+
+    }
+
+    document.getElementById("barcodeNumber")
+        .textContent=product.barcode;
+
+    document.getElementById("barcodeVisual")
+        .textContent="||||||||||||||||||||||||||||||||";
+
+}
+
+
+function generateNewBarcode(){
+
+    const newCode =
+        generateBarcodeNumber();
+
+    const productId =
+        document.getElementById("barcodeProduct").value;
+
+    if(productId){
+
+        const product =
+            products.find(p=>p.id===productId);
+
+        if(product){
+
+            product.barcode=newCode;
+
+            saveDB();
+
+            renderProducts();
+
+            renderBarcodeDropdown();
+
+        }
+
+    }
+
+    document.getElementById("barcodeNumber")
+        .textContent=newCode;
+
+    toast("New barcode generated.");
+
+}
+
+
+function printBarcode(){
+
+    const productId =
+        document.getElementById("barcodeProduct").value;
+
+    const product =
+        products.find(p=>p.id===productId);
+
+    const code =
+        product ? product.barcode : "000000000000";
+
+    const name =
+        product ? product.name : "NAMITA STORE";
+
+    document.getElementById("printArea").innerHTML=`
+
+        <div style="
+        width:60mm;
+        text-align:center;
+        padding:5mm;
+        font-family:Arial;
+        ">
+
+        <strong>NAMITA STORE</strong>
+
+        <div style="
+        font-size:42px;
+        margin:10px 0;
+        font-family:monospace;
+        ">
+        ||||||||||||||||||||||||||
+        </div>
+
+        <div>${escapeHtml(name)}</div>
+
+        <div>${escapeHtml(code)}</div>
+
+        ${
+            product
+            ?
+            `<div>MRP ₹${product.mrp || product.sale}</div>`
+            :
+            ""
+        }
+
+        </div>
+    `;
+
+    window.print();
+
+}
+
+
+/* INVOICE */
+
+function printInvoice(sale){
+
+    let html=`
+
+    <div style="
+    width:80mm;
+    margin:auto;
+    font-family:Arial;
+    font-size:12px;
+    ">
+
+    <div style="text-align:center">
+
+    <h2>NAMITA STORE</h2>
+
+    <div>POS INVOICE</div>
+
+    <div>${sale.invoice}</div>
+
+    <div>${formatDateTime(sale.date)}</div>
+
+    </div>
+
+    <hr>
+
+    `;
+
+    sale.items.forEach(item=>{
+
+        html += `
+
+        <div style="
+        display:flex;
+        justify-content:space-between;
+        margin:5px 0;
+        ">
+
+        <span>
+        ${escapeHtml(item.name)}
+        × ${item.qty}
+        </span>
+
+        <strong>
+        ${money(item.total)}
+        </strong>
+
+        </div>
+
+        `;
+
+    });
+
+    html += `
+
+    <hr>
+
+    <div style="display:flex;justify-content:space-between">
+    <span>Subtotal</span>
+    <span>${money(sale.subtotal)}</span>
+    </div>
+
+    <div style="display:flex;justify-content:space-between">
+    <span>Discount</span>
+    <span>${money(sale.discount)}</span>
+    </div>
+
+    <div style="display:flex;justify-content:space-between">
+    <span>GST</span>
+    <span>${money(sale.gst)}</span>
+    </div>
+
+    <h3 style="
+    display:flex;
+    justify-content:space-between;
+    margin-top:10px;
+    ">
+    <span>Total</span>
+    <span>${money(sale.total)}</span>
+    </h3>
+
+    <p style="text-align:center;margin-top:20px;">
+    Payment: ${escapeHtml(sale.payment)}
+    </p>
+
+    <p style="text-align:center;margin-top:15px;">
+    Thank You!
+    </p>
+
+    </div>
+
+    `;
+
+    document.getElementById("printArea")
+        .innerHTML=html;
+
+    window.print();
+
+}
+
+
+/* REPORTS */
+
+function renderReports(){
+
+    const totalSales =
+        sales.reduce(
+            (sum,s)=>sum+Number(s.total),
+            0
+        );
+
+    const totalPurchases =
+        purchases.reduce(
+            (sum,p)=>sum+Number(p.total),
+            0
+        );
+
+    let estimatedProfit=0;
+
+    sales.forEach(s=>{
+
+        s.items.forEach(item=>{
+
+            estimatedProfit +=
+                (Number(item.sale)-Number(item.purchase))
+                * Number(item.qty);
+
+        });
+
+    });
+
+    document.getElementById("reportSales")
+        .textContent=money(totalSales);
+
+    document.getElementById("reportPurchases")
+        .textContent=money(totalPurchases);
+
+    document.getElementById("reportTransactions")
+        .textContent=sales.length;
+
+    document.getElementById("reportProfit")
+        .textContent=money(estimatedProfit);
+
+}
+
+
+/* DASHBOARD */
+
+function renderDashboard(){
+
+    const today =
+        new Date().toISOString().slice(0,10);
+
+    const todaySales =
+        sales
+        .filter(s=>s.date.slice(0,10)===today)
+        .reduce((sum,s)=>sum+Number(s.total),0);
+
+    document.getElementById("todaySales")
+        .textContent=money(todaySales);
+
+    document.getElementById("totalProducts")
+        .textContent=products.length;
+
+    document.getElementById("stockItems")
+        .textContent=
+            products.reduce(
+                (sum,p)=>sum+Number(p.stock),
+                0
+            );
+
+    const low =
+        products.filter(
+            p=>p.stock<=p.minStock
+        );
+
+    document.getElementById("lowStock")
+        .textContent=low.length;
+
+    document.getElementById("dashboardLowStock").innerHTML=
+
+        low.length ?
+
+        low.slice(0,8).map(p=>`
+
+        <div style="
+        display:flex;
+        justify-content:space-between;
+        padding:9px 0;
+        border-bottom:1px solid #eee;
+        ">
+
+        <span>${escapeHtml(p.name)}</span>
+
+        <strong style="color:#e74c3c">
+        ${p.stock}
+        </strong>
+
+        </div>
+
+        `).join("")
+
+        :
+
+        `<p style="color:#777;">
+        No low stock products.
+        </p>`;
+
+}
+
+
+/* SETTINGS */
+
+function saveSettings(){
+
+    settings.store =
+        document.getElementById("settingStore").value;
+
+    settings.phone =
+        document.getElementById("settingPhone").value;
+
+    settings.address =
+        document.getElementById("settingAddress").value;
+
+    saveDB();
+
+    toast("Settings saved.");
+
+}
+
+
+/* EXPORT */
+
+function exportData(){
+
+    const data={
+
+        version:"1.0",
+
+        exportedAt:
+            new Date().toISOString(),
+
+        products,
+
+        customers,
+
+        suppliers,
+
+        purchases,
+
+        sales,
+
+        settings
+
+    };
+
+    const blob =
+        new Blob(
+            [JSON.stringify(data,null,2)],
+            {type:"application/json"}
+        );
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const a =
+        document.createElement("a");
+
+    a.href=url;
+
+    a.download=
+        "namita-store-backup-" +
+        new Date().toISOString().slice(0,10) +
+        ".json";
+
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+    toast("Backup downloaded.");
+
+}
+
+
+/* IMPORT */
+
+function importData(event){
+
+    const file =
+        event.target.files[0];
+
+    if(!file)
+        return;
+
+    const reader =
+        new FileReader();
+
+    reader.onload=function(e){
+
+        try{
+
+            const data =
+                JSON.parse(e.target.result);
+
+            products =
+                Array.isArray(data.products)
+                ? data.products : [];
+
+            customers =
+                Array.isArray(data.customers)
+                ? data.customers : [];
+
+            suppliers =
+                Array.isArray(data.suppliers)
+                ? data.suppliers : [];
+
+            purchases =
+                Array.isArray(data.purchases)
+                ? data.purchases : [];
+
+            sales =
+                Array.isArray(data.sales)
+                ? data.sales : [];
+
+            settings =
+                data.settings || {};
+
+            saveDB();
+
+            refreshAll();
+
+            toast("Backup restored successfully.");
+
+        }catch(err){
+
+            alert("Invalid backup file.");
+
+        }
+
+    };
+
+    reader.readAsText(file);
+
+}
+
+
+/* CLEAR DATA */
+
+function clearAllData(){
+
+    if(!confirm(
+        "WARNING: This will delete all products, sales, purchases, customers and suppliers. Continue?"
+    ))
+        return;
+
+    localStorage.removeItem("ns_products");
+    localStorage.removeItem("ns_customers");
+    localStorage.removeItem("ns_suppliers");
+    localStorage.removeItem("ns_purchases");
+    localStorage.removeItem("ns_sales");
+    localStorage.removeItem("ns_settings");
+
+    products=[];
+    customers=[];
+    suppliers=[];
+    purchases=[];
+    sales=[];
+    settings={};
+    cart=[];
+
+    refreshAll();
+
+    toast("All data cleared.");
+
+}
+
+
+/* PRINT SALES REPORT */
+
+function printSalesReport(){
+
+    const total =
+        sales.reduce(
+            (s,x)=>s+Number(x.total),
+            0
+        );
+
+    document.getElementById("printArea").innerHTML=`
+
+    <div style="
+    font-family:Arial;
+    width:190mm;
+    margin:auto;
+    ">
+
+    <h1>NAMITA STORE</h1>
+
+    <h2>Sales Report</h2>
+
+    <p>
+    Generated: ${formatDateTime(new Date().toISOString())}
+    </p>
+
+    <hr>
+
+    <table border="1"
+    cellspacing="0"
+    cellpadding="8"
+    style="width:100%;">
+
+    <tr>
+    <th>Invoice</th>
+    <th>Date</th>
+    <th>Payment</th>
+    <th>Total</th>
+    </tr>
+
+    ${sales.map(s=>`
+
+    <tr>
+
+    <td>${escapeHtml(s.invoice)}</td>
+
+    <td>${formatDateTime(s.date)}</td>
+
+    <td>${escapeHtml(s.payment)}</td>
+
+    <td>${money(s.total)}</td>
+
+    </tr>
+
+    `).join("")}
+
+    </table>
+
+    <h2 style="margin-top:20px;">
+    Total Sales: ${money(total)}
+    </h2>
+
+    </div>
+
+    `;
+
+    window.print();
+
+}
+
+
+/* DASHBOARD / ALL REFRESH */
+
+function refreshAll(){
+
+    renderDashboard();
+
+    renderProducts();
+
+    renderPurchases();
+
+    renderInventory();
+
+    renderCustomers();
+
+    renderSuppliers();
+
+    renderPurchaseDropdowns();
+
+    renderBarcodeDropdown();
+
+    generateBarcodePreview();
+
+    renderReports();
+
+    renderCart();
+
+    loadSettings();
+
+}
+
+
+/* SETTINGS LOAD */
+
+function loadSettings(){
+
+    document.getElementById("settingStore").value =
+        settings.store || "NAMITA STORE";
+
+    document.getElementById("settingPhone").value =
+        settings.phone || "";
+
+    document.getElementById("settingAddress").value =
+        settings.address || "";
+
+}
+
+
+/* DATE */
+
+function formatDate(date){
+
+    return new Date(date)
+        .toLocaleDateString("en-IN");
+
+}
+
+function formatDateTime(date){
+
+    return new Date(date)
+        .toLocaleString("en-IN");
+
+}
+
+
+/* HTML SECURITY */
+
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+/* DEMO INITIAL DATA */
+
+function createDemoData(){
+
+    if(products.length>0)
+        return;
+
+    products=[
+
+        {
+            id:id(),
+            name:"Gold Plated Necklace",
+            sku:"NS-001",
+            barcode:"890100000001",
+            category:"Jewellery",
+            purchase:350,
+            sale:599,
+            mrp:699,
+            stock:20,
+            minStock:5,
+            gst:0,
+            hsn:"",
+            createdAt:new Date().toISOString()
+        },
+
+        {
+            id:id(),
+            name:"Artificial Earrings",
+            sku:"NS-002",
+            barcode:"890100000002",
+            category:"Jewellery",
+            purchase:100,
+            sale:199,
+            mrp:249,
+            stock:30,
+            minStock:5,
+            gst:0,
+            hsn:"",
+            createdAt:new Date().toISOString()
+        },
+
+        {
+            id:id(),
+            name:"Vitamin C Face Wash",
+            sku:"NS-003",
+            barcode:"890100000003",
+            category:"Cosmetics",
+            purchase:120,
+            sale:199,
+            mrp:229,
+            stock:15,
+            minStock:5,
+            gst:18,
+            hsn:"",
+            createdAt:new Date().toISOString()
+        }
+
+    ];
+
+    saveDB();
+
+}
+
+
+/* KEYBOARD BARCODE / POS */
+
+document.addEventListener(
+    "keydown",
+    function(event){
+
+        if(
+            event.key==="Enter" &&
+            document.activeElement.id==="posSearch"
+        ){
+
+            const value =
+                document.getElementById("posSearch")
+                .value.trim();
+
+            const product =
+                products.find(
+                    p=>String(p.barcode)===value
+                );
+
+            if(product){
+
+                addToCart(product.id);
+
+                document.getElementById("posSearch")
+                    .value="";
+
+                searchPOS();
+
+                event.preventDefault();
+
+            }
+
+        }
+
+    }
+);
+
+
+/* INIT */
+
+createDemoData();
+
+refreshAll();
+
+</script>
+
+</body>
+</html>
