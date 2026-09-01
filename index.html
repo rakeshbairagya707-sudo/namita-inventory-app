@@ -3,407 +3,396 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Namita Store - POS & Billing Software</title>
+    <title>KhataBuddy - GST Billing Software</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-100 font-sans min-h-screen overflow-hidden text-slate-800">
+<body class="bg-slate-100 font-sans min-h-screen text-slate-800">
 
-    <div class="flex h-screen">
+    <!-- Top Window Bar -->
+    <div class="bg-slate-900 text-slate-300 px-4 py-1.5 flex justify-between items-center text-xs border-b border-slate-800">
+        <div class="flex items-center gap-2">
+            <div class="bg-blue-600 text-white font-black px-2 py-0.5 rounded text-xs">K</div>
+            <span class="font-bold text-white">KhataBuddy</span>
+            <span class="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">v6.58</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded flex items-center gap-1 shadow-sm"><i class="fa-solid fa-headset"></i> Help</button>
+            <button class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 rounded flex items-center gap-1 shadow-sm"><i class="fa-solid fa-video"></i> Tutorials</button>
+            <div class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded">
+                <span class="text-[10px] text-cyan-400 font-bold"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Mode</span>
+                <input type="checkbox" checked class="cursor-pointer">
+            </div>
+            <div class="bg-slate-800 px-3 py-1 rounded flex items-center gap-2 text-white">
+                <i class="fa-solid fa-circle-user text-rose-500"></i>
+                <span class="font-semibold">Main Branch - NAMITA STORE</span>
+                <i class="fa-solid fa-chevron-down text-[10px]"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-[calc(100vh-33px)] overflow-hidden">
+        
         <!-- Sidebar Navigation -->
-        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between border-r border-slate-800 shadow-xl">
-            <div>
-                <!-- Brand Header -->
-                <div class="p-4 bg-indigo-700 text-white flex items-center gap-3 shadow">
-                    <div class="bg-indigo-600 p-2 rounded-xl border border-indigo-400">
-                        <i class="fa-solid fa-store text-xl text-yellow-300"></i>
-                    </div>
+        <aside class="w-60 bg-white border-r border-slate-200 flex flex-col justify-between overflow-y-auto text-xs font-medium">
+            <div class="py-2">
+                <nav class="space-y-0.5">
+                    <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="flex items-center justify-between px-4 py-2.5 bg-blue-50 text-blue-700 font-bold border-l-4 border-blue-600">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-chart-line text-sm w-4"></i> Dashboard</span>
+                    </a>
+                    <a href="#" onclick="switchTab('parties')" id="nav-parties" class="flex items-center px-4 py-2.5 hover:bg-slate-50 text-slate-700">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-users text-sm w-4"></i> Parties</span>
+                    </a>
+                    <a href="#" onclick="switchTab('sales')" id="nav-sales" class="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 text-slate-700">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-cart-shopping text-sm w-4"></i> Sales</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                    </a>
+                    <a href="#" onclick="switchTab('quotations')" id="nav-quotations" class="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 text-slate-700">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-file-lines text-sm w-4"></i> Quotations</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                    </a>
+                    <a href="#" onclick="switchTab('purchases')" id="nav-purchases" class="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 text-slate-700">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-bag-shopping text-sm w-4"></i> Purchases</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                    </a>
+                    <a href="#" onclick="switchTab('payments')" id="nav-payments" class="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 text-slate-700">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-indian-rupee-sign text-sm w-4"></i> Payments</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                    </a>
+                    <a href="#" onclick="switchTab('items')" id="nav-items" class="flex items-center px-4 py-2.5 hover:bg-slate-50 text-slate-700">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-box text-sm w-4"></i> Items</span>
+                    </a>
+                    <a href="#" onclick="switchTab('inventory')" id="nav-inventory" class="flex items-center px-4 py-2.5 hover:bg-slate-50 text-slate-700">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-boxes-stacked text-sm w-4"></i> Inventory</span>
+                    </a>
+                    <a href="#" onclick="switchTab('staff')" id="nav-staff" class="flex items-center px-4 py-2.5 hover:bg-slate-50 text-slate-700">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-user-tie text-sm w-4"></i> Staff & Payroll</span>
+                    </a>
+                    
+                    <!-- More Section -->
                     <div>
-                        <h1 id="storeTitleHeader" class="text-sm font-extrabold tracking-wider">NAMITA STORE</h1>
-                        <p class="text-[10px] text-indigo-200">GST Billing & POS</p>
+                        <button onclick="toggleMoreMenu()" class="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 text-slate-700">
+                            <span class="flex items-center gap-3"><i class="fa-solid fa-circle-chevron-down text-sm w-4"></i> More</span>
+                            <i id="moreArrow" class="fa-solid fa-chevron-up text-[10px] text-slate-400"></i>
+                        </button>
+                        <div id="moreMenuDropdown" class="bg-slate-50 py-1 pl-4 space-y-1 border-y border-slate-100">
+                            <a href="#" onclick="switchTab('projects')" class="block px-4 py-1.5 hover:bg-blue-100/50 rounded text-slate-600 font-semibold">Projects <i class="fa-solid fa-lock text-[9px] text-amber-500 float-right mt-0.5"></i></a>
+                            <a href="#" onclick="switchTab('onlinestore')" class="block px-4 py-1.5 hover:bg-blue-100/50 rounded text-slate-600">Online Store</a>
+                            <a href="#" onclick="switchTab('marketing')" class="block px-4 py-1.5 hover:bg-blue-100/50 rounded text-slate-600">Marketing <i class="fa-solid fa-lock text-[9px] text-amber-500 float-right mt-0.5"></i></a>
+                            <a href="#" onclick="switchTab('reminders')" class="block px-4 py-1.5 hover:bg-blue-100/50 rounded text-slate-600">Service Reminder</a>
+                            <a href="#" onclick="switchTab('datahub')" class="block px-4 py-1.5 hover:bg-blue-100/50 rounded text-slate-600">Data Hub <i class="fa-solid fa-bolt text-[9px] text-yellow-500 float-right mt-0.5"></i></a>
+                            <a href="#" onclick="switchTab('mydrive')" class="block px-4 py-1.5 hover:bg-blue-100/50 rounded text-slate-600">My Drive</a>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Navigation Links -->
-                <nav class="p-3 space-y-1 text-xs font-bold">
-                    <a href="#" onclick="switchTab('pos')" id="nav-pos" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-indigo-600 text-white transition shadow">
-                        <i class="fa-solid fa-cash-register text-base w-5"></i> POS / Billing
+                    <a href="#" onclick="switchTab('reports')" id="nav-reports" class="flex items-center px-4 py-2.5 hover:bg-slate-50 text-slate-700">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-chart-pie text-sm w-4"></i> Reports</span>
                     </a>
-                    <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition">
-                        <i class="fa-solid fa-chart-pie text-base w-5"></i> Dashboard & Stats
-                    </a>
-                    <a href="#" onclick="switchTab('inventory')" id="nav-inventory" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition">
-                        <i class="fa-solid fa-boxes-stacked text-base w-5"></i> Items & Inventory
-                    </a>
-                    <a href="#" onclick="switchTab('parties')" id="nav-parties" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition">
-                        <i class="fa-solid fa-users-rectangle text-base w-5"></i> Parties (Suppliers/Cust)
-                    </a>
-                    <a href="#" onclick="switchTab('reports')" id="nav-reports" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition">
-                        <i class="fa-solid fa-file-invoice-dollar text-base w-5"></i> Sales Reports
-                    </a>
-                    <a href="#" onclick="openSettingsModal()" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition text-amber-400">
-                        <i class="fa-solid fa-gear text-base w-5"></i> Settings
+                    <a href="#" onclick="switchTab('settings')" id="nav-settings" class="flex items-center px-4 py-2.5 hover:bg-slate-50 text-slate-700">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-gear text-sm w-4"></i> Settings</span>
                     </a>
                 </nav>
             </div>
-
-            <!-- Secret Owner Info (Disguised Profit View) -->
-            <div class="p-3 bg-slate-950 border-t border-slate-800 text-[11px]">
-                <div onclick="revealSecretProfit()" class="cursor-pointer flex items-center justify-between text-slate-400 hover:text-white px-2 py-1.5 rounded bg-slate-900 border border-slate-800">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-indigo-400"></i> <span id="secretLabelText">System Status</span></span>
-                    <i class="fa-solid fa-lock text-[10px]" id="secretLockIcon"></i>
+            
+            <!-- Secret Profit Toggle at bottom of sidebar -->
+            <div class="p-3 bg-slate-50 border-t border-slate-200">
+                <div onclick="revealSecretProfit()" class="cursor-pointer bg-white border border-slate-300 rounded p-2 flex justify-between items-center text-[11px] shadow-sm">
+                    <span class="font-bold text-slate-600"><i class="fa-solid fa-shield text-blue-600"></i> Secret Profit</span>
+                    <i class="fa-solid fa-lock text-[10px] text-slate-400" id="secretLockIcon"></i>
                 </div>
-                <div id="secretProfitBox" class="hidden mt-2 p-2 bg-emerald-950 border border-emerald-800 text-emerald-300 rounded font-bold text-center animate-pulse">
-                    Net Margin: <span id="totalProfitValue">₹0.00</span>
+                <div id="secretProfitBox" class="hidden mt-2 p-2 bg-emerald-50 border border-emerald-300 rounded text-center text-emerald-700 font-extrabold text-xs">
+                    Total Margin: <span id="totalProfitValue">₹0.00</span>
                 </div>
             </div>
         </aside>
 
-        <!-- Main Content Wrapper -->
-        <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <!-- Main Workspace Area -->
+        <main class="flex-1 flex flex-col overflow-y-auto p-6 bg-slate-100">
             
-            <!-- Top Header -->
-            <header class="bg-white shadow-sm px-6 py-3 flex justify-between items-center border-b border-slate-200">
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-widest" id="currentViewTitle">Point of Sale (POS)</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="openAddProductModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3.5 py-2 rounded-xl font-bold shadow transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-plus-circle"></i> Add Product
-                    </button>
-                    <button onclick="openSuppliersModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-2 rounded-xl font-bold transition">
-                        Suppliers
-                    </button>
-                    <button onclick="openCustomersModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-2 rounded-xl font-bold transition">
-                        Customers
-                    </button>
-                </div>
-            </header>
-
-            <!-- TAB 1: POS BILLING SCREEN -->
-            <div id="tab-pos-content" class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 p-4 overflow-y-auto">
-                <!-- Left POS Section -->
-                <div class="md:col-span-2 bg-white p-4 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between mb-3 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
-                            <div class="flex gap-2 w-full">
-                                <button onclick="setSaleMode('sale')" id="saleBtn" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow transition flex items-center justify-center gap-1.5">
-                                    <i class="fa-solid fa-cash-register"></i> New Sale
-                                </button>
-                                <button onclick="setSaleMode('return')" id="returnBtn" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-200 transition flex items-center justify-center gap-1.5">
-                                    <i class="fa-solid fa-rotate-left text-rose-500"></i> Return / Exchange
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Search & Add Product -->
-                        <div class="relative mb-3">
-                            <div class="flex items-center gap-2">
-                                <div class="relative w-full">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-indigo-500">
-                                        <i class="fa-solid fa-magnifying-glass"></i>
-                                    </span>
-                                    <input type="text" id="searchBox" oninput="filterProducts()" placeholder="Scan Barcode or Type Product Name..." class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border-2 border-indigo-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner" autocomplete="off">
-                                </div>
-                            </div>
-                            <div id="searchResultsDropdown" class="absolute left-0 right-0 mt-1 bg-white border-2 border-indigo-300 rounded-xl shadow-2xl max-h-60 overflow-y-auto z-50 hidden divide-y divide-slate-100"></div>
-                        </div>
-
-                        <!-- Cart List -->
-                        <div class="pt-1">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 id="cartListTitle" class="text-xs font-bold text-slate-500 uppercase tracking-wider">Cart Items</h3>
-                                <span id="cartCountBadge" class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2.5 py-0.5 rounded-full">0 Items</span>
-                            </div>
-                            <div class="overflow-y-auto h-[calc(100vh-330px)] space-y-2 pr-1" id="cartItems">
-                                <div class="text-center py-20 text-slate-400 flex flex-col items-center justify-center bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                                    <i class="fa-solid fa-basket-shopping text-3xl mb-2 text-indigo-400"></i>
-                                    <p class="text-sm font-bold text-slate-600">No items added to cart</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Billing Summary Section -->
-                <div class="bg-white p-4 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-between overflow-y-auto">
-                    <div>
-                        <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-200">
-                            <h3 class="text-xs font-black text-slate-800 uppercase tracking-wider">Billing & Summary</h3>
-                        </div>
-
-                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 mb-3 space-y-2">
-                            <div class="flex justify-between items-center">
-                                <label class="text-[11px] font-extrabold text-slate-700 uppercase">Customer</label>
-                                <button onclick="openAddCustomerModal()" class="text-[10px] text-indigo-600 font-bold hover:underline">+ Add New</button>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <input type="text" id="custName" placeholder="Name" class="p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold">
-                                <input type="text" id="custPhone" placeholder="Phone" class="p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="border border-slate-200 bg-slate-50 p-3 rounded-2xl space-y-2.5 text-xs">
-                        <div class="flex justify-between text-slate-500">
-                            <span>Subtotal:</span> 
-                            <span id="subtotal" class="font-bold text-slate-800">₹0.00</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-500">Extra Discount (₹):</span>
-                            <input type="number" id="discountInput" value="0" oninput="updateCartUI()" class="w-24 p-1 bg-white border border-slate-300 rounded text-right font-bold">
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-500">Cash Given (₹):</span>
-                            <input type="number" id="cashGivenInput" placeholder="0" oninput="calculateChange()" class="w-24 p-1 bg-white border border-slate-300 rounded text-right font-bold">
-                        </div>
-                        <div class="flex justify-between text-indigo-700 font-bold bg-indigo-50 p-1.5 rounded">
-                            <span>Change Return:</span> 
-                            <span id="changeReturnLabel">₹0.00</span>
-                        </div>
-                        <div class="flex justify-between font-extrabold text-base border-t pt-2">
-                            <span>Grand Total:</span> 
-                            <span id="grandTotal" class="text-emerald-600 text-xl">₹0.00</span>
-                        </div>
-
-                        <div class="mt-2">
-                            <label class="text-[10px] font-bold text-slate-600 uppercase block mb-1">Payment Method</label>
-                            <select id="paymentMethod" onchange="togglePaymentInputs()" class="w-full p-2 bg-white border border-slate-300 rounded-xl font-bold">
-                                <option value="Cash">Cash</option>
-                                <option value="UPI">PhonePe / UPI</option>
-                                <option value="Due">Khaata (Due)</option>
-                            </select>
-                        </div>
-
-                        <button onclick="completeCheckout()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-extrabold shadow-md transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-check-to-slot"></i> Complete Sale & Print
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 2: DASHBOARD & STATS -->
-            <div id="tab-dashboard-content" class="flex-1 p-6 overflow-y-auto hidden space-y-6">
-                <h2 class="text-lg font-black text-slate-800">Business Dashboard Overview</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <p class="text-xs text-slate-500 font-bold uppercase">Today's Total Sales</p>
-                        <h3 id="dashTodaySales" class="text-2xl font-black text-indigo-600 mt-1">₹0.00</h3>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <p class="text-xs text-slate-500 font-bold uppercase">Invoices Created</p>
-                        <h3 id="dashInvoiceCount" class="text-2xl font-black text-purple-600 mt-1">0</h3>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <p class="text-xs text-slate-500 font-bold uppercase">Total Inventory Items</p>
-                        <h3 id="dashTotalItems" class="text-2xl font-black text-emerald-600 mt-1">0</h3>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <p class="text-xs text-slate-500 font-bold uppercase">Total Khaata Due</p>
-                        <h3 id="dashTotalDue" class="text-2xl font-black text-rose-600 mt-1">₹0.00</h3>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 3: INVENTORY MANAGEMENT -->
-            <div id="tab-inventory-content" class="flex-1 p-6 overflow-y-auto hidden space-y-4">
+            <!-- TAB 1: DASHBOARD -->
+            <div id="tab-dashboard" class="space-y-6">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-lg font-black text-slate-800">Inventory Items Management</h2>
-                    <button onclick="openAddProductModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow">
-                        + Add New Product
+                    <h1 class="text-xl font-bold text-slate-800">Create New</h1>
+                </div>
+
+                <!-- Action Shortcut Cards -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 grid grid-cols-7 gap-4 text-center">
+                    <div onclick="switchTab('sales')" class="cursor-pointer p-3 rounded-xl hover:bg-blue-50 transition group">
+                        <div class="w-12 h-12 bg-blue-100 text-blue-600 mx-auto rounded-full flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-file-invoice"></i></div>
+                        <span class="text-xs font-semibold text-slate-700">New Invoice</span>
+                    </div>
+                    <div onclick="switchTab('sales')" class="cursor-pointer p-3 rounded-xl hover:bg-purple-50 transition group">
+                        <div class="w-12 h-12 bg-purple-100 text-purple-600 mx-auto rounded-full flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-receipt"></i></div>
+                        <span class="text-xs font-semibold text-slate-700">New Simple Bill</span>
+                    </div>
+                    <div onclick="switchTab('quotations')" class="cursor-pointer p-3 rounded-xl hover:bg-emerald-50 transition group">
+                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 mx-auto rounded-full flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-file-contract"></i></div>
+                        <span class="text-xs font-semibold text-slate-700">Quotation</span>
+                    </div>
+                    <div onclick="switchTab('purchases')" class="cursor-pointer p-3 rounded-xl hover:bg-amber-50 transition group">
+                        <div class="w-12 h-12 bg-amber-100 text-amber-600 mx-auto rounded-full flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-cart-shopping"></i></div>
+                        <span class="text-xs font-semibold text-slate-700">Purchase</span>
+                    </div>
+                    <div class="cursor-pointer p-3 rounded-xl hover:bg-cyan-50 transition group">
+                        <div class="w-12 h-12 bg-cyan-100 text-cyan-600 mx-auto rounded-full flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-truck"></i></div>
+                        <span class="text-xs font-semibold text-slate-700">Delivery Challan</span>
+                    </div>
+                    <div class="cursor-pointer p-3 rounded-xl hover:bg-emerald-50 transition group">
+                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 mx-auto rounded-full flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-arrow-down"></i></div>
+                        <span class="text-xs font-semibold text-slate-700">Payment In</span>
+                    </div>
+                    <div class="cursor-pointer p-3 rounded-xl hover:bg-rose-50 transition group">
+                        <div class="w-12 h-12 bg-rose-100 text-rose-600 mx-auto rounded-full flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-arrow-up"></i></div>
+                        <span class="text-xs font-semibold text-slate-700">Payment Out</span>
+                    </div>
+                </div>
+
+                <!-- Today's Overview & Month Statistics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-4">Today's Overview</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-xs text-slate-500">Today's Sales</p>
+                                <h4 class="text-xl font-black text-blue-600 mt-1" id="dashTodaySales">₹737</h4>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500">Invoices Created</p>
+                                <h4 class="text-xl font-black text-slate-800 mt-1" id="dashInvoiceCount">9</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-4">Current Month Statistics</h3>
+                        <div class="grid grid-cols-4 gap-2">
+                            <div>
+                                <p class="text-[11px] text-slate-500">Total Sales</p>
+                                <h4 class="text-sm font-bold text-blue-600 mt-1">₹737</h4>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-slate-500">Total Purchase</p>
+                                <h4 class="text-sm font-bold text-slate-700 mt-1">₹275</h4>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-slate-500">Payment Received</p>
+                                <h4 class="text-sm font-bold text-emerald-600 mt-1">₹707</h4>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-slate-500">Payment Made</p>
+                                <h4 class="text-sm font-bold text-rose-600 mt-1">₹275</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: SALES / BILLING SCREEN (KhataBuddy Style Create Simple Bill) -->
+            <div id="tab-sales" class="space-y-4 hidden">
+                <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <h2 class="font-black text-slate-800 text-sm">Create Simple Bill</h2>
+                        <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-semibold cursor-pointer">Resume Draft (1) <i class="fa-solid fa-chevron-down text-[9px]"></i></span>
+                    </div>
+                    <div class="flex items-center gap-4 text-xs">
+                        <div><span class="text-slate-400">Doc #:</span> <span class="font-bold">845</span></div>
+                        <div><span class="text-slate-400">Bill Date:</span> <span class="font-bold">01 Sep 2026</span> <i class="fa-solid fa-calendar text-slate-400 ml-1"></i></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Left Item Grid -->
+                    <div class="md:col-span-2 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between h-[520px]">
+                        <div>
+                            <div class="relative mb-3">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                <input type="text" id="posSearchInput" oninput="filterPosProducts()" placeholder="Scan barcode or search items using name, model, etc..." class="w-full pl-10 pr-4 py-2 border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <div id="posDropdown" class="absolute left-0 right-0 mt-1 bg-white border rounded-lg shadow-xl max-h-48 overflow-y-auto hidden z-20 divide-y"></div>
+                            </div>
+
+                            <!-- Table Header -->
+                            <div class="grid grid-cols-12 bg-slate-50 p-2 rounded text-[11px] font-bold text-slate-500 mb-2">
+                                <div class="col-span-1">S.No</div>
+                                <div class="col-span-5">Item / Description</div>
+                                <div class="col-span-2 text-center">Qty</div>
+                                <div class="col-span-2 text-right">Price</div>
+                                <div class="col-span-2 text-right">Total</div>
+                            </div>
+
+                            <div id="cartItemList" class="space-y-2 overflow-y-auto h-72">
+                                <div class="text-center py-16 text-slate-400 border border-dashed rounded-lg">
+                                    <i class="fa-solid fa-basket-shopping text-2xl mb-1 text-slate-300"></i>
+                                    <p class="text-xs">Select an item from the dropdown to add new item row</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t pt-3 flex justify-between items-center text-xs font-bold text-slate-700">
+                            <div>Total Qty: <span id="cartTotalQty">0</span></div>
+                            <div>Total Amount: <span id="cartGrandTotal" class="text-blue-600 text-base">₹0</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Billing Summary Panel -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3 text-xs flex flex-col justify-between h-[520px]">
+                        <div class="space-y-3">
+                            <div class="border-b pb-2">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-bold text-slate-500 uppercase text-[10px]">Customer Details</span>
+                                    <i class="fa-solid fa-pen text-[10px] text-blue-600"></i>
+                                </div>
+                                <div class="bg-slate-50 p-2 rounded border">
+                                    <p class="font-bold text-slate-800">CASH</p>
+                                    <p class="text-[11px] text-slate-500">1234567890</p>
+                                </div>
+                            </div>
+
+                            <div class="border-b pb-2">
+                                <span class="font-bold text-slate-500 uppercase text-[10px] block mb-1">Payments & Receipts</span>
+                                <div class="bg-emerald-50 border border-emerald-200 p-2 rounded text-emerald-800 font-semibold flex justify-between items-center">
+                                    <span>Mark as fully paid</span>
+                                    <input type="checkbox" checked class="accent-emerald-600">
+                                </div>
+                                <button onclick="alert('Payment Added!')" class="mt-2 w-full bg-blue-50 text-blue-600 py-1.5 rounded font-bold border border-blue-200 hover:bg-blue-100 transition">+ Add Payment</button>
+                            </div>
+
+                            <div class="space-y-1.5 pt-1">
+                                <div class="flex justify-between text-slate-500">
+                                    <span>Extra Discount:</span>
+                                    <input type="number" id="billDiscount" value="0" oninput="calculateBill()" class="w-16 p-1 border rounded text-right font-bold">
+                                </div>
+                                <div class="flex justify-between font-bold text-slate-800 border-t pt-1">
+                                    <span>Taxable Amount:</span>
+                                    <span id="taxableAmountLabel">₹0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <button onclick="completeSaleInvoice()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-black shadow transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-check"></i> Save & Preview
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: PROJECTS (Locked Page matching image 2) -->
+            <div id="tab-projects" class="space-y-4 hidden">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-base font-black text-slate-800">Projects</h2>
+                        <p class="text-xs text-slate-500">Group vouchers under named projects.</p>
+                    </div>
+                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1">
+                        + New Project <i class="fa-solid fa-lock text-[10px] text-amber-300"></i>
                     </button>
                 </div>
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-600">
-                                <th class="p-3">Product Name</th>
-                                <th class="p-3">Category</th>
-                                <th class="p-3">Barcode</th>
-                                <th class="p-3">MRP</th>
-                                <th class="p-3">Selling Price</th>
-                                <th class="p-3">Stock</th>
-                                <th class="p-3 text-right">Action</th>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-3 border-b bg-slate-50">
+                        <input type="text" placeholder="Search projects..." class="w-64 p-1.5 text-xs border rounded">
+                    </div>
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 border-b text-slate-500">
+                            <tr>
+                                <th class="p-3">Name</th>
+                                <th class="p-3">Start Date</th>
+                                <th class="p-3">End Date</th>
+                                <th class="p-3">Description</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="inventoryTableBody" class="divide-y divide-slate-100"></tbody>
+                        <tbody>
+                            <tr>
+                                <td colspan="6" class="text-center py-16 text-slate-400">No data found</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- TAB 4: PARTIES (SUPPLIERS & CUSTOMERS) -->
-            <div id="tab-parties-content" class="flex-1 p-6 overflow-y-auto hidden space-y-6">
-                <h2 class="text-lg font-black text-slate-800">Parties Ledger (Suppliers & Customers)</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="font-extrabold text-indigo-700 text-sm">Suppliers List</h3>
-                            <button onclick="openAddSupplierModal()" class="text-xs bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded font-bold">+ Add</button>
-                        </div>
-                        <div id="partiesSuppliersList" class="space-y-2"></div>
-                    </div>
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="font-extrabold text-purple-700 text-sm">Customers List</h3>
-                            <button onclick="openAddCustomerModal()" class="text-xs bg-purple-50 text-purple-700 px-2.5 py-1 rounded font-bold">+ Add</button>
-                        </div>
-                        <div id="partiesCustomersList" class="space-y-2"></div>
-                    </div>
+            <!-- TAB 4: ITEMS / INVENTORY -->
+            <div id="tab-items" class="space-y-4 hidden">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-base font-black text-slate-800">Items Inventory Management</h2>
+                    <button onclick="openAddItemModal()" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow">+ Add Item</button>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 border-b text-slate-500 font-bold">
+                            <tr>
+                                <th class="p-3">Item Name</th>
+                                <th class="p-3">Barcode</th>
+                                <th class="p-3">MRP</th>
+                                <th class="p-3">Selling Price</th>
+                                <th class="p-3">Stock Qty</th>
+                                <th class="p-3 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody" class="divide-y"></tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- TAB 5: REPORTS -->
-            <div id="tab-reports-content" class="flex-1 p-6 overflow-y-auto hidden space-y-4">
-                <h2 class="text-lg font-black text-slate-800">Sales Invoices & History</h2>
-                <div id="reportsListContainer" class="space-y-2"></div>
+            <!-- Generic placeholder for other tabs -->
+            <div id="tab-generic" class="space-y-4 hidden">
+                <h2 id="genericTitle" class="text-lg font-bold text-slate-800">Section View</h2>
+                <div class="bg-white p-6 rounded-xl border border-slate-200 text-center py-20 text-slate-400">
+                    <p class="text-xs">Module loaded successfully. Ready for operations.</p>
+                </div>
             </div>
         </main>
     </div>
 
-    <!-- MODALS -->
-    <!-- Add Product Modal -->
-    <div id="addProductModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 border-4 border-indigo-600 relative">
-            <h3 class="font-black text-indigo-700 text-base mb-3"><i class="fa-solid fa-plus-circle"></i> Add New Product</h3>
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-bold mb-1">Product Name *</label>
-                    <input type="text" id="newProdName" placeholder="e.g. Rice 1kg" class="w-full p-2.5 border rounded-xl font-bold">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-bold mb-1">Category</label>
-                        <input type="text" id="newProdCategory" placeholder="Groceries" class="w-full p-2.5 border rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block font-bold mb-1">Barcode</label>
-                        <input type="text" id="newProdBarcode" class="w-full p-2.5 border rounded-xl font-bold">
-                    </div>
-                </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div>
-                        <label class="block font-bold mb-1">MRP (₹)</label>
-                        <input type="number" id="newProdMrp" class="w-full p-2.5 border rounded-xl font-bold">
-                    </div>
-                    <div>
-                        <label class="block font-bold mb-1">Selling Price (₹)</label>
-                        <input type="number" id="newProdPrice" class="w-full p-2.5 border rounded-xl font-bold">
-                    </div>
-                    <div>
-                        <label class="block font-bold mb-1">Cost Price (₹)</label>
-                        <input type="number" id="newProdCost" class="w-full p-2.5 border rounded-xl font-bold">
-                    </div>
-                </div>
-                <div>
-                    <label class="block font-bold mb-1">Initial Stock Qty</label>
-                    <input type="number" id="newProdStock" value="50" class="w-full p-2.5 border rounded-xl font-bold">
-                </div>
-                <div class="flex gap-2 pt-2">
-                    <button onclick="saveNewProduct()" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl font-bold">Save Product</button>
-                    <button onclick="closeAddProductModal()" class="bg-slate-200 px-4 py-2.5 rounded-xl font-bold">Cancel</button>
-                </div>
+    <!-- Add Item Modal -->
+    <div id="addItemModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-5 space-y-3 text-xs border-2 border-blue-600">
+            <h3 class="font-bold text-blue-700 text-sm">Add New Item</h3>
+            <input type="text" id="addItemName" placeholder="Item Name" class="w-full p-2 border rounded">
+            <input type="text" id="addItemBarcode" placeholder="Barcode" class="w-full p-2 border rounded">
+            <div class="grid grid-cols-3 gap-2">
+                <input type="number" id="addItemMrp" placeholder="MRP" class="w-full p-2 border rounded">
+                <input type="number" id="addItemPrice" placeholder="Selling Price" class="w-full p-2 border rounded">
+                <input type="number" id="addItemCost" placeholder="Cost Price" class="w-full p-2 border rounded">
             </div>
-        </div>
-    </div>
-
-    <!-- Bill Preview Modal (Invoice Review) -->
-    <div id="billModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border-4 border-indigo-500 relative">
-            <div class="text-center pb-3 border-b">
-                <h2 id="modalStoreName" class="text-lg font-black text-indigo-700">NAMITA STORE</h2>
-                <p id="modalStoreAddress" class="text-xs text-slate-500">Tax Invoice / Cash Memo</p>
-            </div>
-            <div id="billReceiptContent" class="py-3 text-xs space-y-1 text-slate-700 font-mono max-h-60 overflow-y-auto"></div>
-            <div class="flex gap-2 mt-4 pt-3 border-t">
-                <button onclick="window.print()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-bold shadow flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-print"></i> Print Invoice
-                </button>
-                <button onclick="closeBillModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2.5 rounded-xl text-xs font-bold">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 border-4 border-slate-800 relative">
-            <div class="flex justify-between items-center pb-3 border-b">
-                <h2 class="text-base font-black text-slate-900">App Settings</h2>
-                <button onclick="closeSettingsModal()" class="text-slate-400 font-bold text-lg"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="py-4 space-y-3 text-xs">
-                <div>
-                    <label class="block font-semibold mb-1">Store Name:</label>
-                    <input type="text" id="settingStoreName" value="NAMITA STORE" class="w-full p-2 border rounded-lg font-bold">
-                </div>
-                <div>
-                    <label class="block font-semibold mb-1">Store Address / Phone:</label>
-                    <input type="text" id="settingStoreAddress" value="Kolkata, West Bengal | Ph: 9876543210" class="w-full p-2 border rounded-lg">
-                </div>
-                <button onclick="saveSettings()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl font-bold shadow">Save Settings</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Additional Modals -->
-    <div id="addSupplierFormModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border-4 border-indigo-600">
-            <h3 class="font-extrabold text-indigo-800 text-sm mb-3">Add Supplier</h3>
-            <div class="space-y-3 text-xs">
-                <input type="text" id="supName" placeholder="Supplier Name" class="w-full p-2.5 border rounded-lg font-bold">
-                <input type="text" id="supPhone" placeholder="Phone Number" class="w-full p-2.5 border rounded-lg">
-                <input type="number" id="supDue" placeholder="Opening Due (₹)" value="0" class="w-full p-2.5 border rounded-lg font-bold">
-                <div class="flex gap-2">
-                    <button onclick="saveNewSupplier()" class="flex-1 bg-indigo-600 text-white py-2 rounded">Save</button>
-                    <button onclick="document.getElementById('addSupplierFormModal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="addCustomerFormModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border-4 border-purple-600">
-            <h3 class="font-extrabold text-purple-800 text-sm mb-3">Add Customer</h3>
-            <div class="space-y-3 text-xs">
-                <input type="text" id="custModalName" placeholder="Customer Name" class="w-full p-2.5 border rounded-lg font-bold">
-                <input type="text" id="custModalPhone" placeholder="Phone Number" class="w-full p-2.5 border rounded-lg">
-                <input type="number" id="custModalDue" placeholder="Opening Due (₹)" value="0" class="w-full p-2.5 border rounded-lg font-bold">
-                <div class="flex gap-2">
-                    <button onclick="saveNewCustomer()" class="flex-1 bg-purple-600 text-white py-2 rounded">Save</button>
-                    <button onclick="document.getElementById('addCustomerFormModal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded">Cancel</button>
-                </div>
+            <input type="number" id="addItemStock" placeholder="Stock Quantity" value="25" class="w-full p-2 border rounded">
+            <div class="flex gap-2 pt-2">
+                <button onclick="saveItemData()" class="flex-1 bg-blue-600 text-white py-2 rounded font-bold">Save</button>
+                <button onclick="closeAddItemModal()" class="bg-slate-200 px-3 py-2 rounded font-bold">Cancel</button>
             </div>
         </div>
     </div>
 
     <!-- Script Area -->
     <script>
-        let storeConfig = { name: "NAMITA STORE", address: "Kolkata, West Bengal | Ph: 9876543210" };
         let inventory = [
-            { id: 1, name: 'Namita Special Tea', category: 'Beverages', costPrice: 110, mrp: 180, price: 150, stock: 40, barcode: '890101' },
-            { id: 2, name: 'Premium Biscuit Pack', category: 'Snacks', costPrice: 40, mrp: 75, price: 60, stock: 120, barcode: '890102' }
+            { id: 1, name: 'Namita Special Tea 250g', barcode: '890101', mrp: 180, price: 150, cost: 110, stock: 45 },
+            { id: 2, name: 'Premium Biscuit Pack', barcode: '890102', mrp: 75, price: 60, cost: 40, stock: 110 }
         ];
-        let suppliers = [{ id: 1, name: 'Bengal Tea Distributors', phone: '9830012345', due: 12500 }];
-        let customers = [{ id: 1, name: 'Amit Kumar', phone: '9876543210', due: 520 }];
-        let salesHistory = [];
-        let cart = [];
-        let currentMode = 'sale';
+        let billCart = [];
         let accumulatedProfit = 0;
 
         function switchTab(tabId) {
-            ['pos', 'dashboard', 'inventory', 'parties', 'reports'].forEach(t => {
-                document.getElementById(`tab-${t}-content`).classList.add('hidden');
-                document.getElementById(`nav-${t}`)?.classList.remove('bg-indigo-600', 'text-white');
+            ['dashboard', 'sales', 'projects', 'items', 'generic', 'parties', 'quotations', 'purchases', 'payments', 'inventory', 'staff', 'reports', 'settings', 'onlinestore', 'marketing', 'reminders', 'datahub', 'mydrive'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                if(el) el.classList.add('hidden');
             });
-            document.getElementById(`tab-${tabId}-content`).classList.remove('hidden');
-            document.getElementById(`nav-${tabId}`)?.classList.add('bg-indigo-600', 'text-white');
-            document.getElementById('currentViewTitle').innerText = tabId.toUpperCase();
+            
+            const target = document.getElementById(`tab-${tabId}`) || document.getElementById('tab-generic');
+            target.classList.remove('hidden');
 
-            if(tabId === 'dashboard') updateDashboardStats();
-            if(tabId === 'inventory') renderInventoryTable();
-            if(tabId === 'parties') renderPartiesList();
-            if(tabId === 'reports') renderReportsList();
+            if(tabId === 'generic' || ['parties', 'quotations', 'purchases', 'payments', 'inventory', 'staff', 'reports', 'settings', 'onlinestore', 'marketing', 'reminders', 'datahub', 'mydrive'].includes(tabId)) {
+                document.getElementById('genericTitle').innerText = tabId.toUpperCase();
+            }
+            if(tabId === 'items') renderInventoryTable();
+        }
+
+        function toggleMoreMenu() {
+            const menu = document.getElementById('moreMenuDropdown');
+            const arrow = document.getElementById('moreArrow');
+            menu.classList.toggle('hidden');
+            arrow.classList.toggle('fa-chevron-up');
+            arrow.classList.toggle('fa-chevron-down');
         }
 
         function revealSecretProfit() {
@@ -411,183 +400,112 @@
             const icon = document.getElementById('secretLockIcon');
             if(box.classList.contains('hidden')) {
                 box.classList.remove('hidden');
-                icon.className = "fa-solid fa-lock-open text-emerald-400 text-[10px]";
+                icon.className = "fa-solid fa-lock-open text-emerald-600 text-[10px]";
             } else {
                 box.classList.add('hidden');
                 icon.className = "fa-solid fa-lock text-[10px]";
             }
         }
 
-        function setSaleMode(mode) {
-            currentMode = mode;
-            const saleBtn = document.getElementById('saleBtn');
-            const returnBtn = document.getElementById('returnBtn');
-            if(mode === 'sale') {
-                saleBtn.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow flex items-center justify-center gap-1.5";
-                returnBtn.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-200 flex items-center justify-center gap-1.5";
-            } else {
-                returnBtn.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-rose-600 text-white shadow flex items-center justify-center gap-1.5";
-                saleBtn.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-200 flex items-center justify-center gap-1.5";
-            }
-        }
-
-        function filterProducts() {
-            const query = document.getElementById('searchBox').value.toLowerCase().trim();
-            const dropdown = document.getElementById('searchResultsDropdown');
-            if (query === '') { dropdown.classList.add('hidden'); return; }
-            let filtered = inventory.filter(p => p.name.toLowerCase().includes(query) || p.barcode.includes(query));
-            if (filtered.length === 0) {
+        function filterPosProducts() {
+            const query = document.getElementById('posSearchInput').value.toLowerCase().trim();
+            const dropdown = document.getElementById('posDropdown');
+            if(!query) { dropdown.classList.add('hidden'); return; }
+            let filtered = inventory.filter(i => i.name.toLowerCase().includes(query) || i.barcode.includes(query));
+            if(filtered.length === 0) {
                 dropdown.classList.remove('hidden');
-                dropdown.innerHTML = `<div class="p-3 text-xs text-rose-500 font-semibold text-center">No product found!</div>`;
+                dropdown.innerHTML = `<div class="p-2 text-xs text-rose-500">No item found</div>`;
                 return;
             }
             let html = '';
-            filtered.forEach(p => {
-                html += `<div onclick="addToCart('${p.name}', ${p.price}, ${p.mrp}, ${p.costPrice})" class="px-4 py-2 hover:bg-indigo-50 cursor-pointer flex justify-between items-center text-xs">
-                    <div><b>${p.name}</b> <span class="text-slate-400">| Code: ${p.barcode}</span></div>
-                    <div class="text-indigo-600 font-extrabold">₹${p.price}</div>
+            filtered.forEach(i => {
+                html += `<div onclick="addToBillCart('${i.name}', ${i.price}, ${i.cost})" class="p-2 hover:bg-blue-50 cursor-pointer flex justify-between text-xs">
+                    <span><b>${i.name}</b> (Stock: ${i.stock})</span>
+                    <span class="text-blue-600 font-bold">₹${i.price}</span>
                 </div>`;
             });
             dropdown.classList.remove('hidden');
             dropdown.innerHTML = html;
         }
 
-        function addToCart(name, price, mrp, costPrice) {
-            let item = cart.find(i => i.name === name);
+        function addToBillCart(name, price, cost) {
+            let item = billCart.find(i => i.name === name);
             if(item) item.qty += 1;
-            else cart.push({ name, price, mrp, costPrice, qty: 1 });
-            document.getElementById('searchBox').value = '';
-            document.getElementById('searchResultsDropdown').classList.add('hidden');
-            updateCartUI();
+            else billCart.push({ name, price, cost, qty: 1 });
+            document.getElementById('posSearchInput').value = '';
+            document.getElementById('posDropdown').classList.add('hidden');
+            renderBillCart();
         }
 
-        function changeQty(idx, amt) {
-            cart[idx].qty += amt;
-            if(cart[idx].qty <= 0) cart.splice(idx, 1);
-            updateCartUI();
-        }
-
-        function updateCartUI() {
-            const container = document.getElementById('cartItems');
-            const subtotalEl = document.getElementById('subtotal');
-            const grandTotalEl = document.getElementById('grandTotal');
-            if(cart.length === 0) {
-                container.innerHTML = `<div class="text-center py-20 text-slate-400 flex flex-col items-center justify-center bg-slate-50 rounded-xl border border-dashed border-slate-300"><i class="fa-solid fa-basket-shopping text-3xl mb-2 text-indigo-400"></i><p class="text-sm font-bold text-slate-600">No items added to cart</p></div>`;
-                subtotalEl.innerText = '₹0.00'; grandTotalEl.innerText = '₹0.00'; return;
+        function renderBillCart() {
+            const container = document.getElementById('cartItemList');
+            if(billCart.length === 0) {
+                container.innerHTML = `<div class="text-center py-16 text-slate-400 border border-dashed rounded-lg"><i class="fa-solid fa-basket-shopping text-2xl mb-1 text-slate-300"></i><p class="text-xs">Select an item from the dropdown to add new item row</p></div>`;
+                document.getElementById('cartTotalQty').innerText = '0';
+                document.getElementById('cartGrandTotal').innerText = '₹0';
+                document.getElementById('taxableAmountLabel').innerText = '₹0';
+                return;
             }
-            let html = '', subtotal = 0, profit = 0;
-            cart.forEach((i, idx) => {
-                subtotal += i.price * i.qty;
-                profit += (i.price - i.costPrice) * i.qty;
-                html += `<div class="flex justify-between items-center bg-white p-2 rounded-xl text-xs border border-indigo-100 shadow-sm">
-                    <div><b>${i.name}</b><br><span class="text-slate-500">₹${i.price} × ${i.qty} = <b>₹${i.price*i.qty}</b></span></div>
-                    <div class="flex items-center gap-1">
-                        <button onclick="changeQty(${idx}, -1)" class="bg-slate-100 px-2 py-0.5 rounded font-bold">-</button>
-                        <span>${i.qty}</span>
-                        <button onclick="changeQty(${idx}, 1)" class="bg-slate-100 px-2 py-0.5 rounded font-bold">+</button>
+            let html = '', totalQty = 0, subtotal = 0, profit = 0;
+            billCart.forEach((item, idx) => {
+                totalQty += item.qty;
+                subtotal += item.price * item.qty;
+                profit += (item.price - item.cost) * item.qty;
+                html += `<div class="grid grid-cols-12 items-center bg-slate-50 p-2 rounded text-xs border">
+                    <div class="col-span-1 font-bold">${idx+1}</div>
+                    <div class="col-span-5 font-bold truncate">${item.name}</div>
+                    <div class="col-span-2 text-center">
+                        <button onclick="billCart[${idx}].qty = Math.max(1, billCart[${idx}].qty-1); renderBillCart();" class="px-1 bg-white border rounded">-</button>
+                        <span class="mx-1">${item.qty}</span>
+                        <button onclick="billCart[${idx}].qty++; renderBillCart();" class="px-1 bg-white border rounded">+</button>
                     </div>
+                    <div class="col-span-2 text-right font-semibold">₹${item.price}</div>
+                    <div class="col-span-2 text-right font-black text-blue-600">₹${item.price * item.qty}</div>
                 </div>`;
             });
-            let discount = parseFloat(document.getElementById('discountInput').value) || 0;
+            let discount = parseFloat(document.getElementById('billDiscount').value) || 0;
             let grand = subtotal - discount;
-            subtotalEl.innerText = '₹' + subtotal.toFixed(2);
-            grandTotalEl.innerText = '₹' + grand.toFixed(2);
             container.innerHTML = html;
+            document.getElementById('cartTotalQty').innerText = totalQty;
+            document.getElementById('cartGrandTotal').innerText = '₹' + grand;
+            document.getElementById('taxableAmountLabel').innerText = '₹' + grand;
             accumulatedProfit = profit;
             document.getElementById('totalProfitValue').innerText = '₹' + profit.toFixed(2);
         }
 
-        function calculateChange() {
-            let grand = parseFloat(document.getElementById('grandTotal').innerText.replace('₹','')) || 0;
-            let given = parseFloat(document.getElementById('cashGivenInput').value) || 0;
-            document.getElementById('changeReturnLabel').innerText = '₹' + (given > grand ? (given - grand).toFixed(2) : '0.00');
+        function calculateBill() { renderBillCart(); }
+
+        function completeSaleInvoice() {
+            if(billCart.length === 0) { alert('Cart is empty!'); return; }
+            alert('Invoice saved and generated successfully!');
+            billCart = [];
+            renderBillCart();
         }
 
-        function completeCheckout() {
-            if(cart.length === 0) { alert('Cart is empty!'); return; }
-            let custName = document.getElementById('custName').value.trim() || 'Walk-in Customer';
-            let grand = parseFloat(document.getElementById('grandTotal').innerText.replace('₹','')) || 0;
-            
-            let billText = `${storeConfig.name}\n${storeConfig.address}\n--------------------\nCustomer: ${custName}\nDate: ${new Date().toLocaleString()}\n--------------------\n`;
-            cart.forEach(i => billText += `${i.name} (${i.qty}x) - ₹${i.price*i.qty}\n`);
-            billText += `--------------------\n*Grand Total: ₹${grand}*\nThank you! Visit Again.`;
-
-            salesHistory.push({ date: new Date().toLocaleDateString(), customer: custName, total: grand, items: [...cart] });
-            
-            document.getElementById('modalStoreName').innerText = storeConfig.name;
-            document.getElementById('billReceiptContent').innerHTML = billText.replace(/\n/g, '<br>');
-            document.getElementById('billModal').classList.remove('hidden');
-
-            cart = []; updateCartUI();
-            document.getElementById('custName').value = '';
-        }
-
-        function closeBillModal() { document.getElementById('billModal').classList.add('hidden'); }
-        function openAddProductModal() { document.getElementById('addProductModal').classList.remove('hidden'); }
-        function closeAddProductModal() { document.getElementById('addProductModal').classList.add('hidden'); }
+        function openAddItemModal() { document.getElementById('addItemModal').classList.remove('hidden'); }
+        function closeAddItemModal() { document.getElementById('addItemModal').classList.add('hidden'); }
         
-        function saveNewProduct() {
-            let name = document.getElementById('newProdName').value.trim();
-            if(!name) { alert('Enter name'); return; }
+        function saveItemData() {
+            let name = document.getElementById('addItemName').value.trim();
+            if(!name) { alert('Enter item name'); return; }
             inventory.push({
-                id: inventory.length+1, name, category: document.getElementById('newProdCategory').value || 'General',
-                barcode: document.getElementById('newProdBarcode').value || '890' + Math.floor(100+Math.random()*900),
-                mrp: parseFloat(document.getElementById('newProdMrp').value)||100,
-                price: parseFloat(document.getElementById('newProdPrice').value)||90,
-                costPrice: parseFloat(document.getElementById('newProdCost').value)||70,
-                stock: parseInt(document.getElementById('newProdStock').value)||50
+                id: inventory.length+1, name,
+                barcode: document.getElementById('addItemBarcode').value || '890' + Math.floor(100+Math.random()*900),
+                mrp: parseFloat(document.getElementById('addItemMrp').value) || 100,
+                price: parseFloat(document.getElementById('addItemPrice').value) || 90,
+                cost: parseFloat(document.getElementById('addItemCost').value) || 70,
+                stock: parseInt(document.getElementById('addItemStock').value) || 25
             });
-            closeAddProductModal(); alert('Product saved successfully!');
-        }
-
-        function openSettingsModal() { document.getElementById('settingsModal').classList.remove('hidden'); }
-        function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
-        function saveSettings() {
-            storeConfig.name = document.getElementById('settingStoreName').value;
-            storeConfig.address = document.getElementById('settingStoreAddress').value;
-            document.getElementById('storeTitleHeader').innerText = storeConfig.name;
-            closeSettingsModal(); alert('Settings saved!');
-        }
-
-        function updateDashboardStats() {
-            document.getElementById('dashTodaySales').innerText = '₹' + salesHistory.reduce((s,v)=>s+v.total, 0).toFixed(2);
-            document.getElementById('dashInvoiceCount').innerText = salesHistory.length;
-            document.getElementById('dashTotalItems').innerText = inventory.length;
-            document.getElementById('dashTotalDue').innerText = '₹' + customers.reduce((s,v)=>s+v.due,0).toFixed(2);
+            closeAddItemModal();
+            alert('Item added successfully!');
         }
 
         function renderInventoryTable() {
             let html = '';
-            inventory.forEach(p => {
-                html += `<tr class="border-b"><td class="p-3 font-bold">${p.name}</td><td class="p-3">${p.category}</td><td class="p-3">${p.barcode}</td><td class="p-3">₹${p.mrp}</td><td class="p-3 text-indigo-600 font-bold">₹${p.price}</td><td class="p-3">${p.stock}</td><td class="p-3 text-right"><button onclick="deleteProd(${p.id})" class="text-rose-500 font-bold"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+            inventory.forEach(i => {
+                html += `<tr class="border-b"><td class="p-3 font-bold">${i.name}</td><td class="p-3">${i.barcode}</td><td class="p-3">₹${i.mrp}</td><td class="p-3 text-blue-600 font-bold">₹${i.price}</td><td class="p-3">${i.stock}</td><td class="p-3 text-right"><button onclick="inventory=inventory.filter(x=>x.id!==${i.id}); renderInventoryTable();" class="text-rose-500 font-bold"><i class="fa-solid fa-trash"></i></button></td></tr>`;
             });
             document.getElementById('inventoryTableBody').innerHTML = html;
-        }
-        function deleteProd(id) { inventory = inventory.filter(p=>p.id!==id); renderInventoryTable(); }
-
-        function renderPartiesList() {
-            document.getElementById('partiesSuppliersList').innerHTML = suppliers.map(s=>`<div class="p-2 border rounded text-xs flex justify-between"><span><b>${s.name}</b></span><span class="text-rose-600 font-bold">Due: ₹${s.due}</span></div>`).join('');
-            document.getElementById('partiesCustomersList').innerHTML = customers.map(c=>`<div class="p-2 border rounded text-xs flex justify-between"><span><b>${c.name}</b></span><span class="text-rose-600 font-bold">Due: ₹${c.due}</span></div>`).join('');
-        }
-
-        function renderReportsList() {
-            let html = '';
-            salesHistory.salesHistory?.forEach?.((sh, idx) => {}) // safe check
-            salesHistory.forEach((sh, idx) => {
-                html += `<div class="p-3 bg-white border rounded-xl flex justify-between items-center text-xs"><div><b>Invoice #${idx+1}</b> - ${sh.customer}<br><span class="text-slate-500">${sh.date}</span></div><div class="text-right"><b class="text-emerald-600 text-sm">₹${sh.total}</b></div></div>`;
-            });
-            document.getElementById('reportsListContainer').innerHTML = html || `<p class="text-slate-400 text-xs text-center py-5">No invoices generated yet.</p>`;
-        }
-
-        function openAddSupplierModal() { document.getElementById('addSupplierFormModal').classList.remove('hidden'); }
-        function saveNewSupplier() {
-            suppliers.push({ id: suppliers.length+1, name: document.getElementById('supName').value, phone: document.getElementById('supPhone').value, due: parseFloat(document.getElementById('supDue').value)||0 });
-            document.getElementById('addSupplierFormModal').classList.add('hidden'); renderPartiesList();
-        }
-        function openAddCustomerModal() { document.getElementById('addCustomerFormModal').classList.remove('hidden'); }
-        function saveNewCustomer() {
-            customers.push({ id: customers.length+1, name: document.getElementById('custModalName').value, phone: document.getElementById('custModalPhone').value, due: parseFloat(document.getElementById('custModalDue').value)||0 });
-            document.getElementById('addCustomerFormModal').classList.add('hidden');
         }
     </script>
 </body>
