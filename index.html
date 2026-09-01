@@ -16,7 +16,7 @@
             </div>
             <div class="grid grid-cols-3 gap-3 overflow-y-auto flex-1" id="productList">
                 <!-- Sample Product Card -->
-                <div onclick="addToCart('Namita Store Special Item', 500)" class="border p-3 rounded cursor-pointer hover:shadow-md bg-white">
+                <div onclick="addToCart('Namita Store Special Item', 500)" class="border p-3 rounded cursor-pointer hover:shadow-md bg-white transition">
                     <h4 class="font-bold text-sm">Namita Store Item</h4>
                     <p class="text-gray-600 text-xs">₹500.00</p>
                     <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">In Stock: 25</span>
@@ -28,14 +28,18 @@
         <div class="bg-white p-4 rounded-lg shadow flex flex-col justify-between">
             <div>
                 <h2 class="text-lg font-bold mb-3 border-b pb-2">Current Sale / POS</h2>
-                <div class="overflow-y-auto max-h-64 mb-4" id="cartItems">
+                <div class="overflow-y-auto max-h-56 mb-4 space-y-2" id="cartItems">
                     <p class="text-gray-400 text-sm">Cart is empty</p>
                 </div>
             </div>
 
-            <div>
-                <div class="space-y-1 text-sm border-t pt-2">
+            <div class="border-t pt-3">
+                <div class="space-y-1 text-sm">
                     <div class="flex justify-between"><span>Subtotal:</span> <span id="subtotal">₹0.00</span></div>
+                    <div class="flex justify-between items-center">
+                        <span>Discount (₹):</span>
+                        <input type="number" id="discountInput" value="0" oninput="updateCartUI()" class="w-20 p-1 border rounded text-right text-sm">
+                    </div>
                     <div class="flex justify-between font-bold text-base border-t pt-1"><span>Grand Total:</span> <span id="grandTotal">₹0.00</span></div>
                 </div>
 
@@ -59,7 +63,25 @@
         let cart = [];
 
         function addToCart(name, price) {
-            cart.push({ name, price, qty: 1 });
+            let existingItem = cart.find(item => item.name === name);
+            if (existingItem) {
+                existingItem.qty += 1;
+            } else {
+                cart.push({ name, price, qty: 1 });
+            }
+            updateCartUI();
+        }
+
+        function changeQty(index, amount) {
+            cart[index].qty += amount;
+            if (cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            updateCartUI();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
             updateCartUI();
         }
 
@@ -67,6 +89,7 @@
             const cartContainer = document.getElementById('cartItems');
             const subtotalEl = document.getElementById('subtotal');
             const grandTotalEl = document.getElementById('grandTotal');
+            const discountInput = document.getElementById('discountInput');
             
             if (cart.length === 0) {
                 cartContainer.innerHTML = '<p class="text-gray-400 text-sm">Cart is empty</p>';
@@ -76,18 +99,32 @@
             }
 
             let html = '';
-            let total = 0;
+            let subtotal = 0;
+            
             cart.forEach((item, index) => {
-                total += item.price * item.qty;
-                html += `<div class="flex justify-between items-center mb-2 text-sm border-b pb-1">
-                    <div><p class="font-semibold">${item.name}</p><p class="text-xs text-gray-500">₹${item.price} x ${item.qty}</p></div>
-                    <p class="font-bold">₹${item.price * item.qty}</p>
+                let itemTotal = item.price * item.qty;
+                subtotal += itemTotal;
+                html += `<div class="flex justify-between items-center bg-gray-50 p-2 rounded text-sm border">
+                    <div class="flex-1">
+                        <p class="font-semibold">${item.name}</p>
+                        <p class="text-xs text-gray-500">₹${item.price} x ${item.qty} = <b>₹${itemTotal}</b></p>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="changeQty(${index}, -1)" class="bg-gray-200 px-2 py-0.5 rounded font-bold hover:bg-gray-300">-</button>
+                        <span class="px-1 text-xs font-bold">${item.qty}</span>
+                        <button onclick="changeQty(${index}, 1)" class="bg-gray-200 px-2 py-0.5 rounded font-bold hover:bg-gray-300">+</button>
+                        <button onclick="removeItem(${index})" class="text-red-500 ml-2 font-bold hover:text-red-700">×</button>
+                    </div>
                 </div>`;
             });
 
+            let discount = parseFloat(discountInput.value) || 0;
+            let grandTotal = subtotal - discount;
+            if (grandTotal < 0) grandTotal = 0;
+
             cartContainer.innerHTML = html;
-            subtotalEl.innerText = '₹' + total.toFixed(2);
-            grandTotalEl.innerText = '₹' + total.toFixed(2);
+            subtotalEl.innerText = '₹' + subtotal.toFixed(2);
+            grandTotalEl.innerText = '₹' + grandTotal.toFixed(2);
         }
 
         function completeCheckout() {
@@ -97,8 +134,7 @@
             }
             alert('Sale completed successfully! Stock updated.');
             cart = [];
+            document.getElementById('discountInput').value = 0;
             updateCartUI();
         }
     </script>
-</body>
-</html>
