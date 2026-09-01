@@ -3,8 +3,10 @@ const app = express();
 
 app.use(express.json());
 
+const path = require('path');
+
 app.get('/', (req, res) => {
-  res.send('Namita Store Inventory API is Running!');
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
