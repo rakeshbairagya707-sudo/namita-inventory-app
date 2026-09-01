@@ -3,509 +3,454 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KhataBuddy - GST Billing Software</title>
+    <title>NAMITA STORE - Seller Dashboard & Billing</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-100 font-sans min-h-screen text-slate-800">
+<body class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 font-sans min-h-screen text-slate-100">
 
     <!-- Top Window Bar -->
-    <div class="bg-slate-900 text-slate-300 px-4 py-1.5 flex justify-between items-center text-xs border-b border-slate-800">
+    <div class="bg-slate-950/80 backdrop-blur border-b border-slate-800 text-slate-300 px-4 py-2 flex justify-between items-center text-xs">
         <div class="flex items-center gap-2">
-            <div class="bg-blue-600 text-white font-black px-2 py-0.5 rounded text-xs">K</div>
-            <span class="font-bold text-white">KhataBuddy</span>
-            <span class="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">v6.58</span>
+            <div class="bg-gradient-to-r from-pink-500 to-violet-600 text-white font-black px-2.5 py-1 rounded-lg text-xs shadow-lg shadow-pink-500/20">NS</div>
+            <span class="font-bold text-white tracking-wide text-sm">NAMITA STORE</span>
+            <span class="text-[10px] bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full text-indigo-400 font-semibold">Seller Panel Pro v6.5</span>
         </div>
         <div class="flex items-center gap-3">
-            <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded flex items-center gap-1 shadow-sm"><i class="fa-solid fa-headset"></i> Help</button>
-            <button class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 rounded flex items-center gap-1 shadow-sm"><i class="fa-solid fa-video"></i> Tutorials</button>
-            <div class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded">
-                <span class="text-[10px] text-cyan-400 font-bold"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Mode</span>
-                <input type="checkbox" checked class="cursor-pointer">
-            </div>
-            <div class="bg-slate-800 px-3 py-1 rounded flex items-center gap-2 text-white">
-                <i class="fa-solid fa-circle-user text-rose-500"></i>
-                <span class="font-semibold">Main Branch - NAMITA STORE</span>
-                <i class="fa-solid fa-chevron-down text-[10px]"></i>
+            <button class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-md font-medium transition"><i class="fa-solid fa-headset"></i> Support</button>
+            <div class="bg-slate-800/80 border border-slate-700 px-3 py-1 rounded-lg flex items-center gap-2 text-white">
+                <i class="fa-solid fa-store text-pink-500"></i>
+                <span class="font-bold text-slate-200">Main Store Counter</span>
             </div>
         </div>
     </div>
 
-    <div class="flex h-[calc(100vh-33px)] overflow-hidden">
+    <div class="flex h-[calc(100vh-41px)] overflow-hidden">
         
-        <!-- Sidebar Navigation -->
-        <aside class="w-60 bg-white border-r border-slate-200 flex flex-col justify-between overflow-y-auto text-xs font-medium">
-            <div class="py-2">
-                <nav class="space-y-0.5">
-                    <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="flex items-center justify-between px-4 py-2.5 bg-blue-50 text-blue-700 font-bold border-l-4 border-blue-600">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-chart-line text-sm w-4"></i> Dashboard</span>
+        <!-- Colorful Sidebar Navigation -->
+        <aside class="w-64 bg-slate-900/90 backdrop-blur border-r border-slate-800 flex flex-col justify-between overflow-y-auto text-xs font-medium">
+            <div class="py-3">
+                <div class="px-4 pb-2 text-[10px] uppercase tracking-wider text-slate-500 font-bold">Main Menu</div>
+                <nav class="space-y-1 px-2">
+                    <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="flex items-center justify-between px-3 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold shadow-lg shadow-indigo-600/30">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-chart-pie text-sm"></i> Dashboard</span>
                     </a>
-                    <a href="#" onclick="switchTab('parties')" id="nav-parties" class="flex items-center px-4 py-2.5 hover:bg-slate-50 text-slate-700">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-users text-sm w-4"></i> Parties</span>
+                    <a href="#" onclick="switchTab('sales')" id="nav-sales" class="flex items-center px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-cart-shopping text-sm text-pink-500"></i> Sales / Billing</span>
                     </a>
-                    <a href="#" onclick="switchTab('sales')" id="nav-sales" class="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 text-slate-700">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-cart-shopping text-sm w-4"></i> Sales</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                    <a href="#" onclick="switchTab('purchases')" id="nav-purchases" class="flex items-center px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-bag-shopping text-sm text-amber-500"></i> Purchases</span>
                     </a>
-                    <a href="#" onclick="switchTab('quotations')" id="nav-quotations" class="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 text-slate-700">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-file-lines text-sm w-4"></i> Quotations</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                    <a href="#" onclick="switchTab('items')" id="nav-items" class="flex items-center px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-box text-sm text-cyan-500"></i> Items Catalog</span>
                     </a>
-                    <a href="#" onclick="switchTab('purchases')" id="nav-purchases" class="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 text-slate-700">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-bag-shopping text-sm w-4"></i> Purchases</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                    <a href="#" onclick="switchTab('inventory')" id="nav-inventory" class="flex items-center px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-boxes-stacked text-sm text-emerald-500"></i> Inventory Stock</span>
                     </a>
-                    <a href="#" onclick="switchTab('payments')" id="nav-payments" class="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 text-slate-700">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-indian-rupee-sign text-sm w-4"></i> Payments</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                    <a href="#" onclick="switchTab('payments')" id="nav-payments" class="flex items-center px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-indian-rupee-sign text-sm text-yellow-500"></i> Payments</span>
                     </a>
-                    <a href="#" onclick="switchTab('items')" id="nav-items" class="flex items-center px-4 py-2.5 hover:bg-slate-50 text-slate-700">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-box text-sm w-4"></i> Items</span>
-                    </a>
-                    <a href="#" onclick="switchTab('inventory')" id="nav-inventory" class="flex items-center px-4 py-2.5 hover:bg-slate-50 text-slate-700">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-boxes-stacked text-sm w-4"></i> Inventory</span>
-                    </a>
-                    <a href="#" onclick="switchTab('staff')" id="nav-staff" class="flex items-center px-4 py-2.5 hover:bg-slate-50 text-slate-700">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-user-tie text-sm w-4"></i> Staff & Payroll</span>
-                    </a>
-                    
-                    <!-- More Section -->
-                    <div>
-                        <button onclick="toggleMoreMenu()" class="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 text-slate-700">
-                            <span class="flex items-center gap-3"><i class="fa-solid fa-circle-chevron-down text-sm w-4"></i> More</span>
-                            <i id="moreArrow" class="fa-solid fa-chevron-up text-[10px] text-slate-400"></i>
-                        </button>
-                        <div id="moreMenuDropdown" class="bg-slate-50 py-1 pl-4 space-y-1 border-y border-slate-100">
-                            <a href="#" onclick="switchTab('projects')" class="block px-4 py-1.5 hover:bg-blue-100/50 rounded text-slate-600 font-semibold">Projects <i class="fa-solid fa-lock text-[9px] text-amber-500 float-right mt-0.5"></i></a>
-                            <a href="#" onclick="switchTab('onlinestore')" class="block px-4 py-1.5 hover:bg-blue-100/50 rounded text-slate-600">Online Store</a>
-                            <a href="#" onclick="switchTab('marketing')" class="block px-4 py-1.5 hover:bg-blue-100/50 rounded text-slate-600">Marketing <i class="fa-solid fa-lock text-[9px] text-amber-500 float-right mt-0.5"></i></a>
-                            <a href="#" onclick="switchTab('reminders')" class="block px-4 py-1.5 hover:bg-blue-100/50 rounded text-slate-600">Service Reminder</a>
-                            <a href="#" onclick="switchTab('datahub')" class="block px-4 py-1.5 hover:bg-blue-100/50 rounded text-slate-600">Data Hub <i class="fa-solid fa-bolt text-[9px] text-yellow-500 float-right mt-0.5"></i></a>
-                            <a href="#" onclick="switchTab('mydrive')" class="block px-4 py-1.5 hover:bg-blue-100/50 rounded text-slate-600">My Drive</a>
-                        </div>
-                    </div>
-
-                    <a href="#" onclick="switchTab('reports')" id="nav-reports" class="flex items-center px-4 py-2.5 hover:bg-slate-50 text-slate-700">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-chart-pie text-sm w-4"></i> Reports</span>
-                    </a>
-                    <a href="#" onclick="switchTab('settings')" id="nav-settings" class="flex items-center px-4 py-2.5 hover:bg-slate-50 text-slate-700">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-gear text-sm w-4"></i> Settings</span>
+                    <a href="#" onclick="switchTab('parties')" id="nav-parties" class="flex items-center px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-users text-sm text-purple-400"></i> Parties / Customers</span>
                     </a>
                 </nav>
             </div>
             
-            <!-- Secret Profit Toggle at bottom of sidebar -->
-            <div class="p-3 bg-slate-50 border-t border-slate-200">
-                <div onclick="revealSecretProfit()" class="cursor-pointer bg-white border border-slate-300 rounded p-2 flex justify-between items-center text-[11px] shadow-sm">
-                    <span class="font-bold text-slate-600"><i class="fa-solid fa-shield text-blue-600"></i> Secret Profit</span>
-                    <i class="fa-solid fa-lock text-[10px] text-slate-400" id="secretLockIcon"></i>
-                </div>
-                <div id="secretProfitBox" class="hidden mt-2 p-2 bg-emerald-50 border border-emerald-300 rounded text-center text-emerald-700 font-extrabold text-xs">
-                    Total Margin: <span id="totalProfitValue">₹0.00</span>
-                </div>
+            <div class="p-3 m-3 bg-gradient-to-r from-pink-900/40 to-purple-900/40 border border-pink-700/50 rounded-xl text-center">
+                <span class="text-[11px] font-bold text-pink-300 block"><i class="fa-solid fa-shield-halved"></i> NAMITA STORE Active</span>
+                <span class="text-[9px] text-slate-400">All Modules Fully Unlocked</span>
             </div>
         </aside>
 
-        <!-- Main Workspace Area -->
-        <main class="flex-1 flex flex-col overflow-y-auto p-6 bg-slate-100">
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-y-auto p-6 bg-slate-950/50">
             
-            <!-- TAB 1: DASHBOARD -->
+            <!-- 1. COLORFUL DASHBOARD -->
             <div id="tab-dashboard" class="space-y-6">
                 <div class="flex justify-between items-center">
-                    <h1 class="text-xl font-bold text-slate-800">Create New</h1>
-                </div>
-
-                <!-- Action Shortcut Cards -->
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 grid grid-cols-7 gap-4 text-center">
-                    <div onclick="switchTab('sales')" class="cursor-pointer p-3 rounded-xl hover:bg-blue-50 transition group">
-                        <div class="w-12 h-12 bg-blue-100 text-blue-600 mx-auto rounded-full flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-file-invoice"></i></div>
-                        <span class="text-xs font-semibold text-slate-700">New Invoice</span>
-                    </div>
-                    <div onclick="switchTab('sales')" class="cursor-pointer p-3 rounded-xl hover:bg-purple-50 transition group">
-                        <div class="w-12 h-12 bg-purple-100 text-purple-600 mx-auto rounded-full flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-receipt"></i></div>
-                        <span class="text-xs font-semibold text-slate-700">New Simple Bill</span>
-                    </div>
-                    <div onclick="switchTab('quotations')" class="cursor-pointer p-3 rounded-xl hover:bg-emerald-50 transition group">
-                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 mx-auto rounded-full flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-file-contract"></i></div>
-                        <span class="text-xs font-semibold text-slate-700">Quotation</span>
-                    </div>
-                    <div onclick="switchTab('purchases')" class="cursor-pointer p-3 rounded-xl hover:bg-amber-50 transition group">
-                        <div class="w-12 h-12 bg-amber-100 text-amber-600 mx-auto rounded-full flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-cart-shopping"></i></div>
-                        <span class="text-xs font-semibold text-slate-700">Purchase</span>
-                    </div>
-                    <div class="cursor-pointer p-3 rounded-xl hover:bg-cyan-50 transition group">
-                        <div class="w-12 h-12 bg-cyan-100 text-cyan-600 mx-auto rounded-full flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-truck"></i></div>
-                        <span class="text-xs font-semibold text-slate-700">Delivery Challan</span>
-                    </div>
-                    <div class="cursor-pointer p-3 rounded-xl hover:bg-emerald-50 transition group">
-                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 mx-auto rounded-full flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-arrow-down"></i></div>
-                        <span class="text-xs font-semibold text-slate-700">Payment In</span>
-                    </div>
-                    <div class="cursor-pointer p-3 rounded-xl hover:bg-rose-50 transition group">
-                        <div class="w-12 h-12 bg-rose-100 text-rose-600 mx-auto rounded-full flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-arrow-up"></i></div>
-                        <span class="text-xs font-semibold text-slate-700">Payment Out</span>
-                    </div>
-                </div>
-
-                <!-- Today's Overview & Month Statistics Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                        <h3 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-4">Today's Overview</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-xs text-slate-500">Today's Sales</p>
-                                <h4 class="text-xl font-black text-blue-600 mt-1" id="dashTodaySales">₹737</h4>
-                            </div>
-                            <div>
-                                <p class="text-xs text-slate-500">Invoices Created</p>
-                                <h4 class="text-xl font-black text-slate-800 mt-1" id="dashInvoiceCount">9</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                        <h3 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-4">Current Month Statistics</h3>
-                        <div class="grid grid-cols-4 gap-2">
-                            <div>
-                                <p class="text-[11px] text-slate-500">Total Sales</p>
-                                <h4 class="text-sm font-bold text-blue-600 mt-1">₹737</h4>
-                            </div>
-                            <div>
-                                <p class="text-[11px] text-slate-500">Total Purchase</p>
-                                <h4 class="text-sm font-bold text-slate-700 mt-1">₹275</h4>
-                            </div>
-                            <div>
-                                <p class="text-[11px] text-slate-500">Payment Received</p>
-                                <h4 class="text-sm font-bold text-emerald-600 mt-1">₹707</h4>
-                            </div>
-                            <div>
-                                <p class="text-[11px] text-slate-500">Payment Made</p>
-                                <h4 class="text-sm font-bold text-rose-600 mt-1">₹275</h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 2: SALES / BILLING SCREEN (KhataBuddy Style Create Simple Bill) -->
-            <div id="tab-sales" class="space-y-4 hidden">
-                <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="flex items-center gap-2">
-                        <h2 class="font-black text-slate-800 text-sm">Create Simple Bill</h2>
-                        <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-semibold cursor-pointer">Resume Draft (1) <i class="fa-solid fa-chevron-down text-[9px]"></i></span>
-                    </div>
-                    <div class="flex items-center gap-4 text-xs">
-                        <div><span class="text-slate-400">Doc #:</span> <span class="font-bold">845</span></div>
-                        <div><span class="text-slate-400">Bill Date:</span> <span class="font-bold">01 Sep 2026</span> <i class="fa-solid fa-calendar text-slate-400 ml-1"></i></div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Left Item Grid -->
-                    <div class="md:col-span-2 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between h-[520px]">
-                        <div>
-                            <div class="relative mb-3">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-magnifying-glass"></i></span>
-                                <input type="text" id="posSearchInput" oninput="filterPosProducts()" placeholder="Scan barcode or search items using name, model, etc..." class="w-full pl-10 pr-4 py-2 border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <div id="posDropdown" class="absolute left-0 right-0 mt-1 bg-white border rounded-lg shadow-xl max-h-48 overflow-y-auto hidden z-20 divide-y"></div>
-                            </div>
-
-                            <!-- Table Header -->
-                            <div class="grid grid-cols-12 bg-slate-50 p-2 rounded text-[11px] font-bold text-slate-500 mb-2">
-                                <div class="col-span-1">S.No</div>
-                                <div class="col-span-5">Item / Description</div>
-                                <div class="col-span-2 text-center">Qty</div>
-                                <div class="col-span-2 text-right">Price</div>
-                                <div class="col-span-2 text-right">Total</div>
-                            </div>
-
-                            <div id="cartItemList" class="space-y-2 overflow-y-auto h-72">
-                                <div class="text-center py-16 text-slate-400 border border-dashed rounded-lg">
-                                    <i class="fa-solid fa-basket-shopping text-2xl mb-1 text-slate-300"></i>
-                                    <p class="text-xs">Select an item from the dropdown to add new item row</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="border-t pt-3 flex justify-between items-center text-xs font-bold text-slate-700">
-                            <div>Total Qty: <span id="cartTotalQty">0</span></div>
-                            <div>Total Amount: <span id="cartGrandTotal" class="text-blue-600 text-base">₹0</span></div>
-                        </div>
-                    </div>
-
-                    <!-- Right Billing Summary Panel -->
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3 text-xs flex flex-col justify-between h-[520px]">
-                        <div class="space-y-3">
-                            <div class="border-b pb-2">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="font-bold text-slate-500 uppercase text-[10px]">Customer Details</span>
-                                    <i class="fa-solid fa-pen text-[10px] text-blue-600"></i>
-                                </div>
-                                <div class="bg-slate-50 p-2 rounded border">
-                                    <p class="font-bold text-slate-800">CASH</p>
-                                    <p class="text-[11px] text-slate-500">1234567890</p>
-                                </div>
-                            </div>
-
-                            <div class="border-b pb-2">
-                                <span class="font-bold text-slate-500 uppercase text-[10px] block mb-1">Payments & Receipts</span>
-                                <div class="bg-emerald-50 border border-emerald-200 p-2 rounded text-emerald-800 font-semibold flex justify-between items-center">
-                                    <span>Mark as fully paid</span>
-                                    <input type="checkbox" checked class="accent-emerald-600">
-                                </div>
-                                <button onclick="alert('Payment Added!')" class="mt-2 w-full bg-blue-50 text-blue-600 py-1.5 rounded font-bold border border-blue-200 hover:bg-blue-100 transition">+ Add Payment</button>
-                            </div>
-
-                            <div class="space-y-1.5 pt-1">
-                                <div class="flex justify-between text-slate-500">
-                                    <span>Extra Discount:</span>
-                                    <input type="number" id="billDiscount" value="0" oninput="calculateBill()" class="w-16 p-1 border rounded text-right font-bold">
-                                </div>
-                                <div class="flex justify-between font-bold text-slate-800 border-t pt-1">
-                                    <span>Taxable Amount:</span>
-                                    <span id="taxableAmountLabel">₹0</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <button onclick="completeSaleInvoice()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-black shadow transition flex items-center justify-center gap-1.5">
-                                <i class="fa-solid fa-check"></i> Save & Preview
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 3: PROJECTS (Locked Page matching image 2) -->
-            <div id="tab-projects" class="space-y-4 hidden">
-                <div class="flex justify-between items-center">
                     <div>
-                        <h2 class="text-base font-black text-slate-800">Projects</h2>
-                        <p class="text-xs text-slate-500">Group vouchers under named projects.</p>
+                        <h1 class="text-2xl font-black bg-gradient-to-r from-pink-500 via-purple-400 to-indigo-400 bg-clip-text text-transparent">NAMITA STORE Dashboard</h1>
+                        <p class="text-xs text-slate-400 mt-0.5">Welcome back! Here's your live business performance overview.</p>
                     </div>
-                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1">
-                        + New Project <i class="fa-solid fa-lock text-[10px] text-amber-300"></i>
-                    </button>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="p-3 border-b bg-slate-50">
-                        <input type="text" placeholder="Search projects..." class="w-64 p-1.5 text-xs border rounded">
+
+                <!-- Gradient Stat Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-gradient-to-br from-pink-600 to-rose-700 p-5 rounded-2xl shadow-xl shadow-pink-900/30 border border-pink-500/30 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs font-semibold text-pink-200 uppercase tracking-wider">Today's Sales</p>
+                            <h3 class="text-2xl font-black text-white mt-1" id="dashSales">₹0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl text-white"><i class="fa-solid fa-chart-line"></i></div>
                     </div>
+
+                    <div class="bg-gradient-to-br from-indigo-600 to-blue-700 p-5 rounded-2xl shadow-xl shadow-indigo-900/30 border border-indigo-500/30 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs font-semibold text-indigo-200 uppercase tracking-wider">Invoices Created</p>
+                            <h3 class="text-2xl font-black text-white mt-1" id="dashInvoices">0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl text-white"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-amber-600 to-orange-700 p-5 rounded-2xl shadow-xl shadow-amber-900/30 border border-amber-500/30 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs font-semibold text-amber-200 uppercase tracking-wider">Total Purchases</p>
+                            <h3 class="text-2xl font-black text-white mt-1" id="dashPurchases">₹0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl text-white"><i class="fa-solid fa-bag-shopping"></i></div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-emerald-600 to-teal-700 p-5 rounded-2xl shadow-xl shadow-emerald-900/30 border border-emerald-500/30 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs font-semibold text-emerald-200 uppercase tracking-wider">Payments Handled</p>
+                            <h3 class="text-2xl font-black text-white mt-1" id="dashPayments">₹0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl text-white"><i class="fa-solid fa-wallet"></i></div>
+                    </div>
+                </div>
+
+                <!-- Quick Action Hub -->
+                <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl">
+                    <h3 class="text-sm font-bold text-slate-300 mb-4">Quick Operations</h3>
+                    <div class="grid grid-cols-4 gap-4 text-center">
+                        <button onclick="switchTab('sales')" class="p-4 rounded-xl bg-slate-800/80 hover:bg-pink-600/20 border border-slate-700 hover:border-pink-500/50 transition group">
+                            <div class="w-10 h-10 bg-pink-500/20 text-pink-400 mx-auto rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-cart-plus"></i></div>
+                            <span class="text-xs font-bold text-slate-300">Create New Bill</span>
+                        </button>
+                        <button onclick="switchTab('items')" class="p-4 rounded-xl bg-slate-800/80 hover:bg-cyan-600/20 border border-slate-700 hover:border-cyan-500/50 transition group">
+                            <div class="w-10 h-10 bg-cyan-500/20 text-cyan-400 mx-auto rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-square-plus"></i></div>
+                            <span class="text-xs font-bold text-slate-300">Add Item</span>
+                        </button>
+                        <button onclick="switchTab('purchases')" class="p-4 rounded-xl bg-slate-800/80 hover:bg-amber-600/20 border border-slate-700 hover:border-amber-500/50 transition group">
+                            <div class="w-10 h-10 bg-amber-500/20 text-amber-400 mx-auto rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-truck-ramp-box"></i></div>
+                            <span class="text-xs font-bold text-slate-300">Add Purchase</span>
+                        </button>
+                        <button onclick="switchTab('payments')" class="p-4 rounded-xl bg-slate-800/80 hover:bg-emerald-600/20 border border-slate-700 hover:border-emerald-500/50 transition group">
+                            <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 mx-auto rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-money-bill-transfer"></i></div>
+                            <span class="text-xs font-bold text-slate-300">Record Payment</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. SALES / BILLING TAB -->
+            <div id="tab-sales" class="space-y-4 hidden">
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex justify-between items-center">
+                    <h2 class="font-bold text-sm text-pink-400">Point of Sale & Billing - NAMITA STORE</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2 bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-3">
+                        <div class="relative">
+                            <input type="text" id="salesSearch" oninput="filterSalesItems()" placeholder="Search items by name..." class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded-lg text-xs text-white focus:outline-none focus:border-pink-500">
+                            <div id="salesDropdown" class="absolute left-0 right-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-2xl max-h-40 overflow-y-auto hidden z-20"></div>
+                        </div>
+                        <div id="billCartList" class="space-y-2 min-h-[220px] max-h-[280px] overflow-y-auto border border-slate-800 p-2 rounded-lg bg-slate-950/40">
+                            <p class="text-center text-slate-500 text-xs py-16">No items added to cart yet.</p>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 font-bold text-sm border-t border-slate-800">
+                            <span>Grand Total:</span>
+                            <span id="salesGrandTotal" class="text-pink-400 text-base">₹0</span>
+                        </div>
+                        <button onclick="saveSaleBill()" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white py-2.5 rounded-lg font-bold shadow-lg shadow-pink-600/30 transition">Save & Complete Sale</button>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-xs space-y-3">
+                        <h3 class="font-bold text-slate-300">Customer Info</h3>
+                        <input type="text" id="custName" value="Walk-in Customer" class="w-full bg-slate-800 border border-slate-700 p-2 rounded text-white">
+                        <input type="text" id="custPhone" value="9876543210" class="w-full bg-slate-800 border border-slate-700 p-2 rounded text-white">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. PURCHASES TAB -->
+            <div id="tab-purchases" class="space-y-4 hidden">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-base font-bold text-amber-400">Purchases Management</h2>
+                    <button onclick="openPurchaseModal()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-bold shadow transition">+ Add Purchase</button>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
                     <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-50 border-b text-slate-500">
+                        <thead class="bg-slate-800/80 border-b border-slate-700 text-slate-300">
                             <tr>
-                                <th class="p-3">Name</th>
-                                <th class="p-3">Start Date</th>
-                                <th class="p-3">End Date</th>
-                                <th class="p-3">Description</th>
-                                <th class="p-3">Status</th>
-                                <th class="p-3 text-right">Actions</th>
+                                <th class="p-3">Supplier Name</th>
+                                <th class="p-3">Item Name</th>
+                                <th class="p-3">Quantity</th>
+                                <th class="p-3">Total Cost</th>
+                                <th class="p-3 text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="6" class="text-center py-16 text-slate-400">No data found</td>
-                            </tr>
+                        <tbody id="purchaseTableBody" class="divide-y divide-slate-800">
+                            <tr><td colspan="5" class="text-center py-10 text-slate-500">No purchases recorded yet.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- TAB 4: ITEMS / INVENTORY -->
+            <!-- 4. ITEMS CATALOG TAB -->
             <div id="tab-items" class="space-y-4 hidden">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-base font-black text-slate-800">Items Inventory Management</h2>
-                    <button onclick="openAddItemModal()" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow">+ Add Item</button>
+                    <h2 class="text-base font-bold text-cyan-400">Items Catalog</h2>
+                    <button onclick="openItemModal()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs px-3.5 py-2 rounded-lg font-bold shadow transition">+ Add New Item</button>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
                     <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-50 border-b text-slate-500 font-bold">
+                        <thead class="bg-slate-800/80 border-b border-slate-700 text-slate-300">
                             <tr>
                                 <th class="p-3">Item Name</th>
-                                <th class="p-3">Barcode</th>
                                 <th class="p-3">MRP</th>
                                 <th class="p-3">Selling Price</th>
-                                <th class="p-3">Stock Qty</th>
+                                <th class="p-3">Stock</th>
                                 <th class="p-3 text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="inventoryTableBody" class="divide-y"></tbody>
+                        <tbody id="inventoryTableBody" class="divide-y divide-slate-800"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Generic placeholder for other tabs -->
-            <div id="tab-generic" class="space-y-4 hidden">
-                <h2 id="genericTitle" class="text-lg font-bold text-slate-800">Section View</h2>
-                <div class="bg-white p-6 rounded-xl border border-slate-200 text-center py-20 text-slate-400">
-                    <p class="text-xs">Module loaded successfully. Ready for operations.</p>
+            <!-- 5. INVENTORY STOCK TAB -->
+            <div id="tab-inventory" class="space-y-4 hidden">
+                <h2 class="text-base font-bold text-emerald-400">Live Inventory Stock Status</h2>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                    <div id="stockListContainer" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- 6. PAYMENTS TAB -->
+            <div id="tab-payments" class="space-y-4 hidden">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-base font-bold text-yellow-400">Payments In & Out</h2>
+                    <button onclick="openPaymentModal()" class="bg-yellow-600 hover:bg-yellow-500 text-slate-950 text-xs px-3.5 py-2 rounded-lg font-bold shadow transition">+ Record Payment</button>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-800/80 border-b border-slate-700 text-slate-300">
+                            <tr>
+                                <th class="p-3">Type</th>
+                                <th class="p-3">Party Name</th>
+                                <th class="p-3">Amount</th>
+                                <th class="p-3 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentTableBody" class="divide-y divide-slate-800">
+                            <tr><td colspan="4" class="text-center py-10 text-slate-500">No payment records found.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PARTIES TAB -->
+            <div id="tab-parties" class="space-y-4 hidden">
+                <h2 class="text-base font-bold text-purple-400">Parties & Customers Directory</h2>
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl text-center text-slate-400">
+                    <p class="text-xs">Manage all regular customers and wholesale buyers here.</p>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Add Item Modal -->
-    <div id="addItemModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-5 space-y-3 text-xs border-2 border-blue-600">
-            <h3 class="font-bold text-blue-700 text-sm">Add New Item</h3>
-            <input type="text" id="addItemName" placeholder="Item Name" class="w-full p-2 border rounded">
-            <input type="text" id="addItemBarcode" placeholder="Barcode" class="w-full p-2 border rounded">
-            <div class="grid grid-cols-3 gap-2">
-                <input type="number" id="addItemMrp" placeholder="MRP" class="w-full p-2 border rounded">
-                <input type="number" id="addItemPrice" placeholder="Selling Price" class="w-full p-2 border rounded">
-                <input type="number" id="addItemCost" placeholder="Cost Price" class="w-full p-2 border rounded">
-            </div>
-            <input type="number" id="addItemStock" placeholder="Stock Quantity" value="25" class="w-full p-2 border rounded">
+    <!-- Modals -->
+    <div id="itemModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-3 text-xs">
+            <h3 class="font-bold text-cyan-400 text-sm">Add New Item</h3>
+            <input type="text" id="itemName" placeholder="Item Name" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+            <input type="number" id="itemMrp" placeholder="MRP" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+            <input type="number" id="itemPrice" placeholder="Selling Price" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+            <input type="number" id="itemStock" placeholder="Initial Stock" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
             <div class="flex gap-2 pt-2">
-                <button onclick="saveItemData()" class="flex-1 bg-blue-600 text-white py-2 rounded font-bold">Save</button>
-                <button onclick="closeAddItemModal()" class="bg-slate-200 px-3 py-2 rounded font-bold">Cancel</button>
+                <button onclick="saveItem()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-2 rounded font-bold transition">Save</button>
+                <button onclick="closeItemModal()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded text-slate-300 font-bold transition">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- Script Area -->
+    <div id="purchaseModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-3 text-xs">
+            <h3 class="font-bold text-amber-400 text-sm">Add Purchase</h3>
+            <input type="text" id="pSupp" placeholder="Supplier Name" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+            <input type="text" id="pItem" placeholder="Item Name" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+            <input type="number" id="pQty" placeholder="Quantity" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+            <input type="number" id="pCost" placeholder="Total Cost (₹)" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+            <div class="flex gap-2 pt-2">
+                <button onclick="savePurchase()" class="flex-1 bg-amber-600 hover:bg-amber-500 text-white py-2 rounded font-bold transition">Save Purchase</button>
+                <button onclick="closePurchaseModal()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded text-slate-300 font-bold transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="paymentModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-3 text-xs">
+            <h3 class="font-bold text-yellow-400 text-sm">Record Payment</h3>
+            <select id="payType" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                <option value="Payment In">Payment In (Received)</option>
+                <option value="Payment Out">Payment Out (Paid)</option>
+            </select>
+            <input type="text" id="payParty" placeholder="Party Name" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+            <input type="number" id="payAmount" placeholder="Amount (₹)" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+            <div class="flex gap-2 pt-2">
+                <button onclick="savePayment()" class="flex-1 bg-yellow-600 hover:bg-yellow-500 text-slate-950 py-2 rounded font-bold transition">Save Payment</button>
+                <button onclick="closePaymentModal()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded text-slate-300 font-bold transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Application Logic -->
     <script>
         let inventory = [
-            { id: 1, name: 'Namita Special Tea 250g', barcode: '890101', mrp: 180, price: 150, cost: 110, stock: 45 },
-            { id: 2, name: 'Premium Biscuit Pack', barcode: '890102', mrp: 75, price: 60, cost: 40, stock: 110 }
+            { id: 1, name: 'Namita Special Tea 250g', mrp: 180, price: 150, stock: 45 },
+            { id: 2, name: 'Premium Biscuit Pack', mrp: 75, price: 60, stock: 110 }
         ];
+        let purchases = [];
+        let payments = [];
         let billCart = [];
-        let accumulatedProfit = 0;
+        let totalSales = 0, invoiceCount = 0, totalPurchasesVal = 0, totalPaymentsVal = 0;
 
         function switchTab(tabId) {
-            ['dashboard', 'sales', 'projects', 'items', 'generic', 'parties', 'quotations', 'purchases', 'payments', 'inventory', 'staff', 'reports', 'settings', 'onlinestore', 'marketing', 'reminders', 'datahub', 'mydrive'].forEach(t => {
+            ['dashboard', 'sales', 'purchases', 'items', 'inventory', 'payments', 'parties'].forEach(t => {
                 const el = document.getElementById(`tab-${t}`);
                 if(el) el.classList.add('hidden');
             });
-            
-            const target = document.getElementById(`tab-${tabId}`) || document.getElementById('tab-generic');
-            target.classList.remove('hidden');
+            const target = document.getElementById(`tab-${tabId}`);
+            if(target) target.classList.remove('hidden');
 
-            if(tabId === 'generic' || ['parties', 'quotations', 'purchases', 'payments', 'inventory', 'staff', 'reports', 'settings', 'onlinestore', 'marketing', 'reminders', 'datahub', 'mydrive'].includes(tabId)) {
-                document.getElementById('genericTitle').innerText = tabId.toUpperCase();
-            }
-            if(tabId === 'items') renderInventoryTable();
+            if(tabId === 'items' || tabId === 'inventory') renderInventory();
+            if(tabId === 'purchases') renderPurchases();
+            if(tabId === 'payments') renderPayments();
         }
 
-        function toggleMoreMenu() {
-            const menu = document.getElementById('moreMenuDropdown');
-            const arrow = document.getElementById('moreArrow');
-            menu.classList.toggle('hidden');
-            arrow.classList.toggle('fa-chevron-up');
-            arrow.classList.toggle('fa-chevron-down');
-        }
-
-        function revealSecretProfit() {
-            const box = document.getElementById('secretProfitBox');
-            const icon = document.getElementById('secretLockIcon');
-            if(box.classList.contains('hidden')) {
-                box.classList.remove('hidden');
-                icon.className = "fa-solid fa-lock-open text-emerald-600 text-[10px]";
-            } else {
-                box.classList.add('hidden');
-                icon.className = "fa-solid fa-lock text-[10px]";
-            }
-        }
-
-        function filterPosProducts() {
-            const query = document.getElementById('posSearchInput').value.toLowerCase().trim();
-            const dropdown = document.getElementById('posDropdown');
-            if(!query) { dropdown.classList.add('hidden'); return; }
-            let filtered = inventory.filter(i => i.name.toLowerCase().includes(query) || i.barcode.includes(query));
-            if(filtered.length === 0) {
-                dropdown.classList.remove('hidden');
-                dropdown.innerHTML = `<div class="p-2 text-xs text-rose-500">No item found</div>`;
-                return;
-            }
+        // Sales & Billing Engine
+        function filterSalesItems() {
+            let q = document.getElementById('salesSearch').value.toLowerCase();
+            let dd = document.getElementById('salesDropdown');
+            if(!q) { dd.classList.add('hidden'); return; }
+            let res = inventory.filter(i => i.name.toLowerCase().includes(q));
             let html = '';
-            filtered.forEach(i => {
-                html += `<div onclick="addToBillCart('${i.name}', ${i.price}, ${i.cost})" class="p-2 hover:bg-blue-50 cursor-pointer flex justify-between text-xs">
-                    <span><b>${i.name}</b> (Stock: ${i.stock})</span>
-                    <span class="text-blue-600 font-bold">₹${i.price}</span>
-                </div>`;
+            res.forEach(i => {
+                html += `<div onclick="addToCart('${i.name}', ${i.price})" class="p-2.5 hover:bg-slate-700 cursor-pointer flex justify-between text-xs text-slate-200"><span>${i.name}</span><span class="text-pink-400 font-bold">₹${i.price}</span></div>`;
             });
-            dropdown.classList.remove('hidden');
-            dropdown.innerHTML = html;
+            dd.innerHTML = html;
+            dd.classList.remove('hidden');
         }
 
-        function addToBillCart(name, price, cost) {
+        function addToCart(name, price) {
             let item = billCart.find(i => i.name === name);
-            if(item) item.qty += 1;
-            else billCart.push({ name, price, cost, qty: 1 });
-            document.getElementById('posSearchInput').value = '';
-            document.getElementById('posDropdown').classList.add('hidden');
-            renderBillCart();
+            if(item) item.qty++;
+            else billCart.push({ name, price, qty: 1 });
+            document.getElementById('salesSearch').value = '';
+            document.getElementById('salesDropdown').classList.add('hidden');
+            renderCart();
         }
 
-        function renderBillCart() {
-            const container = document.getElementById('cartItemList');
+        function renderCart() {
+            let html = '', total = 0;
             if(billCart.length === 0) {
-                container.innerHTML = `<div class="text-center py-16 text-slate-400 border border-dashed rounded-lg"><i class="fa-solid fa-basket-shopping text-2xl mb-1 text-slate-300"></i><p class="text-xs">Select an item from the dropdown to add new item row</p></div>`;
-                document.getElementById('cartTotalQty').innerText = '0';
-                document.getElementById('cartGrandTotal').innerText = '₹0';
-                document.getElementById('taxableAmountLabel').innerText = '₹0';
+                document.getElementById('billCartList').innerHTML = `<p class="text-center text-slate-500 text-xs py-16">No items added to cart yet.</p>`;
+                document.getElementById('salesGrandTotal').innerText = '₹0';
                 return;
             }
-            let html = '', totalQty = 0, subtotal = 0, profit = 0;
-            billCart.forEach((item, idx) => {
-                totalQty += item.qty;
-                subtotal += item.price * item.qty;
-                profit += (item.price - item.cost) * item.qty;
-                html += `<div class="grid grid-cols-12 items-center bg-slate-50 p-2 rounded text-xs border">
-                    <div class="col-span-1 font-bold">${idx+1}</div>
-                    <div class="col-span-5 font-bold truncate">${item.name}</div>
-                    <div class="col-span-2 text-center">
-                        <button onclick="billCart[${idx}].qty = Math.max(1, billCart[${idx}].qty-1); renderBillCart();" class="px-1 bg-white border rounded">-</button>
-                        <span class="mx-1">${item.qty}</span>
-                        <button onclick="billCart[${idx}].qty++; renderBillCart();" class="px-1 bg-white border rounded">+</button>
-                    </div>
-                    <div class="col-span-2 text-right font-semibold">₹${item.price}</div>
-                    <div class="col-span-2 text-right font-black text-blue-600">₹${item.price * item.qty}</div>
+            billCart.forEach((i, idx) => {
+                total += i.price * i.qty;
+                html += `<div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-slate-800 text-xs">
+                    <span><b>${i.name}</b> (x${i.qty})</span>
+                    <span class="font-bold text-pink-400">₹${i.price * i.qty}</span>
                 </div>`;
             });
-            let discount = parseFloat(document.getElementById('billDiscount').value) || 0;
-            let grand = subtotal - discount;
-            container.innerHTML = html;
-            document.getElementById('cartTotalQty').innerText = totalQty;
-            document.getElementById('cartGrandTotal').innerText = '₹' + grand;
-            document.getElementById('taxableAmountLabel').innerText = '₹' + grand;
-            accumulatedProfit = profit;
-            document.getElementById('totalProfitValue').innerText = '₹' + profit.toFixed(2);
+            document.getElementById('billCartList').innerHTML = html;
+            document.getElementById('salesGrandTotal').innerText = '₹' + total;
         }
 
-        function calculateBill() { renderBillCart(); }
-
-        function completeSaleInvoice() {
+        function saveSaleBill() {
             if(billCart.length === 0) { alert('Cart is empty!'); return; }
-            alert('Invoice saved and generated successfully!');
+            let total = billCart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+            totalSales += total;
+            invoiceCount++;
+            
+            document.getElementById('dashSales').innerText = '₹' + totalSales;
+            document.getElementById('dashInvoices').innerText = invoiceCount;
+
+            alert('Sale invoice completed successfully!');
             billCart = [];
-            renderBillCart();
+            renderCart();
+            switchTab('dashboard');
         }
 
-        function openAddItemModal() { document.getElementById('addItemModal').classList.remove('hidden'); }
-        function closeAddItemModal() { document.getElementById('addItemModal').classList.add('hidden'); }
-        
-        function saveItemData() {
-            let name = document.getElementById('addItemName').value.trim();
+        // Inventory Logic
+        function openItemModal() { document.getElementById('itemModal').classList.remove('hidden'); }
+        function closeItemModal() { document.getElementById('itemModal').classList.add('hidden'); }
+        function saveItem() {
+            let name = document.getElementById('itemName').value;
+            let mrp = parseFloat(document.getElementById('itemMrp').value) || 0;
+            let price = parseFloat(document.getElementById('itemPrice').value) || 0;
+            let stock = parseInt(document.getElementById('itemStock').value) || 0;
             if(!name) { alert('Enter item name'); return; }
-            inventory.push({
-                id: inventory.length+1, name,
-                barcode: document.getElementById('addItemBarcode').value || '890' + Math.floor(100+Math.random()*900),
-                mrp: parseFloat(document.getElementById('addItemMrp').value) || 100,
-                price: parseFloat(document.getElementById('addItemPrice').value) || 90,
-                cost: parseFloat(document.getElementById('addItemCost').value) || 70,
-                stock: parseInt(document.getElementById('addItemStock').value) || 25
-            });
-            closeAddItemModal();
-            alert('Item added successfully!');
+            inventory.push({ id: inventory.length+1, name, mrp, price, stock });
+            closeItemModal();
+            renderInventory();
+            alert('Item added to catalog!');
         }
-
-        function renderInventoryTable() {
-            let html = '';
-            inventory.forEach(i => {
-                html += `<tr class="border-b"><td class="p-3 font-bold">${i.name}</td><td class="p-3">${i.barcode}</td><td class="p-3">₹${i.mrp}</td><td class="p-3 text-blue-600 font-bold">₹${i.price}</td><td class="p-3">${i.stock}</td><td class="p-3 text-right"><button onclick="inventory=inventory.filter(x=>x.id!==${i.id}); renderInventoryTable();" class="text-rose-500 font-bold"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+        function renderInventory() {
+            let html = '', stockHtml = '';
+            inventory.forEach((i, idx) => {
+                html += `<tr class="border-b border-slate-800"><td class="p-3 font-bold text-white">${i.name}</td><td class="p-3">₹${i.mrp}</td><td class="p-3 text-cyan-400 font-bold">₹${i.price}</td><td class="p-3">${i.stock}</td><td class="p-3 text-right"><button onclick="inventory.splice(${idx},1); renderInventory();" class="text-rose-500 font-bold hover:text-rose-400"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+                stockHtml += `<div class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs"><span><b>${i.name}</b></span><span class="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full font-bold">In Stock: ${i.stock}</span></div>`;
             });
             document.getElementById('inventoryTableBody').innerHTML = html;
+            document.getElementById('stockListContainer').innerHTML = stockHtml;
+        }
+
+        // Purchases Logic
+        function openPurchaseModal() { document.getElementById('purchaseModal').classList.remove('hidden'); }
+        function closePurchaseModal() { document.getElementById('purchaseModal').classList.add('hidden'); }
+        function savePurchase() {
+            let supp = document.getElementById('pSupp').value;
+            let item = document.getElementById('pItem').value;
+            let qty = parseInt(document.getElementById('pQty').value) || 0;
+            let cost = parseFloat(document.getElementById('pCost').value) || 0;
+            if(!supp || !item) { alert('Fill required fields'); return; }
+            purchases.push({ supp, item, qty, cost });
+            totalPurchasesVal += cost;
+            document.getElementById('dashPurchases').innerText = '₹' + totalPurchasesVal;
+            closePurchaseModal();
+            renderPurchases();
+            alert('Purchase recorded!');
+        }
+        function renderPurchases() {
+            let html = '';
+            if(purchases.length === 0) {
+                document.getElementById('purchaseTableBody').innerHTML = `<tr><td colspan="5" class="text-center py-10 text-slate-500">No purchases recorded yet.</td></tr>`;
+                return;
+            }
+            purchases.forEach((p, idx) => {
+                html += `<tr class="border-b border-slate-800"><td class="p-3 font-bold text-white">${p.supp}</td><td class="p-3">${p.item}</td><td class="p-3">${p.qty}</td><td class="p-3 text-amber-400 font-bold">₹${p.cost}</td><td class="p-3 text-right"><button onclick="purchases.splice(${idx},1); renderPurchases();" class="text-rose-500 font-bold"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+            });
+            document.getElementById('purchaseTableBody').innerHTML = html;
+        }
+
+        // Payments Logic
+        function openPaymentModal() { document.getElementById('paymentModal').classList.remove('hidden'); }
+        function closePaymentModal() { document.getElementById('paymentModal').classList.add('hidden'); }
+        function savePayment() {
+            let type = document.getElementById('payType').value;
+            let party = document.getElementById('payParty').value;
+            let amount = parseFloat(document.getElementById('payAmount').value) || 0;
+            if(!party) { alert('Enter party name'); return; }
+            payments.push({ type, party, amount });
+            totalPaymentsVal += amount;
+            document.getElementById('dashPayments').innerText = '₹' + totalPaymentsVal;
+            closePaymentModal();
+            renderPayments();
+            alert('Payment recorded!');
+        }
+        function renderPayments() {
+            let html = '';
+            if(payments.length === 0) {
+                document.getElementById('paymentTableBody').innerHTML = `<tr><td colspan="4" class="text-center py-10 text-slate-500">No payment records found.</td></tr>`;
+                return;
+            }
+            payments.forEach((pay, idx) => {
+                let col = pay.type === 'Payment In' ? 'text-emerald-400' : 'text-rose-400';
+                html += `<tr class="border-b border-slate-800"><td class="p-3 font-bold ${col}">${pay.type}</td><td class="p-3 text-white">${pay.party}</td><td class="p-3 font-bold">₹${pay.amount}</td><td class="p-3 text-right"><button onclick="payments.splice(${idx},1); renderPayments();" class="text-rose-500 font-bold"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+            });
+            document.getElementById('paymentTableBody').innerHTML = html;
         }
     </script>
 </body>
