@@ -7,22 +7,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-gradient-to-tr from-indigo-900 via-purple-900 to-slate-900 font-sans min-h-screen overflow-hidden text-slate-100">
+<body class="bg-slate-100 font-sans min-h-screen overflow-hidden text-slate-800">
 
     <!-- Top Navigation Header -->
-    <header class="bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 shadow-lg px-6 py-3.5 flex justify-between items-center border-b border-indigo-400/30">
+    <header class="bg-indigo-700 shadow-md px-6 py-3.5 flex justify-between items-center text-white border-b-2 border-indigo-500">
         <div class="flex items-center gap-3">
-            <div class="bg-white/10 backdrop-blur-md p-2.5 rounded-xl shadow-inner border border-white/20">
+            <div class="bg-indigo-600 p-2.5 rounded-xl shadow-inner border border-indigo-400">
                 <i class="fa-solid fa-store text-xl text-yellow-300"></i>
             </div>
             <div>
-                <h1 class="text-lg font-extrabold tracking-wider text-white drop-shadow">NAMITA STORE</h1>
+                <h1 class="text-lg font-extrabold tracking-wider text-white">NAMITA STORE</h1>
                 <p class="text-xs text-indigo-200 font-medium">POS & Inventory Management System</p>
             </div>
         </div>
         <div class="flex items-center gap-4">
-            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-xs px-3.5 py-1.5 rounded-full shadow-inner flex items-center gap-1.5 font-semibold">
-                <i class="fa-solid fa-circle text-emerald-400 text-[10px] animate-pulse"></i> Live Counter Active
+            <span class="bg-emerald-500 text-white text-xs px-3.5 py-1.5 rounded-full shadow flex items-center gap-1.5 font-bold">
+                <i class="fa-solid fa-circle text-white text-[9px] animate-pulse"></i> Live Counter Active
             </span>
         </div>
     </header>
@@ -30,92 +30,98 @@
     <!-- Main Content Area -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 h-[calc(100vh-76px)]">
         
-        <!-- Left Section: Product Search & Dynamic Catalog (Takes 2 Columns) -->
-        <div class="md:col-span-2 bg-slate-800/80 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border-2 border-indigo-500/40 flex flex-col">
-            <div class="flex items-center gap-2 mb-4">
-                <div class="relative w-full">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-indigo-300">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </span>
-                    <input type="text" id="searchBox" oninput="filterProducts()" placeholder="Type Product Name or Barcode to search..." class="w-full pl-11 pr-4 py-3 bg-slate-900/90 border-2 border-indigo-500/50 rounded-xl text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/30 focus:border-indigo-400 transition shadow-inner">
-                </div>
-                <button onclick="openAddProductModal()" class="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/30 border border-indigo-400/40 transition flex items-center gap-2 whitespace-nowrap active:scale-95">
-                    <i class="fa-solid fa-plus-circle text-base"></i> Add Product
-                </button>
-            </div>
-
-            <!-- Product Catalog Header -->
-            <div class="flex justify-between items-center mb-3 px-1">
-                <h3 class="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <i class="fa-solid fa-boxes-stacked"></i> Search Results / Inventory
-                </h3>
-                <span id="productCount" class="text-xs text-indigo-200 bg-indigo-950/80 px-2.5 py-1 rounded-lg border border-indigo-500/30 font-semibold">0 products found</span>
-            </div>
-
-            <!-- Dynamic Product Cards Container -->
-            <div class="grid grid-cols-3 gap-3.5 overflow-y-auto flex-1 pr-1 content-start custom-scroll" id="productList">
-                <div class="col-span-3 text-center py-20 text-slate-400 flex flex-col items-center justify-center bg-slate-900/40 rounded-xl border border-dashed border-indigo-500/30">
-                    <div class="bg-indigo-600/20 p-4 rounded-full text-indigo-400 mb-3 border border-indigo-500/30">
-                        <i class="fa-solid fa-barcode text-3xl"></i>
+        <!-- Left Section: Product Search, Catalog & Cart Items (Takes 2 Columns) -->
+        <div class="md:col-span-2 bg-white p-4 rounded-2xl shadow-xl border-2 border-indigo-200 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="relative w-full">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-indigo-500">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="searchBox" oninput="filterProducts()" placeholder="Type Product Name or Barcode to search & add..." class="w-full pl-11 pr-4 py-3 bg-slate-50 border-2 border-indigo-300 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition shadow-inner font-medium">
                     </div>
-                    <p class="text-sm font-bold text-slate-200">Start typing product name or scan barcode</p>
-                    <p class="text-xs text-indigo-300/70 mt-1">Matching products will appear here instantly with vibrant highlights</p>
+                    <button onclick="openAddProductModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-md border border-indigo-500 transition flex items-center gap-2 whitespace-nowrap active:scale-95">
+                        <i class="fa-solid fa-plus-circle text-base"></i> Add Product
+                    </button>
+                </div>
+
+                <!-- Search Results Grid (Shows when searching) -->
+                <div id="searchResultsSection" class="mb-3 hidden">
+                    <div class="flex justify-between items-center mb-2 px-1">
+                        <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-barcode"></i> Search Results
+                        </h3>
+                        <span id="productCount" class="text-xs text-slate-500 font-semibold">0 found</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2.5 max-h-40 overflow-y-auto pr-1" id="productList"></div>
+                </div>
+
+                <!-- Main Cart Items List on Left Panel -->
+                <div class="border-t border-slate-200 pt-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-cart-shopping text-indigo-600"></i> Current Cart Items (Added Products)
+                        </h3>
+                        <span id="cartCountBadge" class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2.5 py-0.5 rounded-full">0 Items</span>
+                    </div>
+                    
+                    <div class="overflow-y-auto h-[calc(100vh-320px)] space-y-2 pr-1" id="cartItems">
+                        <div class="text-center py-20 text-slate-400 flex flex-col items-center justify-center bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                            <div class="bg-indigo-100 p-4 rounded-full text-indigo-600 mb-3 border border-indigo-200">
+                                <i class="fa-solid fa-basket-shopping text-3xl"></i>
+                            </div>
+                            <p class="text-sm font-bold text-slate-700">No products added to cart yet</p>
+                            <p class="text-xs text-slate-400 mt-1">Search product above and click to add items here</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Right Section: POS Cart & Billing Summary (Takes 1 Column) -->
-        <div class="bg-slate-800/80 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border-2 border-purple-500/40 flex flex-col justify-between">
+        <!-- Right Section: Grand Total, Discount, Payment & Checkout (Takes 1 Column) -->
+        <div class="bg-white p-4 rounded-2xl shadow-xl border-2 border-purple-200 flex flex-col justify-between">
             <div>
-                <div class="flex justify-between items-center mb-3 border-b border-purple-500/30 pb-2.5">
-                    <h2 class="text-base font-extrabold text-white flex items-center gap-2">
-                        <span class="bg-purple-600/30 p-1.5 rounded-lg border border-purple-400/30 text-purple-300">
+                <div class="flex justify-between items-center mb-4 border-b border-purple-100 pb-3">
+                    <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+                        <span class="bg-purple-100 p-2 rounded-xl text-purple-600 border border-purple-200">
                             <i class="fa-solid fa-receipt text-sm"></i>
                         </span> 
-                        Current Sale / POS
+                        Billing & Payment Summary
                     </h2>
-                    <span id="cartCountBadge" class="text-xs bg-purple-950 text-purple-300 border border-purple-500/40 font-extrabold px-2.5 py-1 rounded-full shadow-inner">0 Items</span>
-                </div>
-                
-                <!-- Cart Items List Container -->
-                <div class="overflow-y-auto max-h-[calc(100vh-390px)] mb-3 space-y-2.5 pr-1" id="cartItems">
-                    <div class="text-center py-14 text-slate-400 flex flex-col items-center justify-center bg-slate-900/40 rounded-xl border border-dashed border-purple-500/30">
-                        <div class="bg-purple-600/20 p-3.5 rounded-full text-purple-400 mb-2 border border-purple-500/30">
-                            <i class="fa-solid fa-cart-shopping text-2xl"></i>
-                        </div>
-                        <p class="text-sm font-bold text-slate-200">Cart is empty</p>
-                        <p class="text-xs text-purple-300/70 mt-0.5">Select products from the left panel</p>
-                    </div>
                 </div>
             </div>
 
             <!-- Billing Totals & Checkout Actions -->
-            <div class="border-2 border-purple-500/30 bg-slate-900/90 p-3.5 rounded-xl shadow-inner">
-                <div class="space-y-2 text-sm text-slate-200">
+            <div class="border-2 border-purple-200 bg-purple-50/50 p-4 rounded-2xl shadow-inner space-y-3">
+                <div class="space-y-2.5 text-sm text-slate-700">
                     <div class="flex justify-between font-medium">
-                        <span class="text-slate-400">Subtotal:</span> 
-                        <span id="subtotal" class="font-bold text-white">₹0.00</span>
+                        <span class="text-slate-500">Subtotal:</span> 
+                        <span id="subtotal" class="font-bold text-slate-800">₹0.00</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-slate-400">Discount (<i class="fa-solid fa-indian-rupee-sign text-xs"></i>):</span>
-                        <input type="number" id="discountInput" value="0" oninput="updateCartUI()" class="w-28 p-1.5 bg-slate-800 border-2 border-purple-500/40 rounded-lg text-right text-sm font-bold text-white focus:ring-2 focus:ring-purple-400 focus:outline-none">
+                        <span class="text-slate-500">Discount (<i class="fa-solid fa-indian-rupee-sign text-xs"></i>):</span>
+                        <input type="number" id="discountInput" value="0" oninput="updateCartUI()" class="w-32 p-2 bg-white border-2 border-purple-300 rounded-xl text-right text-sm font-bold text-slate-800 focus:ring-2 focus:ring-purple-400 focus:outline-none shadow-sm">
                     </div>
-                    <div class="flex justify-between font-extrabold text-base text-white border-t border-purple-500/30 pt-2 mt-1">
-                        <span class="text-indigo-300">Grand Total:</span> 
-                        <span id="grandTotal" class="text-emerald-400 text-xl drop-shadow">₹0.00</span>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500">Change / Return:</span> 
+                        <span id="changeReturn" class="font-bold text-amber-600">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between font-extrabold text-lg text-slate-900 border-t border-purple-200 pt-3 mt-1">
+                        <span class="text-purple-900">Grand Total:</span> 
+                        <span id="grandTotal" class="text-emerald-600 text-2xl drop-shadow-sm">₹0.00</span>
                     </div>
                 </div>
 
                 <div class="mt-3">
-                    <label class="text-[11px] font-bold text-indigo-300 uppercase tracking-wider block mb-1">Payment Method</label>
-                    <select id="paymentMethod" class="w-full p-2.5 bg-slate-800 border-2 border-purple-500/40 rounded-xl text-sm font-semibold text-white focus:ring-2 focus:ring-purple-400 focus:outline-none">
+                    <label class="text-[11px] font-bold text-purple-900 uppercase tracking-wider block mb-1">Payment Method</label>
+                    <select id="paymentMethod" class="w-full p-3 bg-white border-2 border-purple-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-purple-400 focus:outline-none shadow-sm">
                         <option value="Cash">💵 Cash Payment</option>
                         <option value="UPI">📱 UPI / QR Code</option>
                         <option value="Card">💳 Credit / Debit Card</option>
                     </select>
                 </div>
 
-                <button onclick="completeCheckout()" class="w-full mt-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white py-3 rounded-xl font-extrabold shadow-lg shadow-emerald-600/30 border border-emerald-400/40 transition flex items-center justify-center gap-2 active:scale-95 text-base">
+                <button onclick="completeCheckout()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-xl font-extrabold shadow-lg shadow-emerald-600/30 border border-emerald-500 transition flex items-center justify-center gap-2 active:scale-95 text-base">
                     <i class="fa-solid fa-check-to-slot text-lg"></i> Complete Sale & Print
                 </button>
             </div>
@@ -136,55 +142,39 @@
 
         function filterProducts() {
             const query = document.getElementById('searchBox').value.toLowerCase().trim();
+            const searchResultsSection = document.getElementById('searchResultsSection');
             const productListEl = document.getElementById('productList');
             const productCountEl = document.getElementById('productCount');
 
             if (query === '') {
-                productListEl.innerHTML = `
-                    <div class="col-span-3 text-center py-20 text-slate-400 flex flex-col items-center justify-center bg-slate-900/40 rounded-xl border border-dashed border-indigo-500/30">
-                        <div class="bg-indigo-600/20 p-4 rounded-full text-indigo-400 mb-3 border border-indigo-500/30">
-                            <i class="fa-solid fa-barcode text-3xl"></i>
-                        </div>
-                        <p class="text-sm font-bold text-slate-200">Start typing product name or scan barcode</p>
-                        <p class="text-xs text-indigo-300/70 mt-1">Matching products will appear here instantly with vibrant highlights</p>
-                    </div>`;
-                productCountEl.innerText = '0 products found';
+                searchResultsSection.classList.add('hidden');
                 return;
             }
 
+            searchResultsSection.classList.remove('hidden');
             let filtered = inventory.filter(p => 
                 p.name.toLowerCase().includes(query) || p.barcode.includes(query)
             );
 
-            productCountEl.innerText = filtered.length + (filtered.length === 1 ? ' product found' : ' products found');
+            productCountEl.innerText = filtered.length + (filtered.length === 1 ? ' found' : ' found');
 
             if (filtered.length === 0) {
-                productListEl.innerHTML = `
-                    <div class="col-span-3 text-center py-20 text-slate-400 flex flex-col items-center justify-center bg-slate-900/40 rounded-xl border border-dashed border-amber-500/30">
-                        <div class="bg-amber-600/20 p-4 rounded-full text-amber-400 mb-3 border border-amber-500/30">
-                            <i class="fa-solid fa-triangle-exclamation text-3xl"></i>
-                        </div>
-                        <p class="text-sm font-bold text-slate-200">No product found matching "${query}"</p>
-                        <p class="text-xs text-amber-300/70 mt-1">Use 'Add Product' button to add new items</p>
-                    </div>`;
+                productListEl.innerHTML = `<div class="col-span-3 text-center py-4 text-xs text-rose-500 font-semibold bg-rose-50 rounded-lg border border-rose-200">No product found! Use 'Add Product' button.</div>`;
                 return;
             }
 
             let html = '';
             filtered.forEach(p => {
                 html += `
-                    <div onclick="addToCart('${p.name}', ${p.price})" class="border-2 border-indigo-500/30 bg-gradient-to-b from-slate-800 to-slate-900 p-3.5 rounded-2xl cursor-pointer hover:shadow-lg hover:shadow-indigo-500/20 hover:border-indigo-400 transition group flex flex-col justify-between h-28">
+                    <div onclick="addToCart('${p.name}', ${p.price})" class="border-2 border-indigo-200 bg-white p-2.5 rounded-xl cursor-pointer hover:shadow-md hover:border-indigo-500 transition group flex flex-col justify-between">
                         <div>
-                            <div class="flex justify-between items-start mb-1">
-                                <h4 class="font-bold text-sm text-white group-hover:text-indigo-300 transition truncate">${p.name}</h4>
-                                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-semibold px-2 py-0.5 rounded-full">Stock: ${p.stock}</span>
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-xs text-slate-800 group-hover:text-indigo-600 truncate">${p.name}</h4>
+                                <span class="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">Stock:${p.stock}</span>
                             </div>
-                            <p class="text-indigo-400 font-extrabold text-sm mb-1">₹${p.price.toFixed(2)}</p>
+                            <p class="text-indigo-600 font-extrabold text-xs mt-1">₹${p.price.toFixed(2)}</p>
                         </div>
-                        <div class="flex justify-between items-center text-xs text-slate-400 border-t border-slate-700/60 pt-2 mt-1">
-                            <span>Code: ${p.barcode}</span>
-                            <span class="text-indigo-300 font-bold group-hover:underline flex items-center gap-1">Add <i class="fa-solid fa-cart-plus text-[10px]"></i></span>
-                        </div>
+                        <div class="text-[10px] text-indigo-500 font-bold mt-1 text-right group-hover:underline">Click to Add +</div>
                     </div>`;
             });
 
@@ -212,6 +202,8 @@
             } else {
                 cart.push({ name, price, qty: 1 });
             }
+            document.getElementById('searchBox').value = '';
+            document.getElementById('searchResultsSection').classList.add('hidden');
             updateCartUI();
         }
 
@@ -240,12 +232,12 @@
 
             if (cart.length === 0) {
                 cartContainer.innerHTML = `
-                    <div class="text-center py-14 text-slate-400 flex flex-col items-center justify-center bg-slate-900/40 rounded-xl border border-dashed border-purple-500/30">
-                        <div class="bg-purple-600/20 p-3.5 rounded-full text-purple-400 mb-2 border border-purple-500/30">
-                            <i class="fa-solid fa-cart-shopping text-2xl"></i>
+                    <div class="text-center py-20 text-slate-400 flex flex-col items-center justify-center bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                        <div class="bg-indigo-100 p-4 rounded-full text-indigo-600 mb-3 border border-indigo-200">
+                            <i class="fa-solid fa-basket-shopping text-3xl"></i>
                         </div>
-                        <p class="text-sm font-bold text-slate-200">Cart is empty</p>
-                        <p class="text-xs text-purple-300/70 mt-0.5">Select products from the left panel</p>
+                        <p class="text-sm font-bold text-slate-700">No products added to cart yet</p>
+                        <p class="text-xs text-slate-400 mt-1">Search product above and click to add items here</p>
                     </div>`;
                 subtotalEl.innerText = '₹0.00';
                 grandTotalEl.innerText = '₹0.00';
@@ -258,16 +250,16 @@
             cart.forEach((item, index) => {
                 let itemTotal = item.price * item.qty;
                 subtotal += itemTotal;
-                html += `<div class="flex justify-between items-center bg-slate-900/90 p-2.5 rounded-xl text-sm border border-purple-500/30 shadow-md">
+                html += `<div class="flex justify-between items-center bg-white p-3 rounded-xl text-sm border-2 border-indigo-100 shadow-sm hover:border-indigo-300 transition">
                     <div class="flex-1 pr-2">
-                        <p class="font-bold text-white">${item.name}</p>
-                        <p class="text-xs text-slate-400">₹${item.price} × ${item.qty} = <b class="text-purple-300">₹${itemTotal}</b></p>
+                        <p class="font-extrabold text-slate-800">${item.name}</p>
+                        <p class="text-xs text-slate-500">₹${item.price} × ${item.qty} = <b class="text-indigo-600">₹${itemTotal}</b></p>
                     </div>
-                    <div class="flex items-center gap-1.5">
-                        <button onclick="changeQty(${index}, -1)" class="bg-slate-800 text-slate-200 border border-slate-600 w-6 h-6 rounded-lg flex items-center justify-center font-bold hover:bg-slate-700 transition">-</button>
-                        <span class="px-1 text-xs font-extrabold text-white">${item.qty}</span>
-                        <button onclick="changeQty(${index}, 1)" class="bg-slate-800 text-slate-200 border border-slate-600 w-6 h-6 rounded-lg flex items-center justify-center font-bold hover:bg-slate-700 transition">+</button>
-                        <button onclick="removeItem(${index})" class="text-rose-400 hover:text-rose-300 ml-1.5 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="changeQty(${index}, -1)" class="bg-slate-100 text-slate-700 border border-slate-300 w-7 h-7 rounded-lg flex items-center justify-center font-bold hover:bg-slate-200 transition">-</button>
+                        <span class="px-2 text-sm font-extrabold text-slate-800">${item.qty}</span>
+                        <button onclick="changeQty(${index}, 1)" class="bg-slate-100 text-slate-700 border border-slate-300 w-7 h-7 rounded-lg flex items-center justify-center font-bold hover:bg-slate-200 transition">+</button>
+                        <button onclick="removeItem(${index})" class="text-rose-500 hover:text-rose-700 ml-2 p-1.5"><i class="fa-solid fa-trash-can text-sm"></i></button>
                     </div>
                 </div>`;
             });
@@ -283,10 +275,10 @@
 
         function completeCheckout() {
             if(cart.length === 0) {
-                alert('Cart is empty!');
+                alert('Cart is empty! Please add products first.');
                 return;
             }
-            alert('Sale completed successfully! Stock updated.');
+            alert('Sale completed successfully! Stock updated and receipt generated.');
             cart = [];
             document.getElementById('discountInput').value = 0;
             updateCartUI();
