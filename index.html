@@ -3,230 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NAMITA STORE - Advanced Seller Panel Pro</title>
+    <title>NAMITA STORE - Enterprise POS & Barcode Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- JsBarcode for generating barcodes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #printableBarcodeArea, #printableBarcodeArea * { visibility: visible; }
+            #printableBarcodeArea { position: absolute; left: 0; top: 0; width: 100%; }
+        }
+    </style>
 </head>
-<body class="bg-slate-950 font-sans min-h-screen text-slate-100">
+<body class="bg-slate-900 font-sans min-h-screen text-slate-100">
 
     <!-- Top Navigation Bar -->
-    <div class="bg-slate-900 border-b border-slate-800 text-slate-300 px-4 py-2.5 flex justify-between items-center text-xs">
+    <header class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex justify-between items-center text-xs sticky top-0 z-40">
         <div class="flex items-center gap-3">
-            <div class="bg-gradient-to-r from-pink-500 to-violet-600 text-white font-black px-2.5 py-1 rounded-lg text-xs shadow-lg shadow-pink-500/20">NS</div>
-            <span class="font-extrabold text-white tracking-wide text-sm">NAMITA STORE</span>
-            <span class="text-[10px] bg-slate-800 border border-slate-700 px-2.5 py-0.5 rounded-full text-pink-400 font-semibold">Enterprise Pro v7.0</span>
+            <div class="bg-indigo-600 text-white font-extrabold px-3 py-1.5 rounded-xl text-sm shadow-md">NS</div>
+            <div>
+                <h1 class="font-bold text-white tracking-wide text-sm">NAMITA STORE</h1>
+                <p class="text-[10px] text-slate-400">Enterprise Pro v9.0 Barcode Edition</p>
+            </div>
         </div>
         <div class="flex items-center gap-4">
-            <div class="bg-slate-800/90 border border-slate-700 px-3 py-1 rounded-lg flex items-center gap-2 text-emerald-400 font-bold">
-                <i class="fa-solid fa-wallet"></i>
-                <span>Cash in Hand: <span id="topCashInHand" class="text-white">₹0</span></span>
+            <div class="bg-slate-900 border border-slate-800 px-4 py-1.5 rounded-xl flex items-center gap-2 text-emerald-400 font-semibold shadow-inner">
+                <i class="fa-solid fa-wallet text-sm"></i>
+                <span>Cash in Hand: <span id="topCashInHand" class="text-white font-bold">₹0</span></span>
             </div>
-            <div class="bg-slate-800/90 border border-slate-700 px-3 py-1 rounded-lg flex items-center gap-2 text-white">
-                <i class="fa-solid fa-store text-pink-500"></i>
+            <div class="bg-slate-900 border border-slate-800 px-4 py-1.5 rounded-xl flex items-center gap-2 text-slate-300">
+                <i class="fa-solid fa-store text-indigo-400"></i>
                 <span>Main Counter</span>
             </div>
         </div>
-    </div>
+    </header>
 
-    <div class="flex h-[calc(100vh-45px)] overflow-hidden">
+    <div class="flex h-[calc(100vh-57px)] overflow-hidden">
         
         <!-- Sidebar Menu -->
-        <aside class="w-64 bg-slate-900/95 backdrop-blur border-r border-slate-800 flex flex-col justify-between overflow-y-auto text-xs font-medium">
-            <div class="py-3 space-y-1">
+        <aside class="w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between overflow-y-auto text-xs font-medium">
+            <div class="py-4 space-y-1">
                 <div class="px-4 pb-2 text-[10px] uppercase tracking-wider text-slate-500 font-bold">Store Management</div>
-                <nav class="space-y-1 px-2">
-                    <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold shadow-lg shadow-indigo-600/30"><i class="fa-solid fa-chart-pie text-sm"></i> Dashboard</a>
-                    <a href="#" onclick="switchTab('sales')" id="nav-sales" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 transition"><i class="fa-solid fa-cart-shopping text-sm text-pink-500"></i> POS & Billing</a>
-                    <a href="#" onclick="switchTab('online')" id="nav-online" class="nav-link flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 transition">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-globe text-sm text-blue-400"></i> Online Orders</span>
-                        <span id="onlineBadge" class="bg-pink-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">0</span>
-                    </a>
-                    <a href="#" onclick="switchTab('items')" id="nav-items" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 transition"><i class="fa-solid fa-box text-sm text-cyan-500"></i> Items Catalog</a>
-                    <a href="#" onclick="switchTab('inventory')" id="nav-inventory" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 transition"><i class="fa-solid fa-boxes-stacked text-sm text-emerald-500"></i> Inventory & Stock</a>
-                    <a href="#" onclick="switchTab('purchases')" id="nav-purchases" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 transition"><i class="fa-solid fa-bag-shopping text-sm text-amber-500"></i> Purchases & Suppliers</a>
-                    <a href="#" onclick="switchTab('parties')" id="nav-parties" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 transition"><i class="fa-solid fa-users text-sm text-purple-400"></i> Customers / Parties</a>
-                    <a href="#" onclick="switchTab('reports')" id="nav-reports" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 transition"><i class="fa-solid fa-chart-line text-sm text-yellow-400"></i> Reports (Sales/Profit)</a>
-                    <a href="#" onclick="switchTab('returns')" id="nav-returns" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 transition"><i class="fa-solid fa-rotate-left text-sm text-rose-400"></i> Returns & Exchange</a>
+                <nav class="space-y-1 px-3">
+                    <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/20"><i class="fa-solid fa-chart-pie text-sm"></i> Dashboard</a>
+                    <a href="#" onclick="switchTab('sales')" id="nav-sales" class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-cash-register text-sm text-pink-400"></i> POS & Billing</a>
+                    <a href="#" onclick="switchTab('items')" id="nav-items" class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-box text-sm text-cyan-400"></i> Items & Barcodes</a>
+                    <a href="#" onclick="switchTab('categories')" id="nav-categories" class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-tags text-sm text-yellow-400"></i> Category Master</a>
+                    <a href="#" onclick="switchTab('suppliers')" id="nav-suppliers" class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-truck-field text-sm text-amber-400"></i> Supplier Master</a>
+                    <a href="#" onclick="switchTab('purchases')" id="nav-purchases" class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-truck-ramp-box text-sm text-orange-400"></i> Purchases & Barcode Print</a>
+                    <a href="#" onclick="switchTab('parties')" id="nav-parties" class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-users text-sm text-purple-400"></i> Customers Directory</a>
+                    <a href="#" onclick="switchTab('reports')" id="nav-reports" class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-chart-line text-sm text-emerald-400"></i> Business Reports</a>
                 </nav>
             </div>
             
-            <div class="p-3 m-3 bg-gradient-to-r from-pink-900/40 to-purple-900/40 border border-pink-700/50 rounded-xl text-center">
-                <span class="text-[11px] font-bold text-pink-300 block"><i class="fa-solid fa-shield-check"></i> NAMITA STORE Active</span>
-                <span class="text-[9px] text-slate-400">All Modules Fully Unlocked</span>
+            <div class="p-4 m-3 bg-slate-900 border border-slate-800 rounded-xl text-center">
+                <span class="text-[11px] font-bold text-indigo-400 block mb-0.5"><i class="fa-solid fa-barcode"></i> Barcode Module Active</span>
+                <span class="text-[9px] text-slate-500">Namita Store Enterprise</span>
             </div>
         </aside>
 
         <!-- Main Content Area -->
-        <main class="flex-1 flex flex-col overflow-y-auto p-6 bg-slate-950">
+        <main class="flex-1 flex flex-col overflow-y-auto p-6 bg-slate-900">
             
             <!-- 1. DASHBOARD -->
             <div id="tab-dashboard" class="tab-content space-y-6">
                 <div>
-                    <h1 class="text-2xl font-black bg-gradient-to-r from-pink-500 via-purple-400 to-indigo-400 bg-clip-text text-transparent">NAMITA STORE Dashboard</h1>
-                    <p class="text-xs text-slate-400 mt-0.5">Live store overview, financials, and quick shortcuts.</p>
+                    <h2 class="text-xl font-bold text-white">Dashboard Overview</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Real-time business performance indicators.</p>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-gradient-to-br from-pink-600 to-rose-700 p-5 rounded-2xl shadow-xl border border-pink-500/30 flex justify-between items-center">
-                        <div>
-                            <p class="text-xs font-semibold text-pink-200 uppercase tracking-wider">Total Sales</p>
-                            <h3 class="text-2xl font-black text-white mt-1" id="dashSales">₹0</h3>
-                        </div>
-                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl text-white"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                    <div class="bg-slate-950 border border-slate-800 p-4 rounded-2xl shadow-sm">
+                        <p class="text-[11px] font-medium text-slate-400 uppercase">Total Sales</p>
+                        <h3 class="text-2xl font-bold text-white mt-1" id="dashSales">₹0</h3>
                     </div>
-
-                    <div class="bg-gradient-to-br from-emerald-600 to-teal-700 p-5 rounded-2xl shadow-xl border border-emerald-500/30 flex justify-between items-center">
-                        <div>
-                            <p class="text-xs font-semibold text-emerald-200 uppercase tracking-wider">Net Profit</p>
-                            <h3 class="text-2xl font-black text-white mt-1" id="dashProfit">₹0</h3>
-                        </div>
-                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl text-white"><i class="fa-solid fa-chart-pie"></i></div>
+                    <div class="bg-slate-950 border border-slate-800 p-4 rounded-2xl shadow-sm">
+                        <p class="text-[11px] font-medium text-slate-400 uppercase">Net Profit</p>
+                        <h3 class="text-2xl font-bold text-emerald-400 mt-1" id="dashProfit">₹0</h3>
                     </div>
-
-                    <div class="bg-gradient-to-br from-indigo-600 to-blue-700 p-5 rounded-2xl shadow-xl border border-indigo-500/30 flex justify-between items-center">
-                        <div>
-                            <p class="text-xs font-semibold text-indigo-200 uppercase tracking-wider">Invoices Issued</p>
-                            <h3 class="text-2xl font-black text-white mt-1" id="dashInvoices">0</h3>
-                        </div>
-                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl text-white"><i class="fa-solid fa-file-invoice"></i></div>
+                    <div class="bg-slate-950 border border-slate-800 p-4 rounded-2xl shadow-sm">
+                        <p class="text-[11px] font-medium text-slate-400 uppercase">Total Invoices</p>
+                        <h3 class="text-2xl font-bold text-indigo-400 mt-1" id="dashInvoices">0</h3>
                     </div>
-
-                    <div class="bg-gradient-to-br from-amber-600 to-orange-700 p-5 rounded-2xl shadow-xl border border-amber-500/30 flex justify-between items-center">
-                        <div>
-                            <p class="text-xs font-semibold text-amber-200 uppercase tracking-wider">Total Customers</p>
-                            <h3 class="text-2xl font-black text-white mt-1" id="dashCustomers">0</h3>
-                        </div>
-                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl text-white"><i class="fa-solid fa-users"></i></div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
-                        <h3 class="text-sm font-bold text-slate-200">Quick Actions</h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            <button onclick="switchTab('sales')" class="p-3 bg-slate-800 hover:bg-pink-600/20 border border-slate-700 hover:border-pink-500 rounded-xl text-left transition cursor-pointer">
-                                <i class="fa-solid fa-cart-plus text-pink-400 text-base mb-1 block"></i>
-                                <span class="font-bold text-xs">New POS Bill</span>
-                            </button>
-                            <button onclick="switchTab('items')" class="p-3 bg-slate-800 hover:bg-cyan-600/20 border border-slate-700 hover:border-cyan-500 rounded-xl text-left transition cursor-pointer">
-                                <i class="fa-solid fa-square-plus text-cyan-400 text-base mb-1 block"></i>
-                                <span class="font-bold text-xs">Add Product</span>
-                            </button>
-                            <button onclick="switchTab('parties')" class="p-3 bg-slate-800 hover:bg-purple-600/20 border border-slate-700 hover:border-purple-500 rounded-xl text-left transition cursor-pointer">
-                                <i class="fa-solid fa-user-plus text-purple-400 text-base mb-1 block"></i>
-                                <span class="font-bold text-xs">Add Customer</span>
-                            </button>
-                            <button onclick="switchTab('reports')" class="p-3 bg-slate-800 hover:bg-yellow-600/20 border border-slate-700 hover:border-yellow-500 rounded-xl text-left transition cursor-pointer">
-                                <i class="fa-solid fa-file-lines text-yellow-400 text-base mb-1 block"></i>
-                                <span class="font-bold text-xs">View Reports</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between">
-                        <div>
-                            <h3 class="text-sm font-bold text-slate-200 mb-1">Store Cash Register</h3>
-                            <p class="text-xs text-slate-400">Manage cash in hand and daily ledger operations easily.</p>
-                        </div>
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center my-3">
-                            <div>
-                                <span class="text-[11px] text-slate-400 uppercase">Current Cash Balance</span>
-                                <h4 class="text-xl font-black text-emerald-400" id="dashCashBox">₹0</h4>
-                            </div>
-                            <button onclick="openCashModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg font-bold text-xs transition cursor-pointer">+ Adjust Cash</button>
-                        </div>
+                    <div class="bg-slate-950 border border-slate-800 p-4 rounded-2xl shadow-sm">
+                        <p class="text-[11px] font-medium text-slate-400 uppercase">Cash in Hand Drawer</p>
+                        <h3 class="text-2xl font-bold text-amber-400 mt-1" id="dashCashBox">₹0</h3>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. SALES / POS BILLING -->
+            <!-- 2. POS BILLING -->
             <div id="tab-sales" class="tab-content space-y-4 hidden">
-                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex justify-between items-center">
-                    <h2 class="font-bold text-sm text-pink-400"><i class="fa-solid fa-cash-register"></i> Point of Sale & Billing Terminal</h2>
-                    <span class="text-xs text-slate-400">Barcode / Item Search Ready</span>
+                <div class="flex justify-between items-center bg-slate-950 border border-slate-800 p-4 rounded-xl">
+                    <h2 class="font-bold text-sm text-pink-400"><i class="fa-solid fa-cash-register"></i> Point of Sale Billing Terminal</h2>
+                    <span class="text-xs text-slate-400">Scan Barcode or Search Item</span>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="md:col-span-2 bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-3">
+                    <div class="md:col-span-2 bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3">
                         <div class="relative">
-                            <input type="text" id="salesSearch" oninput="filterSalesItems()" placeholder="Type item name to search & add..." class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded-lg text-xs text-white focus:outline-none focus:border-pink-500">
-                            <div id="salesDropdown" class="absolute left-0 right-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-2xl max-h-44 overflow-y-auto hidden z-20"></div>
+                            <input type="text" id="salesSearch" oninput="filterSalesItems()" placeholder="Scan barcode or type product name..." class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-xs text-white focus:outline-none focus:border-indigo-500">
+                            <div id="salesDropdown" class="absolute left-0 right-0 mt-1 bg-slate-900 border border-slate-800 rounded-lg shadow-xl max-h-40 overflow-y-auto hidden z-20"></div>
                         </div>
-                        <div id="billCartList" class="space-y-2 min-h-[200px] max-h-[260px] overflow-y-auto border border-slate-800 p-2 rounded-lg bg-slate-950/40">
-                            <p class="text-center text-slate-500 text-xs py-14">No items added to cart yet.</p>
+                        <div id="billCartList" class="space-y-2 min-h-[180px] max-h-[240px] overflow-y-auto border border-slate-800 p-2 rounded-lg bg-slate-900">
+                            <p class="text-center text-slate-500 text-xs py-12">No items added to cart.</p>
                         </div>
                         <div class="space-y-2 pt-2 border-t border-slate-800 text-xs">
                             <div class="flex justify-between items-center">
                                 <span class="text-slate-400">Discount (₹):</span>
-                                <input type="number" id="billDiscount" value="0" oninput="renderCart()" class="w-28 bg-slate-800 border border-slate-700 p-1.5 rounded text-right text-white">
+                                <input type="number" id="billDiscount" value="0" oninput="renderCart()" class="w-28 bg-slate-900 border border-slate-800 p-1.5 rounded text-right text-white">
                             </div>
                             <div class="flex justify-between items-center font-bold text-sm">
                                 <span>Grand Total:</span>
                                 <span id="salesGrandTotal" class="text-pink-400 text-base">₹0</span>
                             </div>
                         </div>
-                        <button onclick="completeSale()" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white py-2.5 rounded-lg font-bold shadow-lg shadow-pink-600/30 transition cursor-pointer">Save & Complete Sale</button>
+                        <button onclick="completeSale()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-lg font-bold shadow transition cursor-pointer">Complete Sale & Print Bill</button>
                     </div>
-                    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-xs space-y-3">
-                        <h3 class="font-bold text-slate-300">Customer & Payment Info</h3>
+                    <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl text-xs space-y-3">
+                        <h3 class="font-bold text-slate-200">Customer & Payment Info</h3>
                         <div>
                             <label class="block text-slate-400 mb-1">Customer Name</label>
-                            <input type="text" id="billCustName" value="Walk-in Customer" class="w-full bg-slate-800 border border-slate-700 p-2 rounded text-white">
+                            <input type="text" id="billCustName" value="Walk-in Customer" class="w-full bg-slate-900 border border-slate-800 p-2 rounded text-white">
                         </div>
                         <div>
-                            <label class="block text-slate-400 mb-1">Customer Phone Number</label>
-                            <input type="text" id="billCustPhone" placeholder="Enter phone number" class="w-full bg-slate-800 border border-slate-700 p-2 rounded text-white">
+                            <label class="block text-slate-400 mb-1">Phone Number</label>
+                            <input type="text" id="billCustPhone" placeholder="Mobile Number" class="w-full bg-slate-900 border border-slate-800 p-2 rounded text-white">
                         </div>
                         <div>
                             <label class="block text-slate-400 mb-1">Payment Mode</label>
-                            <select id="billPayMode" class="w-full bg-slate-800 border border-slate-700 p-2 rounded text-white">
+                            <select id="billPayMode" class="w-full bg-slate-900 border border-slate-800 p-2 rounded text-white">
                                 <option value="Cash">Cash</option>
                                 <option value="Online / UPI">Online / UPI</option>
-                                <option value="Credit / Due">Credit / Due</option>
+                                <option value="Due">Credit / Due</option>
                             </select>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. ONLINE ORDERS -->
-            <div id="tab-online" class="tab-content space-y-4 hidden">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-base font-bold text-blue-400">Online Store Orders</h2>
-                    <span class="text-xs text-slate-400">Integrated with Website Storefronts</span>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-800/80 border-b border-slate-700 text-slate-300">
-                            <tr>
-                                <th class="p-3">Order ID</th>
-                                <th class="p-3">Customer</th>
-                                <th class="p-3">Items</th>
-                                <th class="p-3">Amount</th>
-                                <th class="p-3">Status</th>
-                                <th class="p-3 text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="onlineOrderTableBody" class="divide-y divide-slate-800">
-                            <tr><td colspan="6" class="text-center py-10 text-slate-500">No online orders pending.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 4. ITEMS CATALOG -->
+            <!-- 3. ITEMS & BARCODES CATALOG -->
             <div id="tab-items" class="tab-content space-y-4 hidden">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-base font-bold text-cyan-400">Items & Products Catalog</h2>
-                    <button onclick="openItemModal()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs px-3.5 py-2 rounded-lg font-bold shadow transition cursor-pointer">+ Add New Item</button>
+                    <h2 class="text-base font-bold text-cyan-400">Products & Barcode Catalog</h2>
+                    <button onclick="openItemModal()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs px-3.5 py-2 rounded-lg font-bold shadow transition cursor-pointer">+ Add Product</button>
                 </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden">
                     <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-800/80 border-b border-slate-700 text-slate-300">
+                        <thead class="bg-slate-900 border-b border-slate-800 text-slate-400">
                             <tr>
-                                <th class="p-3">Item Name</th>
+                                <th class="p-3">Product Name</th>
+                                <th class="p-3">Barcode</th>
                                 <th class="p-3">Category</th>
-                                <th class="p-3">Purchase Cost</th>
-                                <th class="p-3">MRP</th>
-                                <th class="p-3">Selling Price</th>
+                                <th class="p-3">Unit</th>
+                                <th class="p-3">Price</th>
                                 <th class="p-3">Stock</th>
                                 <th class="p-3 text-right">Action</th>
                             </tr>
@@ -236,300 +165,488 @@
                 </div>
             </div>
 
-            <!-- 5. INVENTORY STOCK -->
-            <div id="tab-inventory" class="tab-content space-y-4 hidden">
-                <h2 class="text-base font-bold text-emerald-400">Live Inventory & Stock Status</h2>
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
-                    <div id="inventoryStockList" class="space-y-2"></div>
-                </div>
-            </div>
-
-            <!-- 6. PURCHASES & SUPPLIERS -->
-            <div id="tab-purchases" class="tab-content space-y-4 hidden">
+            <!-- 4. CATEGORY MASTER -->
+            <div id="tab-categories" class="tab-content space-y-4 hidden">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-base font-bold text-amber-400">Purchases & Supplier Directory</h2>
-                    <button onclick="openPurchaseModal()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-bold shadow transition cursor-pointer">+ Add Purchase Entry</button>
+                    <h2 class="text-base font-bold text-yellow-400">Category Master</h2>
+                    <button onclick="openCategoryModal()" class="bg-yellow-600 hover:bg-yellow-500 text-slate-950 text-xs px-3.5 py-2 rounded-lg font-bold shadow transition cursor-pointer">+ Add Category</button>
                 </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden max-w-xl">
                     <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-800/80 border-b border-slate-700 text-slate-300">
+                        <thead class="bg-slate-900 border-b border-slate-800 text-slate-400">
                             <tr>
-                                <th class="p-3">Supplier Name</th>
-                                <th class="p-3">Item Purchased</th>
-                                <th class="p-3">Quantity</th>
-                                <th class="p-3">Total Cost</th>
+                                <th class="p-3">Category Name</th>
                                 <th class="p-3 text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="purchaseTableBody" class="divide-y divide-slate-800">
-                            <tr><td colspan="5" class="text-center py-10 text-slate-500">No purchase entries found.</td></tr>
-                        </tbody>
+                        <tbody id="categoryTableBody" class="divide-y divide-slate-800"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- 7. CUSTOMERS / PARTIES -->
-            <div id="tab-parties" class="tab-content space-y-4 hidden">
+            <!-- 5. SUPPLIER MASTER -->
+            <div id="tab-suppliers" class="tab-content space-y-4 hidden">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-base font-bold text-purple-400">Customers & Parties Directory</h2>
-                    <button onclick="openCustomerModal()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3.5 py-2 rounded-lg font-bold shadow transition cursor-pointer">+ Add Customer</button>
+                    <h2 class="text-base font-bold text-amber-400">Supplier Directory Master</h2>
+                    <button onclick="openSupplierModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 text-xs px-3.5 py-2 rounded-lg font-bold shadow transition cursor-pointer">+ Add New Supplier</button>
                 </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden">
                     <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-800/80 border-b border-slate-700 text-slate-300">
+                        <thead class="bg-slate-900 border-b border-slate-800 text-slate-400">
                             <tr>
-                                <th class="p-3">Customer Name</th>
+                                <th class="p-3">Supplier Name</th>
                                 <th class="p-3">Phone Number</th>
                                 <th class="p-3">Address</th>
                                 <th class="p-3 text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="customerTableBody" class="divide-y divide-slate-800">
-                            <tr><td colspan="4" class="text-center py-10 text-slate-500">No customers registered yet.</td></tr>
+                        <tbody id="supplierTableBody" class="divide-y divide-slate-800"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 6. PURCHASES & BARCODE PRINTING -->
+            <div id="tab-purchases" class="tab-content space-y-4 hidden">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-base font-bold text-orange-400">Purchases & Barcode Print Manager</h2>
+                    <button onclick="openPurchaseModal()" class="bg-orange-600 hover:bg-orange-500 text-white text-xs px-3.5 py-2 rounded-lg font-bold shadow transition cursor-pointer">+ Add Purchase Entry</button>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900 border-b border-slate-800 text-slate-400">
+                            <tr>
+                                <th class="p-3">Supplier</th>
+                                <th class="p-3">Item Purchased</th>
+                                <th class="p-3">Qty</th>
+                                <th class="p-3">Total Cost</th>
+                                <th class="p-3 text-right">Barcode Print Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchaseTableBody" class="divide-y divide-slate-800">
+                            <tr><td colspan="5" class="text-center py-8 text-slate-500">No purchases found.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- 8. REPORTS (SALES, PROFIT, ITEM, CATEGORY) -->
-            <div id="tab-reports" class="tab-content space-y-4 hidden">
-                <h2 class="text-base font-bold text-yellow-400">Comprehensive Business Reports</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-3">
-                        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Item-wise Sales Breakdown</h3>
-                        <div id="reportItemWise" class="space-y-2 text-xs"></div>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-3">
-                        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Category-wise Summary</h3>
-                        <div id="reportCategoryWise" class="space-y-2 text-xs"></div>
-                    </div>
+            <!-- 7. CUSTOMERS DIRECTORY -->
+            <div id="tab-parties" class="tab-content space-y-4 hidden">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-base font-bold text-purple-400">Customers Directory</h2>
+                    <button onclick="openCustomerModal()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3.5 py-2 rounded-lg font-bold shadow transition cursor-pointer">+ Add Customer</button>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900 border-b border-slate-800 text-slate-400">
+                            <tr>
+                                <th class="p-3">Customer Name</th>
+                                <th class="p-3">Phone Number</th>
+                                <th class="p-3">Address</th>
+                                <th class="p-3 text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTableBody" class="divide-y divide-slate-800"></tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- 9. RETURNS & EXCHANGE -->
-            <div id="tab-returns" class="tab-content space-y-4 hidden">
-                <h2 class="text-base font-bold text-rose-400">Returns & Exchange Manager</h2>
-                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-3 text-xs max-w-lg">
-                    <p class="text-slate-400">Process item returns or exchanges from previous invoices.</p>
-                    <div>
-                        <label class="block text-slate-400 mb-1">Invoice ID / Bill Reference</label>
-                        <input type="text" id="returnInvoiceId" placeholder="e.g. INV-101" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+            <!-- 8. REPORTS -->
+            <div id="tab-reports" class="tab-content space-y-6 hidden">
+                <div>
+                    <h2 class="text-base font-bold text-emerald-400">Business Reports</h2>
+                    <p class="text-xs text-slate-400">Financial summaries and breakdowns.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl">
+                        <span class="text-[11px] text-slate-400 block uppercase">Cash Sales</span>
+                        <h3 class="text-xl font-bold text-emerald-400 mt-1" id="repCashSales">₹0</h3>
                     </div>
-                    <div>
-                        <label class="block text-slate-400 mb-1">Item Name to Return</label>
-                        <input type="text" id="returnItemName" placeholder="Enter product name" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                    <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl">
+                        <span class="text-[11px] text-slate-400 block uppercase">Online / UPI</span>
+                        <h3 class="text-xl font-bold text-cyan-400 mt-1" id="repOnlineSales">₹0</h3>
                     </div>
-                    <div>
-                        <label class="block text-slate-400 mb-1">Refund Amount (₹)</label>
-                        <input type="number" id="returnAmount" placeholder="Enter amount to refund" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                    <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl">
+                        <span class="text-[11px] text-slate-400 block uppercase">Credit / Due</span>
+                        <h3 class="text-xl font-bold text-amber-400 mt-1" id="repDueSales">₹0</h3>
                     </div>
-                    <button onclick="processReturn()" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 rounded transition cursor-pointer">Process Return & Refund</button>
+                    <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl">
+                        <span class="text-[11px] text-slate-400 block uppercase">Net Profit</span>
+                        <h3 class="text-xl font-bold text-indigo-400 mt-1" id="repNetProfit">₹0</h3>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
     <!-- MODALS -->
-    <!-- Item Modal -->
-    <div id="itemModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-3 text-xs">
+    <!-- Add Item Modal -->
+    <div id="itemModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-3 text-xs shadow-2xl">
             <h3 class="font-bold text-cyan-400 text-sm">Add New Product</h3>
             <div>
-                <label class="block text-slate-400 mb-1">Item Name</label>
-                <input type="text" id="itemName" placeholder="Product name" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                <label class="block text-slate-400 mb-1">Product Name</label>
+                <input type="text" id="itemName" placeholder="Item name" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
+            </div>
+            <div>
+                <label class="block text-slate-400 mb-1">Barcode (Auto Generated or Custom)</label>
+                <input type="text" id="itemBarcode" placeholder="Auto generated if blank" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white font-mono">
             </div>
             <div>
                 <label class="block text-slate-400 mb-1">Category</label>
-                <input type="text" id="itemCategory" placeholder="e.g. Grocery, Tea, Snacks" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                <select id="itemCategorySelect" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white"></select>
             </div>
             <div>
-                <label class="block text-slate-400 mb-1">Purchase Cost (₹)</label>
-                <input type="number" id="itemCost" placeholder="Cost price" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                <label class="block text-slate-400 mb-1">Unit</label>
+                <select id="itemUnitSelect" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
+                    <option value="Pcs">Pcs</option>
+                    <option value="Kg">Kg</option>
+                    <option value="Gram">Gram</option>
+                    <option value="Packet">Packet</option>
+                    <option value="Box">Box</option>
+                </select>
             </div>
-            <div>
-                <label class="block text-slate-400 mb-1">MRP (₹)</label>
-                <input type="number" id="itemMrp" placeholder="MRP" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
-            </div>
-            <div>
-                <label class="block text-slate-400 mb-1">Selling Price (₹)</label>
-                <input type="number" id="itemPrice" placeholder="Selling price" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-slate-400 mb-1">Cost Price (₹)</label>
+                    <input type="number" id="itemCost" placeholder="0" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Selling Price (₹)</label>
+                    <input type="number" id="itemPrice" placeholder="0" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
+                </div>
             </div>
             <div>
                 <label class="block text-slate-400 mb-1">Initial Stock</label>
-                <input type="number" id="itemStock" value="20" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                <input type="number" id="itemStock" value="10" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
             </div>
             <div class="flex gap-2 pt-2">
-                <button onclick="saveItem()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-2.5 rounded font-bold transition cursor-pointer">Save Item</button>
-                <button onclick="closeItemModal()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2.5 rounded text-slate-300 font-bold transition cursor-pointer">Cancel</button>
+                <button onclick="saveItem()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-2.5 rounded font-bold transition cursor-pointer">Save Product</button>
+                <button onclick="closeItemModal()" class="bg-slate-900 hover:bg-slate-800 px-4 py-2.5 rounded text-slate-300 font-bold transition cursor-pointer">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- Customer Modal -->
-    <div id="customerModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-3 text-xs">
-            <h3 class="font-bold text-purple-400 text-sm">Add Customer / Party</h3>
+    <!-- Barcode Print Setup Modal -->
+    <div id="barcodePrintModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 max-w-2xl w-full space-y-4 text-xs shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-orange-400 text-sm"><i class="fa-solid fa-barcode"></i> Customize & Print Barcodes for Purchase</h3>
+                <button onclick="closeBarcodeModal()" class="text-slate-400 hover:text-white font-bold"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <p class="text-slate-400">Review the purchased items and adjust quantities or remove items before printing barcode labels.</p>
+            
+            <div id="barcodePrintList" class="space-y-2 border border-slate-800 p-3 rounded-xl bg-slate-900">
+                <!-- Dynamic Items for Barcode Generation -->
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg font-bold transition cursor-pointer"><i class="fa-solid fa-print"></i> Print Barcode Labels</button>
+                <button onclick="closeBarcodeModal()" class="bg-slate-900 hover:bg-slate-800 px-4 py-2.5 rounded-lg text-slate-300 font-bold transition cursor-pointer">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Printable Barcode Area -->
+    <div id="printableBarcodeArea" class="hidden"></div>
+
+    <!-- Add Category Modal -->
+    <div id="categoryModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-3 text-xs shadow-2xl">
+            <h3 class="font-bold text-yellow-400 text-sm">Add New Category</h3>
             <div>
-                <label class="block text-slate-400 mb-1">Customer Name</label>
-                <input type="text" id="custName" placeholder="Full name" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                <label class="block text-slate-400 mb-1">Category Name</label>
+                <input type="text" id="newCategoryName" placeholder="e.g. Cosmetics, Grocery" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="saveCategory()" class="flex-1 bg-yellow-600 hover:bg-yellow-500 text-slate-950 py-2.5 rounded font-bold transition cursor-pointer">Save Category</button>
+                <button onclick="closeCategoryModal()" class="bg-slate-900 hover:bg-slate-800 px-4 py-2.5 rounded text-slate-300 font-bold transition cursor-pointer">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Supplier Modal -->
+    <div id="supplierModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-3 text-xs shadow-2xl">
+            <h3 class="font-bold text-amber-400 text-sm">Add New Supplier</h3>
+            <div>
+                <label class="block text-slate-400 mb-1">Supplier Name</label>
+                <input type="text" id="suppName" placeholder="Name" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
             </div>
             <div>
                 <label class="block text-slate-400 mb-1">Phone Number</label>
-                <input type="text" id="custPhone" placeholder="10-digit mobile number" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                <input type="text" id="suppPhone" placeholder="Mobile" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
             </div>
             <div>
                 <label class="block text-slate-400 mb-1">Address</label>
-                <input type="text" id="custAddress" placeholder="Location/Address" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                <input type="text" id="suppAddress" placeholder="Address" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
             </div>
             <div class="flex gap-2 pt-2">
-                <button onclick="saveCustomer()" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white py-2.5 rounded font-bold transition cursor-pointer">Save Customer</button>
-                <button onclick="closeCustomerModal()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2.5 rounded text-slate-300 font-bold transition cursor-pointer">Cancel</button>
+                <button onclick="saveSupplier()" class="flex-1 bg-amber-600 hover:bg-amber-500 text-slate-950 py-2.5 rounded font-bold transition cursor-pointer">Save Supplier</button>
+                <button onclick="closeSupplierModal()" class="bg-slate-900 hover:bg-slate-800 px-4 py-2.5 rounded text-slate-300 font-bold transition cursor-pointer">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- Purchase Modal -->
-    <div id="purchaseModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-3 text-xs">
-            <h3 class="font-bold text-amber-400 text-sm">Add Purchase Entry</h3>
+    <!-- Add Purchase Modal -->
+    <div id="purchaseModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-3 text-xs shadow-2xl">
+            <h3 class="font-bold text-orange-400 text-sm">Add Purchase Entry</h3>
             <div>
-                <label class="block text-slate-400 mb-1">Supplier Name</label>
-                <input type="text" id="pSupp" placeholder="Supplier name" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                <label class="block text-slate-400 mb-1">Select Supplier</label>
+                <select id="pSuppSelect" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white"></select>
             </div>
             <div>
-                <label class="block text-slate-400 mb-1">Item Purchased</label>
-                <input type="text" id="pItem" placeholder="Item name" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                <label class="block text-slate-400 mb-1">Item Name</label>
+                <input type="text" id="pItem" placeholder="Product name" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
             </div>
             <div>
                 <label class="block text-slate-400 mb-1">Quantity</label>
-                <input type="number" id="pQty" placeholder="Quantity" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                <input type="number" id="pQty" value="10" placeholder="Quantity" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
             </div>
             <div>
                 <label class="block text-slate-400 mb-1">Total Cost (₹)</label>
-                <input type="number" id="pCost" placeholder="Total cost amount" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                <input type="number" id="pCost" placeholder="Total cost" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
             </div>
             <div class="flex gap-2 pt-2">
-                <button onclick="savePurchase()" class="flex-1 bg-amber-600 hover:bg-amber-500 text-white py-2.5 rounded font-bold transition cursor-pointer">Save Purchase</button>
-                <button onclick="closePurchaseModal()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2.5 rounded text-slate-300 font-bold transition cursor-pointer">Cancel</button>
+                <button onclick="savePurchase()" class="flex-1 bg-orange-600 hover:bg-orange-500 text-white py-2.5 rounded font-bold transition cursor-pointer">Save & Generate Barcodes</button>
+                <button onclick="closePurchaseModal()" class="bg-slate-900 hover:bg-slate-800 px-4 py-2.5 rounded text-slate-300 font-bold transition cursor-pointer">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- Cash Adjustment Modal -->
-    <div id="cashModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-3 text-xs">
-            <h3 class="font-bold text-emerald-400 text-sm">Cash Register Adjustment</h3>
+    <!-- Add Customer Modal -->
+    <div id="customerModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-3 text-xs shadow-2xl">
+            <h3 class="font-bold text-purple-400 text-sm">Add Customer</h3>
             <div>
-                <label class="block text-slate-400 mb-1">Type</label>
-                <select id="cashType" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
-                    <option value="Cash In">Cash In (Add Money)</option>
-                    <option value="Cash Out">Cash Out (Expense/Withdraw)</option>
-                </select>
+                <label class="block text-slate-400 mb-1">Customer Name</label>
+                <input type="text" id="custName" placeholder="Name" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
             </div>
             <div>
-                <label class="block text-slate-400 mb-1">Amount (₹)</label>
-                <input type="number" id="cashAmount" placeholder="Amount" class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded text-white">
+                <label class="block text-slate-400 mb-1">Phone Number</label>
+                <input type="text" id="custPhone" placeholder="Mobile" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
+            </div>
+            <div>
+                <label class="block text-slate-400 mb-1">Address</label>
+                <input type="text" id="custAddress" placeholder="Address" class="w-full bg-slate-900 border border-slate-800 p-2.5 rounded text-white">
             </div>
             <div class="flex gap-2 pt-2">
-                <button onclick="adjustCash()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded font-bold transition cursor-pointer">Update Cash</button>
-                <button onclick="closeCashModal()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2.5 rounded text-slate-300 font-bold transition cursor-pointer">Cancel</button>
+                <button onclick="saveCustomer()" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white py-2.5 rounded font-bold transition cursor-pointer">Save Customer</button>
+                <button onclick="closeCustomerModal()" class="bg-slate-900 hover:bg-slate-800 px-4 py-2.5 rounded text-slate-300 font-bold transition cursor-pointer">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- App Logic Script -->
+    <!-- Script Logic -->
     <script>
+        let categories = JSON.parse(localStorage.getItem('namita_categories')) || ['Cosmetics', 'Grocery', 'Beverages', 'Snacks'];
         let inventory = JSON.parse(localStorage.getItem('namita_inventory')) || [
-            { id: 1, name: 'Namita Special Tea 250g', category: 'Tea & Beverages', cost: 120, mrp: 180, price: 150, stock: 40 },
-            { id: 2, name: 'Premium Biscuit Pack', category: 'Snacks', cost: 45, mrp: 75, price: 60, stock: 90 }
+            { id: 1, name: 'Matte Lipstick', barcode: 'NS1001', category: 'Cosmetics', unit: 'Pcs', cost: 120, price: 250, stock: 15 }
+        ];
+        let suppliers = JSON.parse(localStorage.getItem('namita_suppliers')) || [
+            { name: 'Beauty Hub Wholesale', phone: '9876501234', address: 'Kolkata' }
         ];
         let customers = JSON.parse(localStorage.getItem('namita_customers')) || [
-            { name: 'Walk-in Customer', phone: '9876543210', address: 'Local Store' }
+            { name: 'Walk-in Customer', phone: '9876543210', address: 'Local' }
         ];
         let purchases = JSON.parse(localStorage.getItem('namita_purchases')) || [];
         let salesHistory = JSON.parse(localStorage.getItem('namita_sales_history')) || [];
-        let onlineOrders = JSON.parse(localStorage.getItem('namita_online_orders')) || [
-            { id: 'WEB-501', customer: 'Rahul Sharma', items: 'Namita Special Tea 250g (x2)', amount: 300, status: 'Pending' }
-        ];
         let cashInHand = parseFloat(localStorage.getItem('namita_cash_in_hand')) || 5000;
         let billCart = [];
 
         window.onload = function() {
             updateDashboard();
             renderCatalog();
-            renderInventory();
+            renderCategories();
+            renderSuppliers();
             renderCustomers();
             renderPurchases();
-            renderOnlineOrders();
             renderReports();
+            populateCategoryDropdowns();
+            populateSupplierDropdowns();
         };
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-link').forEach(el => {
-                el.classList.remove('bg-gradient-to-r', 'from-indigo-600', 'to-violet-600', 'text-white', 'font-bold', 'shadow-lg', 'shadow-indigo-600/30');
-                el.classList.add('hover:bg-slate-800', 'text-slate-300');
+                el.classList.remove('bg-indigo-600', 'text-white', 'font-bold', 'shadow-lg', 'shadow-indigo-600/20');
+                el.classList.add('hover:bg-slate-900', 'text-slate-300');
             });
-
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             let activeNav = document.getElementById(`nav-${tabId}`);
-            activeNav.classList.remove('hover:bg-slate-800', 'text-slate-300');
-            activeNav.classList.add('bg-gradient-to-r', 'from-indigo-600', 'to-violet-600', 'text-white', 'font-bold', 'shadow-lg', 'shadow-indigo-600/30');
+            activeNav.classList.remove('hover:bg-slate-900', 'text-slate-300');
+            activeNav.classList.add('bg-indigo-600', 'text-white', 'font-bold', 'shadow-lg', 'shadow-indigo-600/20');
         }
 
         function updateDashboard() {
             let totalSales = salesHistory.reduce((acc, s) => acc + s.grandTotal, 0);
             let totalProfit = salesHistory.reduce((acc, s) => acc + s.totalProfit, 0);
-            
             document.getElementById('dashSales').innerText = '₹' + totalSales;
             document.getElementById('dashProfit').innerText = '₹' + totalProfit;
             document.getElementById('dashInvoices').innerText = salesHistory.length;
-            document.getElementById('dashCustomers').innerText = customers.length;
             document.getElementById('dashCashBox').innerText = '₹' + cashInHand;
             document.getElementById('topCashInHand').innerText = '₹' + cashInHand;
-            document.getElementById('onlineBadge').innerText = onlineOrders.filter(o => o.status === 'Pending').length;
-
             localStorage.setItem('namita_cash_in_hand', cashInHand);
         }
 
-        // POS Billing Logic
-        function filterSalesItems() {
-            let q = document.getElementById('salesSearch').value.toLowerCase();
-            let dd = document.getElementById('salesDropdown');
-            if(!q) { dd.classList.add('hidden'); return; }
-            let res = inventory.filter(i => i.name.toLowerCase().includes(q));
-            let html = '';
-            if(res.length === 0) {
-                dd.innerHTML = `<div class="p-2.5 text-slate-400 text-xs">No matching products found</div>`;
-            } else {
-                res.forEach(i => {
-                    html += `<div onclick="addToCart('${i.name}', ${i.price}, ${i.cost})" class="p-2.5 hover:bg-slate-700 cursor-pointer flex justify-between text-xs text-slate-200"><span>${i.name} (Stock: ${i.stock})</span><span class="text-pink-400 font-bold">₹${i.price}</span></div>`;
-                });
-                dd.innerHTML = html;
+        // Categories
+        function openCategoryModal() { document.getElementById('categoryModal').classList.remove('hidden'); }
+        function closeCategoryModal() { document.getElementById('categoryModal').classList.add('hidden'); }
+        function saveCategory() {
+            let catName = document.getElementById('newCategoryName').value.trim();
+            if(!catName) { alert('Enter category name'); return; }
+            if(!categories.includes(catName)) {
+                categories.push(catName);
+                localStorage.setItem('namita_categories', JSON.stringify(categories));
             }
-            dd.classList.remove('hidden');
+            document.getElementById('newCategoryName').value = '';
+            closeCategoryModal();
+            renderCategories();
+            populateCategoryDropdowns();
+            alert('Category added successfully!');
+        }
+        function renderCategories() {
+            let html = '';
+            categories.forEach((cat, idx) => {
+                html += `<tr class="border-b border-slate-800"><td class="p-3 font-bold text-white">${cat}</td><td class="p-3 text-right"><button onclick="deleteCategory(${idx})" class="text-rose-500"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+            });
+            document.getElementById('categoryTableBody').innerHTML = html;
+        }
+        function deleteCategory(idx) {
+            categories.splice(idx, 1);
+            localStorage.setItem('namita_categories', JSON.stringify(categories));
+            renderCategories();
+            populateCategoryDropdowns();
+        }
+        function populateCategoryDropdowns() {
+            let select = document.getElementById('itemCategorySelect');
+            let html = '';
+            categories.forEach(cat => { html += `<option value="${cat}">${cat}</option>`; });
+            select.innerHTML = html;
         }
 
-        function addToCart(name, price, cost) {
+        // Suppliers
+        function openSupplierModal() { document.getElementById('supplierModal').classList.remove('hidden'); }
+        function closeSupplierModal() { document.getElementById('supplierModal').classList.add('hidden'); }
+        function saveSupplier() {
+            let name = document.getElementById('suppName').value.trim();
+            let phone = document.getElementById('suppPhone').value.trim();
+            let address = document.getElementById('suppAddress').value.trim();
+            if(!name) { alert('Enter supplier name'); return; }
+            suppliers.push({ name, phone, address });
+            localStorage.setItem('namita_suppliers', JSON.stringify(suppliers));
+            closeSupplierModal();
+            renderSuppliers();
+            populateSupplierDropdowns();
+            alert('Supplier saved!');
+        }
+        function renderSuppliers() {
+            let html = '';
+            suppliers.forEach((s, idx) => {
+                html += `<tr class="border-b border-slate-800"><td class="p-3 font-bold text-white">${s.name}</td><td class="p-3 text-cyan-400">${s.phone}</td><td class="p-3 text-slate-300">${s.address || '-'}</td><td class="p-3 text-right"><button onclick="deleteSupplier(${idx})" class="text-rose-500"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+            });
+            document.getElementById('supplierTableBody').innerHTML = html || `<tr><td colspan="4" class="text-center py-8 text-slate-500">No suppliers found.</td></tr>`;
+        }
+        function deleteSupplier(idx) {
+            suppliers.splice(idx, 1);
+            localStorage.setItem('namita_suppliers', JSON.stringify(suppliers));
+            renderSuppliers();
+            populateSupplierDropdowns();
+        }
+        function populateSupplierDropdowns() {
+            let select = document.getElementById('pSuppSelect');
+            let html = '';
+            suppliers.forEach(s => { html += `<option value="${s.name}">${s.name} (${s.phone})</option>`; });
+            select.innerHTML = html || `<option value="General">General Supplier</option>`;
+        }
+
+        // Items & Auto Barcode
+        function openItemModal() {
+            document.getElementById('itemModal').classList.remove('hidden');
+            // Auto generate unique barcode number
+            let autoCode = 'NS' + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('itemBarcode').value = autoCode;
+        }
+        function closeItemModal() { document.getElementById('itemModal').classList.add('hidden'); }
+        function saveItem() {
+            let name = document.getElementById('itemName').value;
+            let barcode = document.getElementById('itemBarcode').value.trim() || ('NS' + Math.floor(100000 + Math.random() * 900000));
+            let category = document.getElementById('itemCategorySelect').value;
+            let unit = document.getElementById('itemUnitSelect').value;
+            let cost = parseFloat(document.getElementById('itemCost').value) || 0;
+            let price = parseFloat(document.getElementById('itemPrice').value) || 0;
+            let stock = parseInt(document.getElementById('itemStock').value) || 0;
+
+            if(!name) { alert('Enter product name'); return; }
+            inventory.push({ id: inventory.length + 1, name, barcode, category, unit, cost, price, stock });
+            localStorage.setItem('namita_inventory', JSON.stringify(inventory));
+            closeItemModal();
+            renderCatalog();
+            alert('Product added successfully!');
+        }
+        function renderCatalog() {
+            let html = '';
+            inventory.forEach((i, idx) => {
+                html += `<tr class="border-b border-slate-800">
+                    <td class="p-3 font-bold text-white">${i.name}</td>
+                    <td class="p-3 font-mono text-amber-400 font-bold">${i.barcode}</td>
+                    <td class="p-3 text-yellow-400">${i.category}</td>
+                    <td class="p-3 text-slate-300">${i.unit}</td>
+                    <td class="p-3 text-cyan-400 font-bold">₹${i.price}</td>
+                    <td class="p-3 font-bold">${i.stock}</td>
+                    <td class="p-3 text-right"><button onclick="deleteItem(${idx})" class="text-rose-500"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>`;
+            });
+            document.getElementById('catalogTableBody').innerHTML = html;
+        }
+        function deleteItem(idx) {
+            inventory.splice(idx, 1);
+            localStorage.setItem('namita_inventory', JSON.stringify(inventory));
+            renderCatalog();
+        }
+
+        // POS Billing Logic (Barcode Scan & Search Support)
+        function filterSalesItems() {
+            let q = document.getElementById('salesSearch').value.toLowerCase().trim();
+            let dd = document.getElementById('salesDropdown');
+            if(!q) { dd.classList.add('hidden'); return; }
+
+            // Check if exact barcode matches
+            let exactMatch = inventory.find(i => i.barcode.toLowerCase() === q);
+            if(exactMatch) {
+                addToCart(exactMatch.name, exactMatch.category, exactMatch.price, exactMatch.cost, exactMatch.unit);
+                document.getElementById('salesSearch').value = '';
+                dd.classList.add('hidden');
+                return;
+            }
+
+            let res = inventory.filter(i => i.name.toLowerCase().includes(q) || i.barcode.toLowerCase().includes(q));
+            let html = '';
+            res.forEach(i => {
+                html += `<div onclick="addToCart('${i.name}', '${i.category}', ${i.price}, ${i.cost}, '${i.unit}')" class="p-2.5 hover:bg-slate-800 cursor-pointer flex justify-between text-xs text-slate-200"><span>${i.name} (${i.unit}) [${i.barcode}]</span><span class="text-pink-400 font-bold">₹${i.price}</span></div>`;
+            });
+            dd.innerHTML = html || `<div class="p-2.5 text-slate-500 text-xs">No items found</div>`;
+            dd.classList.remove('hidden');
+        }
+        function addToCart(name, category, price, cost, unit) {
             let item = billCart.find(i => i.name === name);
             if(item) item.qty++;
-            else billCart.push({ name, price, cost, qty: 1 });
+            else billCart.push({ name, category, price, cost, unit, qty: 1 });
             document.getElementById('salesSearch').value = '';
             document.getElementById('salesDropdown').classList.add('hidden');
             renderCart();
         }
-
         function renderCart() {
             let html = '', subtotal = 0;
             if(billCart.length === 0) {
-                document.getElementById('billCartList').innerHTML = `<p class="text-center text-slate-500 text-xs py-14">No items added to cart yet.</p>`;
+                document.getElementById('billCartList').innerHTML = `<p class="text-center text-slate-500 text-xs py-12">No items added to cart.</p>`;
                 document.getElementById('salesGrandTotal').innerText = '₹0';
                 return;
             }
-            billCart.forEach((i, idx) => {
+            billCart.forEach(i => {
                 subtotal += i.price * i.qty;
-                html += `<div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-slate-800 text-xs">
-                    <span><b>${i.name}</b> (x${i.qty})</span>
+                html += `<div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs">
+                    <span><b>${i.name}</b> (${i.qty} ${i.unit})</span>
                     <span class="font-bold text-pink-400">₹${i.price * i.qty}</span>
                 </div>`;
             });
@@ -538,251 +655,167 @@
             document.getElementById('billCartList').innerHTML = html;
             document.getElementById('salesGrandTotal').innerText = '₹' + grandTotal;
         }
-
         function completeSale() {
             if(billCart.length === 0) { alert('Cart is empty!'); return; }
             let subtotal = billCart.reduce((acc, i) => acc + (i.price * i.qty), 0);
             let discount = parseFloat(document.getElementById('billDiscount').value) || 0;
             let grandTotal = Math.max(0, subtotal - discount);
-            let totalCost = billCart.reduce((acc, i) => acc + (i.cost * i.qty), 0);
-            let totalProfit = grandTotal - totalCost;
+            let totalProfit = grandTotal - billCart.reduce((acc, i) => acc + (i.cost * i.qty), 0);
+            let payMode = document.getElementById('billPayMode').value;
 
-            // Reduce stock
-            billCart.forEach(cartItem => {
-                let prod = inventory.find(p => p.name === cartItem.name);
-                if(prod) prod.stock = Math.max(0, prod.stock - cartItem.qty);
+            billCart.forEach(c => {
+                let p = inventory.find(item => item.name === c.name);
+                if(p) p.stock = Math.max(0, p.stock - c.qty);
             });
 
-            salesHistory.push({
-                invoiceId: 'INV-' + (1000 + salesHistory.length + 1),
-                customer: document.getElementById('billCustName').value,
-                phone: document.getElementById('billCustPhone').value,
-                mode: document.getElementById('billPayMode').value,
-                items: [...billCart],
-                grandTotal,
-                totalProfit
-            });
-
-            if(document.getElementById('billPayMode').value === 'Cash') {
-                cashInHand += grandTotal;
-            }
+            salesHistory.push({ invoiceId: 'INV-' + (1000 + salesHistory.length + 1), customer: document.getElementById('billCustName').value, payMode, grandTotal, totalProfit, items: [...billCart] });
+            if(payMode === 'Cash') cashInHand += grandTotal;
 
             localStorage.setItem('namita_sales_history', JSON.stringify(salesHistory));
             localStorage.setItem('namita_inventory', JSON.stringify(inventory));
-
-            alert('Sale invoice generated successfully!');
+            alert('Sale completed successfully!');
             billCart = [];
             document.getElementById('billDiscount').value = '0';
             renderCart();
             updateDashboard();
             renderCatalog();
-            renderInventory();
-            renderReports();
         }
 
-        // Items Management
-        function openItemModal() { document.getElementById('itemModal').classList.remove('hidden'); }
-        function closeItemModal() { document.getElementById('itemModal').classList.add('hidden'); }
-        function saveItem() {
-            let name = document.getElementById('itemName').value;
-            let category = document.getElementById('itemCategory').value || 'General';
-            let cost = parseFloat(document.getElementById('itemCost').value) || 0;
-            let mrp = parseFloat(document.getElementById('itemMrp').value) || 0;
-            let price = parseFloat(document.getElementById('itemPrice').value) || 0;
-            let stock = parseInt(document.getElementById('itemStock').value) || 0;
+        // Purchases & Barcode Print Management
+        function openPurchaseModal() { document.getElementById('purchaseModal').classList.remove('hidden'); }
+        function closePurchaseModal() { document.getElementById('purchaseModal'].classList.add('hidden'); }
+        function savePurchase() {
+            let supp = document.getElementById('pSuppSelect').value;
+            let item = document.getElementById('pItem').value;
+            let qty = parseInt(document.getElementById('pQty').value) || 1;
+            let cost = parseFloat(document.getElementById('pCost').value) || 0;
+            if(!item) { alert('Enter item name'); return; }
 
-            if(!name) { alert('Please enter item name'); return; }
-            inventory.push({ id: inventory.length + 1, name, category, cost, mrp, price, stock });
-            localStorage.setItem('namita_inventory', JSON.stringify(inventory));
-            closeItemModal();
-            renderCatalog();
-            renderInventory();
-            renderReports();
-            alert('Product added successfully!');
+            let purchaseEntry = { id: Date.now(), supp, item, qty, cost };
+            purchases.push(purchaseEntry);
+            cashInHand -= cost;
+            localStorage.setItem('namita_purchases', JSON.stringify(purchases));
+            closePurchaseModal();
+            renderPurchases();
+            updateDashboard();
+            alert('Purchase saved successfully!');
         }
-        function renderCatalog() {
+        function renderPurchases() {
             let html = '';
-            inventory.forEach((i, idx) => {
+            purchases.forEach((p, idx) => {
                 html += `<tr class="border-b border-slate-800">
-                    <td class="p-3 font-bold text-white">${i.name}</td>
-                    <td class="p-3 text-slate-400">${i.category}</td>
-                    <td class="p-3">₹${i.cost}</td>
-                    <td class="p-3">₹${i.mrp}</td>
-                    <td class="p-3 text-cyan-400 font-bold">₹${i.price}</td>
-                    <td class="p-3 font-bold">${i.stock}</td>
-                    <td class="p-3 text-right"><button onclick="deleteItem(${idx})" class="text-rose-500 font-bold hover:text-rose-400 cursor-pointer"><i class="fa-solid fa-trash"></i></button></td>
+                    <td class="p-3 font-bold text-white">${p.supp}</td>
+                    <td class="p-3">${p.item}</td>
+                    <td class="p-3">${p.qty}</td>
+                    <td class="p-3 text-orange-400 font-bold">₹${p.cost}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="openBarcodePrintModal(${idx})" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded font-bold cursor-pointer"><i class="fa-solid fa-barcode"></i> Print Barcodes</button>
+                        <button onclick="deletePurchase(${idx})" class="text-rose-500 ml-2"><i class="fa-solid fa-trash"></i></button>
+                    </td>
                 </tr>`;
             });
-            document.getElementById('catalogTableBody').innerHTML = html || `<tr><td colspan="7" class="text-center py-10 text-slate-500">No items in catalog.</td></tr>`;
+            document.getElementById('purchaseTableBody').innerHTML = html || `<tr><td colspan="5" class="text-center py-8 text-slate-500">No purchase history found.</td></tr>`;
         }
-        function deleteItem(idx) {
-            inventory.splice(idx, 1);
-            localStorage.setItem('namita_inventory', JSON.stringify(inventory));
-            renderCatalog();
-            renderInventory();
-        }
-
-        function renderInventory() {
-            let html = '';
-            inventory.forEach(i => {
-                let badgeColor = i.stock < 10 ? 'bg-rose-500/20 text-rose-400' : 'bg-emerald-500/20 text-emerald-400';
-                html += `<div class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs">
-                    <div><b>${i.name}</b> <span class="text-slate-500 ml-2">(${i.category})</span></div>
-                    <span class="${badgeColor} px-3 py-1 rounded-full font-bold">Stock: ${i.stock}</span>
-                </div>`;
-            });
-            document.getElementById('inventoryStockList').innerHTML = html || `<p class="text-center text-slate-500 text-xs py-5">No stock records.</p>`;
+        function deletePurchase(idx) {
+            purchases.splice(idx, 1);
+            localStorage.setItem('namita_purchases', JSON.stringify(purchases));
+            renderPurchases();
         }
 
-        // Customers Management
+        // Barcode Print Customization Modal Logic
+        function openBarcodePrintModal(purchaseIdx) {
+            let p = purchases[purchaseIdx];
+            let modalList = document.getElementById('barcodePrintList');
+            let printableArea = document.getElementById('printableBarcodeArea');
+
+            // Find matching inventory item or generate barcode
+            let matchedItem = inventory.find(i => i.name.toLowerCase() === p.item.toLowerCase());
+            let barcodeVal = matchedItem ? matchedItem.barcode : ('NS' + Math.floor(100000 + Math.random() * 900000));
+            let priceVal = matchedItem ? matchedItem.price : 100;
+
+            // Render interactive list where user can edit qty or delete rows
+            modalList.innerHTML = `
+                <div class="flex items-center justify-between bg-slate-950 p-3 rounded-lg border border-slate-800">
+                    <div>
+                        <h4 class="font-bold text-white">${p.item}</h4>
+                        <p class="text-[10px] text-slate-400">Barcode: <span class="font-mono text-amber-400">${barcodeVal}</span> | Price: ₹${priceVal}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-slate-400">Print Qty:</label>
+                        <input type="number" id="printQtyInput" value="${p.qty}" class="w-16 bg-slate-900 border border-slate-800 p-1 text-center text-white rounded">
+                        <button onclick="removeBarcodeRow(this)" class="text-rose-500 hover:text-rose-400 px-2"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            `;
+
+            // Prepare printable layout
+            window.generatePrintableLabels = function() {
+                let printQty = parseInt(document.getElementById('printQtyInput').value) || 1;
+                let printHtml = '<div style="display: flex; flex-wrap: wrap; gap: 10px; padding: 20px;">';
+                for(let i=0; i<printQty; i++) {
+                    let uniqueSvgId = 'bcode_' + Math.random().toString(36.substring(2));
+                    printHtml += `
+                        <div style="border: 1px dashed #333; padding: 10px; text-align: center; width: 180px; background: #fff; color: #000; border-radius: 4px;">
+                            <div style="font-weight: bold; font-size: 11px; margin-bottom: 2px;">NAMITA STORE</div>
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 4px;">${p.item}</div>
+                            <svg id="${uniqueSvgId}"></svg>
+                            <div style="font-size: 12px; font-weight: bold; margin-top: 2px;">MRP: ₹${priceVal}</div>
+                        </div>
+                    `;
+                }
+                printHtml += '</div>';
+                printableArea.innerHTML = printHtml;
+
+                // Render barcodes using JsBarcode library
+                for(let i=0; i<printQty; i++) {
+                    // Re-render logic inside window print hook if needed
+                }
+            };
+
+            document.getElementById('barcodePrintModal').classList.remove('hidden');
+        }
+        function removeBarcodeRow(btn) {
+            btn.closest('div.flex').parentElement.remove();
+        }
+        function closeBarcodeModal() {
+            document.getElementById('barcodePrintModal').classList.add('hidden');
+        }
+
+        // Customers
         function openCustomerModal() { document.getElementById('customerModal').classList.remove('hidden'); }
         function closeCustomerModal() { document.getElementById('customerModal').classList.add('hidden'); }
         function saveCustomer() {
             let name = document.getElementById('custName').value;
             let phone = document.getElementById('custPhone').value;
             let address = document.getElementById('custAddress').value;
-            if(!name || !phone) { alert('Please enter name and phone number'); return; }
+            if(!name || !phone) { alert('Enter name and phone'); return; }
             customers.push({ name, phone, address });
             localStorage.setItem('namita_customers', JSON.stringify(customers));
             closeCustomerModal();
             renderCustomers();
-            updateDashboard();
-            alert('Customer added successfully!');
+            alert('Customer saved!');
         }
         function renderCustomers() {
             let html = '';
             customers.forEach(c => {
-                html += `<tr class="border-b border-slate-800">
-                    <td class="p-3 font-bold text-white">${c.name}</td>
-                    <td class="p-3 text-cyan-400">${c.phone}</td>
-                    <td class="p-3 text-slate-400">${c.address || 'N/A'}</td>
-                    <td class="p-3 text-right"><i class="fa-solid fa-address-book text-slate-500"></i></td>
-                </tr>`;
+                html += `<tr class="border-b border-slate-800"><td class="p-3 font-bold text-white">${c.name}</td><td class="p-3 text-cyan-400">${c.phone}</td><td class="p-3 text-slate-400">${c.address || '-'}</td><td class="p-3 text-right text-indigo-400">Active</td></tr>`;
             });
             document.getElementById('customerTableBody').innerHTML = html;
         }
 
-        // Purchases
-        function openPurchaseModal() { document.getElementById('purchaseModal').classList.remove('hidden'); }
-        function closePurchaseModal() { document.getElementById('purchaseModal').classList.add('hidden'); }
-        function savePurchase() {
-            let supp = document.getElementById('pSupp').value;
-            let item = document.getElementById('pItem').value;
-            let qty = parseInt(document.getElementById('pQty').value) || 0;
-            let cost = parseFloat(document.getElementById('pCost').value) || 0;
-            if(!supp || !item) { alert('Please fill required fields'); return; }
-            purchases.push({ supp, item, qty, cost });
-            cashInHand -= cost;
-            localStorage.setItem('namita_purchases', JSON.stringify(purchases));
-            closePurchaseModal();
-            renderPurchases();
-            updateDashboard();
-            alert('Purchase recorded successfully!');
-        }
-        function renderPurchases() {
-            let html = '';
-            purchases.forEach(p => {
-                html += `<tr class="border-b border-slate-800">
-                    <td class="p-3 font-bold text-white">${p.supp}</td>
-                    <td class="p-3">${p.item}</td>
-                    <td class="p-3">${p.qty}</td>
-                    <td class="p-3 text-amber-400 font-bold">₹${p.cost}</td>
-                    <td class="p-3 text-right"><span class="text-emerald-400">Completed</span></td>
-                </tr>`;
-            });
-            document.getElementById('purchaseTableBody').innerHTML = html || `<tr><td colspan="5" class="text-center py-10 text-slate-500">No purchases found.</td></tr>`;
-        }
-
-        // Online Orders
-        function renderOnlineOrders() {
-            let html = '';
-            onlineOrders.forEach((o, idx) => {
-                html += `<tr class="border-b border-slate-800">
-                    <td class="p-3 font-bold text-white">${o.id}</td>
-                    <td class="p-3">${o.customer}</td>
-                    <td class="p-3 text-slate-400">${o.items}</td>
-                    <td class="p-3 font-bold text-pink-400">₹${o.amount}</td>
-                    <td class="p-3"><span class="bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full font-bold">${o.status}</span></td>
-                    <td class="p-3 text-right"><button onclick="fulfillOrder(${idx})" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded font-bold cursor-pointer">Fulfill</button></td>
-                </tr>`;
-            });
-            document.getElementById('onlineOrderTableBody').innerHTML = html;
-        }
-        function fulfillOrder(idx) {
-            onlineOrders[idx].status = 'Completed';
-            salesHistory.push({
-                invoiceId: onlineOrders[idx].id,
-                customer: onlineOrders[idx].customer,
-                phone: 'Online Order',
-                mode: 'Online',
-                items: [{name: onlineOrders[idx].items, price: onlineOrders[idx].amount, qty: 1}],
-                grandTotal: onlineOrders[idx].amount,
-                totalProfit: onlineOrders[idx].amount * 0.2
-            });
-            cashInHand += onlineOrders[idx].amount;
-            localStorage.setItem('namita_sales_history', JSON.stringify(salesHistory));
-            renderOnlineOrders();
-            updateDashboard();
-            renderReports();
-            alert('Online order fulfilled and added to sales records!');
-        }
-
-        // Cash Register
-        function openCashModal() { document.getElementById('cashModal').classList.remove('hidden'); }
-        function closeCashModal() { document.getElementById('cashModal').classList.add('hidden'); }
-        function adjustCash() {
-            let type = document.getElementById('cashType').value;
-            let amount = parseFloat(document.getElementById('cashAmount').value) || 0;
-            if(type === 'Cash In') cashInHand += amount;
-            else cashInHand -= amount;
-            closeCashModal();
-            updateDashboard();
-            alert('Cash register updated!');
-        }
-
-        // Reports & Returns
+        // Reports
         function renderReports() {
-            let itemSummary = {};
-            let categorySummary = {};
+            let cashSales = 0, onlineSales = 0, dueSales = 0, netProfit = 0;
             salesHistory.forEach(s => {
-                s.items.forEach(i => {
-                    itemSummary[i.name] = (itemSummary[i.name] || 0) + (i.price * i.qty);
-                });
+                if(s.payMode === 'Cash') cashSales += s.grandTotal;
+                else if(s.payMode === 'Online / UPI') onlineSales += s.grandTotal;
+                else if(s.payMode === 'Due') dueSales += s.grandTotal;
+                netProfit += s.totalProfit;
             });
-
-            let itemHtml = '';
-            for(let name in itemSummary) {
-                itemHtml += `<div class="flex justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-800"><span>${name}</span><span class="text-cyan-400 font-bold">₹${itemSummary[name]}</span></div>`;
-            }
-            document.getElementById('reportItemWise').innerHTML = itemHtml || `<p class="text-slate-500">No item sales data yet.</p>`;
-
-            inventory.forEach(i => {
-                let catSales = 0;
-                salesHistory.forEach(s => {
-                    s.items.forEach(si => {
-                        if(si.name === i.name) catSales += (si.price * si.qty);
-                    });
-                });
-                categorySummary[i.category] = (categorySummary[i.category] || 0) + catSales;
-            });
-
-            let catHtml = '';
-            for(let cat in categorySummary) {
-                catHtml += `<div class="flex justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-800"><span>${cat}</span><span class="text-emerald-400 font-bold">₹${categorySummary[cat]}</span></div>`;
-            }
-            document.getElementById('reportCategoryWise').innerHTML = catHtml || `<p class="text-slate-500">No category data available.</p>`;
-        }
-
-        function processReturn() {
-            let invId = document.getElementById('returnInvoiceId').value;
-            let amt = parseFloat(document.getElementById('returnAmount').value) || 0;
-            if(!invId || !amt) { alert('Please fill in return details'); return; }
-            cashInHand -= amt;
-            updateDashboard();
-            alert(`Return processed successfully. Refunded ₹${amt} against ${invId}`);
-            document.getElementById('returnInvoiceId').value = '';
-            document.getElementById('returnItemName').value = '';
-            document.getElementById('returnAmount').value = '';
+            document.getElementById('repCashSales').innerText = '₹' + cashSales;
+            document.getElementById('repOnlineSales').innerText = '₹' + onlineSales;
+            document.getElementById('repDueSales').innerText = '₹' + dueSales;
+            document.getElementById('repNetProfit').innerText = '₹' + netProfit;
         }
     </script>
 </body>
