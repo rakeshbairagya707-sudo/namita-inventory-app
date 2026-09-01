@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NAMITA STORE - Enterprise POS & Barcode Suite</title>
+    <title>NAMITA STORE - Enterprise POS & Barcode Suite v10.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
     <style>
         @media print {
             body * { visibility: hidden; }
-            #printableBarcodeArea, #printableBarcodeArea * { visibility: visible; }
-            #printableBarcodeArea { position: absolute; left: 0; top: 0; width: 100%; }
+            #printableBarcodeArea, #printableBarcodeArea *, #printableReceipt, #printableReceipt * { visibility: visible; }
+            #printableBarcodeArea, #printableReceipt { position: absolute; left: 0; top: 0; width: 100%; }
         }
     </style>
 </head>
 <body class="bg-slate-900 font-sans min-h-screen text-slate-100">
 
     <!-- Top Navigation Bar -->
-    <header class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex justify-between items-center text-xs sticky top-0 z-40">
+    <header class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex justify-between items-center text-xs sticky top-0 z-40 shadow-md">
         <div class="flex items-center gap-3">
             <div class="bg-indigo-600 text-white font-extrabold px-3 py-1.5 rounded-xl text-sm shadow-md">NS</div>
             <div>
                 <h1 class="font-bold text-white tracking-wide text-sm">NAMITA STORE</h1>
-                <p class="text-[10px] text-slate-400">Enterprise Pro v9.0 Barcode Edition</p>
+                <p class="text-[10px] text-slate-400">Enterprise Pro v10.0 Barcode Edition</p>
             </div>
         </div>
         <div class="flex items-center gap-4">
@@ -63,7 +63,7 @@
         </aside>
 
         <!-- Main Content Area -->
-        <main class="flex-1 flex flex-col overflow-y-auto p-6 bg-slate-900">
+        <main class="flex-1 flex flex-col overflow-y-auto p-6 bg-slate-950/40">
             
             <!-- 1. DASHBOARD -->
             <div id="tab-dashboard" class="tab-content space-y-6">
@@ -154,7 +154,8 @@
                                 <th class="p-3">Barcode</th>
                                 <th class="p-3">Category</th>
                                 <th class="p-3">Unit</th>
-                                <th class="p-3">Price</th>
+                                <th class="p-3">Cost Price</th>
+                                <th class="p-3">Selling Price</th>
                                 <th class="p-3">Stock</th>
                                 <th class="p-3 text-right">Action</th>
                             </tr>
@@ -347,6 +348,7 @@
 
     <!-- Hidden Printable Barcode Area -->
     <div id="printableBarcodeArea" class="hidden"></div>
+    <div id="printableReceipt" class="hidden"></div>
 
     <!-- Add Category Modal -->
     <div id="categoryModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -599,6 +601,7 @@
                     <td class="p-3 font-mono text-amber-400 font-bold">${i.barcode}</td>
                     <td class="p-3 text-yellow-400">${i.category}</td>
                     <td class="p-3 text-slate-300">${i.unit}</td>
+                    <td class="p-3 text-slate-400 font-bold">₹${i.cost}</td>
                     <td class="p-3 text-cyan-400 font-bold">₹${i.price}</td>
                     <td class="p-3 font-bold">${i.stock}</td>
                     <td class="p-3 text-right"><button onclick="deleteItem(${idx})" class="text-rose-500 cursor-pointer"><i class="fa-solid fa-trash"></i></button></td>
@@ -669,17 +672,23 @@
             let grandTotal = Math.max(0, subtotal - discount);
             let totalProfit = grandTotal - billCart.reduce((acc, i) => acc + (i.cost * i.qty), 0);
             let payMode = document.getElementById('billPayMode').value;
+            let customerName = document.getElementById('billCustName').value;
 
             billCart.forEach(c => {
                 let p = inventory.find(item => item.name === c.name);
                 if(p) p.stock = Math.max(0, p.stock - c.qty);
             });
 
-            salesHistory.push({ invoiceId: 'INV-' + (1000 + salesHistory.length + 1), customer: document.getElementById('billCustName').value, payMode, grandTotal, totalProfit, items: [...billCart] });
+            let invoiceId = 'INV-' + (1000 + salesHistory.length + 1);
+            salesHistory.push({ invoiceId, customer: customerName, payMode, grandTotal, totalProfit, items: [...billCart] });
             if(payMode === 'Cash') cashInHand += grandTotal;
 
             localStorage.setItem('namita_sales_history', JSON.stringify(salesHistory));
             localStorage.setItem('namita_inventory', JSON.stringify(inventory));
+            
+            // Trigger receipt print
+            printReceipt(invoiceId, customerName, payMode, grandTotal, billCart);
+
             alert('Sale completed successfully!');
             billCart = [];
             document.getElementById('billDiscount').value = '0';
@@ -688,24 +697,72 @@
             renderCatalog();
         }
 
+        function printReceipt(invoiceId, customerName, payMode, grandTotal, items) {
+            let receiptDiv = document.getElementById('printableReceipt');
+            let itemsHtml = '';
+            items.forEach(i => {
+                itemsHtml += `<tr><td>${i.name} (${i.qty})</td><td style="text-align:right;">₹${i.price * i.qty}</td></tr>`;
+            });
+            receiptDiv.innerHTML = `
+                <div style="font-family: monospace; width: 300px; padding: 15px; background: #fff; color: #000; font-size: 12px;">
+                    <div style="text-align: center; font-weight: bold; font-size: 16px;">NAMITA STORE</div>
+                    <div style="text-align: center; font-size: 10px; margin-bottom: 10px;">Enterprise POS System</div>
+                    <div>Invoice: ${invoiceId}</div>
+                    <div>Customer: ${customerName}</div>
+                    <div>Date: ${new Date().toLocaleString()}</div>
+                    <hr style="border-dash: 1px solid #000; margin: 5px 0;">
+                    <table style="width: 100%; font-size: 12px;">
+                        <tr><th align="left">Item</th><th align="right">Total</th></tr>
+                        ${itemsHtml}
+                    </table>
+                    <hr style="border-dash: 1px solid #000; margin: 5px 0;">
+                    <div style="text-align: right; font-weight: bold; font-size: 14px;">Grand Total: ₹${grandTotal}</div>
+                    <div style="text-align: center; margin-top: 15px; font-size: 11px;">Thank you for shopping with us!</div>
+                </div>
+            `;
+            setTimeout(() => {
+                window.print();
+            }, 100);
+        }
+
         // Purchases & Barcode Print Management
         function openPurchaseModal() { document.getElementById('purchaseModal').classList.remove('hidden'); }
         function closePurchaseModal() { document.getElementById('purchaseModal').classList.add('hidden'); }
         function savePurchase() {
             let supp = document.getElementById('pSuppSelect').value;
-            let item = document.getElementById('pItem').value;
+            let item = document.getElementById('pItem').value.trim();
             let qty = parseInt(document.getElementById('pQty').value) || 1;
             let cost = parseFloat(document.getElementById('pCost').value) || 0;
             if(!item) { alert('Enter item name'); return; }
+
+            // Auto update or add to inventory stock
+            let existingItem = inventory.find(i => i.name.toLowerCase() === item.toLowerCase());
+            if(existingItem) {
+                existingItem.stock += qty;
+                existingItem.cost = cost / qty;
+            } else {
+                inventory.push({
+                    id: inventory.length + 1,
+                    name: item,
+                    barcode: 'NS' + Math.floor(100000 + Math.random() * 900000),
+                    category: categories[0] || 'General',
+                    unit: 'Pcs',
+                    cost: cost / qty,
+                    price: Math.round((cost / qty) * 1.3), // default 30% margin
+                    stock: qty
+                });
+            }
 
             let purchaseEntry = { id: Date.now(), supp, item, qty, cost };
             purchases.push(purchaseEntry);
             cashInHand -= cost;
             localStorage.setItem('namita_purchases', JSON.stringify(purchases));
+            localStorage.setItem('namita_inventory', JSON.stringify(inventory));
             closePurchaseModal();
             renderPurchases();
+            renderCatalog();
             updateDashboard();
-            alert('Purchase saved successfully!');
+            alert('Purchase saved & inventory updated successfully!');
         }
         function renderPurchases() {
             let html = '';
@@ -786,18 +843,11 @@
             }
             printHtml += '</div>';
             printableArea.innerHTML = printHtml;
-
-            // Generate SVGs via JsBarcode
-            for(let i=0; i<printQty; i++) {
-                let uniqueSvgId = 'bcode_' + i + '_' + Math.floor(Math.random() * 10000);
-                // Re-generate matching IDs safely
-            }
             
-            // Simpler approach for bulk SVG generation in print
             setTimeout(() => {
                 let container = document.getElementById('printableBarcodeArea');
                 let svgs = container.querySelectorAll('svg');
-                svgs.forEach(svg => {
+                svgs.forEach((svg, index) => {
                     try {
                         JsBarcode(svg, currentBarcodeData.barcode, { format: "CODE128", width: 1.5, height: 40, displayValue: true, fontSize: 12 });
                     } catch(e) {}
