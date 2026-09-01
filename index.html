@@ -5,55 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Namita Store - POS & Inventory Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gradient-to-br from-slate-100 to-slate-200 font-sans min-h-screen">
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 h-screen">
-        <!-- Left Section: Product Search & List -->
-        <div class="md:col-span-2 bg-white p-4 rounded-lg shadow flex flex-col">
-            <div class="flex items-center gap-2 mb-4">
-                <input type="text" id="searchBox" placeholder="Search by Product Name or Barcode..." class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <!-- Top Navigation Header -->
+    <header class="bg-indigo-700 text-white shadow-md px-6 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 p-2 rounded-lg shadow-inner">
+                <i class="fa-solid fa-store text-xl text-yellow-300"></i>
             </div>
-            <div class="grid grid-cols-3 gap-3 overflow-y-auto flex-1" id="productList">
-                <!-- Sample Product Card -->
-                <div onclick="addToCart('Namita Store Special Item', 500)" class="border p-3 rounded cursor-pointer hover:shadow-md bg-white transition">
-                    <h4 class="font-bold text-sm">Namita Store Item</h4>
-                    <p class="text-gray-600 text-xs">₹500.00</p>
-                    <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">In Stock: 25</span>
+            <div>
+                <h1 class="text-lg font-bold tracking-wide">NAMITA STORE</h1>
+                <p class="text-xs text-indigo-200">POS & Inventory Management System</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="bg-indigo-800 text-xs px-3 py-1.5 rounded-full border border-indigo-600 shadow-sm">
+                <i class="fa-solid fa-circle text-emerald-400 text-[10px] mr-1"></i> Live Counter
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 h-[calc(100vh-70px)]">
+        
+        <!-- Left Section: Product Search & Grid -->
+        <div class="md:col-span-2 bg-white p-4 rounded-xl shadow-lg border border-slate-200 flex flex-col">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="relative w-full">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="searchBox" placeholder="Search by Product Name or Barcode..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                </div>
+                <button onclick="alert('Product Add Feature Opening Soon!')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold shadow transition flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-plus"></i> Add Product
+                </button>
+            </div>
+
+            <!-- Product Cards Container -->
+            <div class="grid grid-cols-3 gap-3 overflow-y-auto flex-1 pr-1" id="productList">
+                <!-- Sample Product Card with nice styling -->
+                <div onclick="addToCart('Namita Store Special Item', 500)" class="border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-3.5 rounded-xl cursor-pointer hover:shadow-md hover:border-indigo-300 transition group flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-1">
+                            <h4 class="font-bold text-sm text-slate-800 group-hover:text-indigo-600 transition">Namita Store Item</h4>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full">In Stock</span>
+                        </div>
+                        <p class="text-indigo-600 font-extrabold text-sm mb-2">₹500.00</p>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-slate-500 border-t pt-2 mt-1">
+                        <span>Stock: 25</span>
+                        <span class="text-indigo-600 font-medium group-hover:underline">Add <i class="fa-solid fa-cart-plus ml-0.5"></i></span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Right Section: POS Cart & Billing Summary -->
-        <div class="bg-white p-4 rounded-lg shadow flex flex-col justify-between">
+        <div class="bg-white p-4 rounded-xl shadow-lg border border-slate-200 flex flex-col justify-between">
             <div>
-                <h2 class="text-lg font-bold mb-3 border-b pb-2">Current Sale / POS</h2>
-                <div class="overflow-y-auto max-h-56 mb-4 space-y-2" id="cartItems">
-                    <p class="text-gray-400 text-sm">Cart is empty</p>
+                <div class="flex justify-between items-center mb-3 border-b pb-2">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-receipt text-indigo-600"></i> Current Sale / POS
+                    </h2>
+                    <span id="cartCountBadge" class="text-xs bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-full">0 Items</span>
+                </div>
+                
+                <div class="overflow-y-auto max-h-52 mb-3 space-y-2 pr-1" id="cartItems">
+                    <div class="text-center py-8 text-slate-400">
+                        <i class="fa-solid fa-cart-shopping text-3xl mb-2 text-slate-300"></i>
+                        <p class="text-sm">Cart is empty</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="border-t pt-3">
-                <div class="space-y-1 text-sm">
-                    <div class="flex justify-between"><span>Subtotal:</span> <span id="subtotal">₹0.00</span></div>
+            <div class="border-t pt-3 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                <div class="space-y-1.5 text-sm text-slate-700">
+                    <div class="flex justify-between"><span>Subtotal:</span> <span id="subtotal" class="font-semibold">₹0.00</span></div>
                     <div class="flex justify-between items-center">
-                        <span>Discount (₹):</span>
-                        <input type="number" id="discountInput" value="0" oninput="updateCartUI()" class="w-20 p-1 border rounded text-right text-sm">
+                        <span>Discount (<i class="fa-solid fa-indian-rupee-sign text-xs"></i>):</span>
+                        <input type="number" id="discountInput" value="0" oninput="updateCartUI()" class="w-24 p-1 bg-white border border-slate-300 rounded text-right text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                     </div>
-                    <div class="flex justify-between font-bold text-base border-t pt-1"><span>Grand Total:</span> <span id="grandTotal">₹0.00</span></div>
+                    <div class="flex justify-between font-bold text-base text-indigo-900 border-t border-slate-200 pt-1.5 mt-1">
+                        <span>Grand Total:</span> 
+                        <span id="grandTotal" class="text-indigo-600 text-lg">₹0.00</span>
+                    </div>
                 </div>
 
                 <div class="mt-3">
-                    <label class="text-xs font-semibold text-gray-600">Payment Method</label>
-                    <select id="paymentMethod" class="w-full p-2 border rounded mt-1 text-sm">
-                        <option value="Cash">Cash</option>
-                        <option value="UPI">UPI / QR</option>
-                        <option value="Card">Card</option>
+                    <label class="text-xs font-bold text-slate-600 uppercase tracking-wide">Payment Method</label>
+                    <select id="paymentMethod" class="w-full p-2 bg-white border border-slate-300 rounded-lg mt-1 text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="Cash">Cash Payment</option>
+                        <option value="UPI">UPI / QR Code</option>
+                        <option value="Card">Credit / Debit Card</option>
                     </select>
                 </div>
 
-                <button onclick="completeCheckout()" class="w-full mt-4 bg-blue-600 text-white py-2.5 rounded font-bold hover:bg-blue-700 transition">
-                    Complete Sale & Print
+                <button onclick="completeCheckout()" class="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold shadow-md hover:shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check-to-slot"></i> Complete Sale & Print
                 </button>
             </div>
         </div>
@@ -90,9 +141,17 @@
             const subtotalEl = document.getElementById('subtotal');
             const grandTotalEl = document.getElementById('grandTotal');
             const discountInput = document.getElementById('discountInput');
+            const cartCountBadge = document.getElementById('cartCountBadge');
             
+            let totalItemsCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            cartCountBadge.innerText = totalItemsCount + (totalItemsCount === 1 ? ' Item' : ' Items');
+
             if (cart.length === 0) {
-                cartContainer.innerHTML = '<p class="text-gray-400 text-sm">Cart is empty</p>';
+                cartContainer.innerHTML = `
+                    <div class="text-center py-8 text-slate-400">
+                        <i class="fa-solid fa-cart-shopping text-3xl mb-2 text-slate-300"></i>
+                        <p class="text-sm">Cart is empty</p>
+                    </div>`;
                 subtotalEl.innerText = '₹0.00';
                 grandTotalEl.innerText = '₹0.00';
                 return;
@@ -104,16 +163,16 @@
             cart.forEach((item, index) => {
                 let itemTotal = item.price * item.qty;
                 subtotal += itemTotal;
-                html += `<div class="flex justify-between items-center bg-gray-50 p-2 rounded text-sm border">
-                    <div class="flex-1">
-                        <p class="font-semibold">${item.name}</p>
-                        <p class="text-xs text-gray-500">₹${item.price} x ${item.qty} = <b>₹${itemTotal}</b></p>
+                html += `<div class="flex justify-between items-center bg-white p-2.5 rounded-lg text-sm border border-slate-200 shadow-sm">
+                    <div class="flex-1 pr-2">
+                        <p class="font-bold text-slate-800">${item.name}</p>
+                        <p class="text-xs text-slate-500">₹${item.price} × ${item.qty} = <b class="text-indigo-600">₹${itemTotal}</b></p>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <button onclick="changeQty(${index}, -1)" class="bg-gray-200 px-2 py-0.5 rounded font-bold hover:bg-gray-300">-</button>
-                        <span class="px-1 text-xs font-bold">${item.qty}</span>
-                        <button onclick="changeQty(${index}, 1)" class="bg-gray-200 px-2 py-0.5 rounded font-bold hover:bg-gray-300">+</button>
-                        <button onclick="removeItem(${index})" class="text-red-500 ml-2 font-bold hover:text-red-700">×</button>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="changeQty(${index}, -1)" class="bg-slate-100 text-slate-700 w-6 h-6 rounded flex items-center justify-center font-bold hover:bg-slate-200 transition">-</button>
+                        <span class="px-1 text-xs font-bold text-slate-700">${item.qty}</span>
+                        <button onclick="changeQty(${index}, 1)" class="bg-slate-100 text-slate-700 w-6 h-6 rounded flex items-center justify-center font-bold hover:bg-slate-200 transition">+</button>
+                        <button onclick="removeItem(${index})" class="text-rose-500 hover:text-rose-700 ml-1.5 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
                     </div>
                 </div>`;
             });
@@ -138,3 +197,5 @@
             updateCartUI();
         }
     </script>
+</body>
+</html>
