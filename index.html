@@ -591,6 +591,10 @@ th{
 .v3-change strong{font-size:20px}
 @media(max-width:1100px){.v3-kpi{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:700px){.v3-kpi{grid-template-columns:1fr 1fr}}
+
+.v3-inventory-search{display:flex;gap:10px;align-items:center;margin:0 0 15px;padding:12px;background:#fff;border:1px solid #e8eaf0;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.v3-inventory-search input{flex:1;min-width:220px;padding:12px 14px;border:1px solid #dfe3ea;border-radius:9px;font-size:14px;outline:none}
+.v3-inventory-search input:focus{border-color:#777;box-shadow:0 0 0 3px rgba(0,0,0,.05)}
 </style>
 </head>
 
@@ -609,7 +613,6 @@ th{
 <ul class="menu">
 
 <li><button class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</button></li>
-<li><button onclick="showPage('pos',this)">🛒 POS Billing</button></li>
 <li><button onclick="showPage('products',this)">📦 Products</button></li>
 <li><button onclick="showPage('purchase',this)">🚚 Purchase</button></li>
 <li><button onclick="showPage('inventory',this)">📊 Inventory</button></li>
@@ -920,6 +923,7 @@ oninput="renderProducts(this.value)">
 
 <!-- INVENTORY -->
 <section id="inventory" class="page">
+<div class="v3-inventory-search"><input id="inventorySearch3" type="search" placeholder="🔎 Product search — name / barcode / SKU / category" oninput="filterInventory3(this.value)"><button class="btn light" onclick="document.getElementById('inventorySearch3').value='';filterInventory3('')">Clear</button></div>
 
 <h2>Inventory / Stock</h2>
 
@@ -1226,6 +1230,8 @@ Data is stored locally in this browser.
     <button class="v2-action" onclick="showPage('inventory')">📦 Stock Adjustment</button>
     <button class="v2-action" onclick="showPage('reportsAdvanced')">📊 Reports</button>
     <button class="v2-action" onclick="showPage('ecommerce')">🛍️ E-Commerce Orders</button>
+    <button class="v2-action" onclick="showPage('customerPayments')">💰 Customer Payment Receive</button>
+    <button class="v2-action" onclick="showPage('supplierPayments')">💸 Supplier Payment</button>
   </div>
   <div class="panel">
     <h3>Quick Customer & Sale Setup</h3>
@@ -3845,6 +3851,7 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
   /* Sidebar: all professional modules */
   function initMenu3(){
     const ul=document.querySelector(".menu"); if(!ul)return;
+    const oldV2=ul.querySelector(".v2-menu"); if(oldV2)oldV2.remove();
     if(ul.dataset.v3)return; ul.dataset.v3="1";
     const items=[
       ["seller","🧾 Seller Panel"],["bulkProducts","📋 Bulk Purchase / Excel"],
@@ -3964,9 +3971,12 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
   window.openAdjustForProduct=function(pid){
     showPage("adjustments"); setTimeout(()=>{q3("adjProduct").value=pid;q3("adjQty").focus()},50);
   }
+  let inventoryFilter3="";
+  window.filterInventory3=function(v){inventoryFilter3=String(v||"").trim().toLowerCase();renderInventory3();};
   function renderInventory3(){
     const tb=q3("inventoryTable");if(!tb)return;
-    tb.innerHTML=products.map(p=>{
+    const list=products.filter(p=>{if(!inventoryFilter3)return true;const hay=[p.name,p.barcode,p.sku,p.category].map(x=>String(x||"").toLowerCase()).join(" ");return hay.includes(inventoryFilter3);});
+    tb.innerHTML=list.map(p=>{
       let status=p.stock<=0?"Out of Stock":(p.stock<=p.minStock?"Low Stock":"In Stock");
       let cls=p.stock<=0?"red":(p.stock<=p.minStock?"orange":"green");
       return '<tr><td>'+esc(p.barcode)+'</td><td><strong>'+esc(p.name)+'</strong></td><td>'+esc(p.category)+'</td><td><strong>'+num(p.stock)+'</strong></td><td>'+num(p.minStock)+'</td><td><span class="badge '+cls+'">'+status+'</span></td><td><div class="v3-inline"><button class="v3-smallbtn v3-minus" onclick="adjustInventoryQuick(\''+esc(p.id)+'\',-1)">−</button><input id="invq_'+esc(p.id)+'" type="number" min="1" value="1"><button class="v3-smallbtn v3-plus" onclick="adjustInventoryQuick(\''+esc(p.id)+'\',num(document.getElementById(\'invq_'+esc(p.id)+'\').value)||1)">+</button><button class="btn light" onclick="openAdjustForProduct(\''+esc(p.id)+'\')">Adjust</button></div></td></tr>';
@@ -4098,6 +4108,96 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
     if(q3("cashbookCards"))q3("cashbookCards").innerHTML='<div class="v2-mini"><span>Total In</span><strong>'+v2Money(sin)+'</strong></div><div class="v2-mini"><span>Total Out</span><strong>'+v2Money(out)+'</strong></div><div class="v2-mini"><span>Net</span><strong>'+v2Money(sin-out)+'</strong></div><div class="v2-mini"><span>Transactions</span><strong>'+rows.length+'</strong></div>';
     if(q3("cashbookTable"))q3("cashbookTable").innerHTML=rows.map(p=>'<tr><td>'+formatDateTime(p.date)+'</td><td>'+esc(p.type)+'</td><td>'+esc(p.party||"")+'</td><td>'+esc(p.method||"")+'</td><td>'+(["sale","customer_receive"].includes(p.type)?v2Money(p.amount):"")+'</td><td>'+ (p.type==="supplier_pay"?v2Money(p.amount):"")+'</td><td>'+esc(p.reference||"")+'</td></tr>').join("")||'<tr><td colspan="7">No entries.</td></tr>';
   }
+
+
+  /* V4.1 navigation + Excel-style product entry */
+  const v41NavStack=[];
+  let v41NavBusy=false;
+  const v41OldShowPage=window.showPage;
+  window.showPage=function(page,button){
+    const current=document.querySelector('.page.active')?.id;
+    if(!v41NavBusy && current && current!==page) v41NavStack.push(current);
+    v41OldShowPage(page,button);
+    setTimeout(addV41BackButton,0);
+  };
+  window.goBackV41=function(){
+    const prev=v41NavStack.pop()||'seller';
+    v41NavBusy=true;
+    try{v41OldShowPage(prev);}
+    finally{v41NavBusy=false;}
+    setTimeout(addV41BackButton,0);
+  };
+  function addV41BackButton(){
+    document.querySelectorAll('.page').forEach(pg=>{
+      if(pg.id==='dashboard')return;
+      let b=pg.querySelector(':scope > .v41-back');
+      if(!b){
+        b=document.createElement('button'); b.className='btn light v41-back'; b.type='button';
+        b.textContent='← Back'; b.onclick=window.goBackV41;
+        const h=pg.querySelector(':scope > h2, :scope > .v2-hero h2');
+        if(h){ h.parentElement.insertBefore(b,h); }
+        else pg.insertBefore(b,pg.firstChild);
+      }
+    });
+  }
+
+  function addProductToPurchaseRowV41(product, qty){
+    showPage('bulkProducts');
+    setTimeout(function(){
+      const body=q3('bulkBody'); if(!body)return;
+      const row=document.createElement('tr');
+      row.innerHTML='<td class="bno"></td><td><input class="bn" value="'+esc(product.name)+'"></td><td><input class="bsku" value="'+esc(product.sku||'')+'"></td><td><input class="bbc" value="'+esc(product.barcode||'')+'"></td><td><input class="bcat" value="'+esc(product.category||'General')+'"></td><td><input class="bpur" type="number" min="0" value="'+num(product.purchase)+'"></td><td><input class="bsale" type="number" min="0" value="'+num(product.sale)+'"></td><td><input class="bmrp" type="number" min="0" value="'+num(product.mrp)+'"></td><td><input class="bqty" type="number" min="0" value="'+num(qty)+'"></td><td><input class="bmin" type="number" min="0" value="'+num(product.minStock||5)+'"></td><td><input class="bgst" type="number" min="0" value="'+num(product.gst)+'"></td><td><input class="bsup"></td><td><select class="bpay"><option>Cash</option><option>Credit</option><option>UPI</option><option>Card</option><option>Bank Transfer</option></select></td><td><button class="btn red" type="button" onclick="this.closest(\'tr\').remove();renumberBulkV41()">×</button></td>';
+      body.appendChild(row); renumberBulkV41();
+      const first=row.querySelector('.bn'); if(first){first.focus();first.select()}
+      toast('Product added to Purchase row. Enter next product in the next row.');
+    },30);
+  }
+  window.renumberBulkV41=function(){
+    document.querySelectorAll('#bulkBody tr').forEach((r,i)=>{const n=r.querySelector('.bno');if(n)n.textContent=i+1;});
+  };
+
+  const v41OriginalOpenProductModal=window.openProductModal;
+  window.openProductModal=function(){
+    v41OriginalOpenProductModal();
+    setTimeout(function(){
+      const ids=['productName','productSku','productBarcode','productCategory','productPurchase','productSale','productMrp','productStock','productMinStock','productGst','productHsn'];
+      ids.forEach((id,i)=>{const el=q3(id);if(!el)return;el.onkeydown=function(e){if(e.key!=='Enter')return;e.preventDefault();if(i<ids.length-1){const n=q3(ids[i+1]);if(n){n.focus();n.select?.()}}else saveProductV41();};});
+      q3('productName')?.focus();
+    },50);
+  };
+  window.saveProductV41=function(){
+    const name=q3('productName')?.value.trim(); if(!name){toast('Product name is required.');q3('productName')?.focus();return}
+    const data={name,sku:q3('productSku').value.trim(),barcode:q3('productBarcode').value.trim()||generateBarcodeNumber(),category:q3('productCategory').value.trim()||'General',purchase:num(q3('productPurchase').value),sale:num(q3('productSale').value),mrp:num(q3('productMrp').value),stock:V3.editId?(products.find(x=>x.id===V3.editId)?.stock||0):0,minStock:num(q3('productMinStock').value)||5,gst:num(q3('productGst').value),hsn:q3('productHsn').value.trim()};
+    let p=V3.editId?products.find(x=>x.id===V3.editId):null;
+    if(p){Object.assign(p,data);save3();closeModal('productModal');refresh3();toast('Product updated.');return}
+    p={id:id(),...data,createdAt:new Date().toISOString()}; products.push(p); save3(); closeModal('productModal');
+    addProductToPurchaseRowV41(p,num(q3('productStock').value));
+  };
+
+  window.saveProduct=window.saveProductV41;
+
+  /* Make the existing bulk grid behave like an Excel sheet: Enter = next cell, last cell = new row. */
+  function wireBulkExcelV41(){
+    const body=q3('bulkBody');if(!body||body.dataset.v41)return;body.dataset.v41='1';
+    body.addEventListener('keydown',function(e){
+      if(e.key!=='Enter')return;
+      const t=e.target;if(!t.matches('input,select'))return;e.preventDefault();
+      const row=t.closest('tr'); if(!row)return;
+      const cells=[...row.querySelectorAll('input,select')]; const idx=cells.indexOf(t);
+      if(idx<cells.length-1){cells[idx+1].focus();cells[idx+1].select?.();return}
+      const rows=[...body.rows],ridx=rows.indexOf(row);
+      if(ridx===rows.length-1){addBulkRow();setTimeout(()=>{renumberBulkV41();const nr=body.rows[body.rows.length-1];nr?.querySelector('input,select')?.focus()},30)}
+      else rows[ridx+1].querySelector('input,select')?.focus();
+    });
+    renumberBulkV41();
+  }
+  const v41OldAddBulkRow=window.addBulkRow;
+  window.addBulkRow=function(){v41OldAddBulkRow();setTimeout(renumberBulkV41,0)};
+  const v41OldClearBulkRows=window.clearBulkRows;
+  window.clearBulkRows=function(){v41OldClearBulkRows();setTimeout(renumberBulkV41,0)};
+  const v41OldEnhancePurchase=window.enhancePurchase;
+  window.enhancePurchase=function(){v41OldEnhancePurchase();wireBulkExcelV41();addV41BackButton()};
+  document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){addV41BackButton();wireBulkExcelV41()},100)});
 
   /* Refresh wrapper */
   function refresh3(){
