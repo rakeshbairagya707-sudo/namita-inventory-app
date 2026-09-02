@@ -528,6 +528,49 @@ th{
     }
 }
 </style>
+
+<style>
+/* ===== NAMITA STORE v2 ENHANCEMENTS ===== */
+:root{--v2:#5865f2;--v2g:#16a673;--v2o:#f39c12;--v2r:#e74c3c;--v2dark:#171b2d}
+.v2-menu{margin-top:8px;padding-top:10px;border-top:1px solid #33384d}
+.v2-menu button{font-weight:700}
+.v2-menu button:hover{background:linear-gradient(90deg,#5865f2,#7b61ff)}
+.v2-hero{background:linear-gradient(135deg,#5865f2,#7b61ff 55%,#16a673);color:#fff;border-radius:18px;padding:24px;box-shadow:0 10px 30px rgba(88,101,242,.22);margin-bottom:20px}
+.v2-hero h2{font-size:26px;margin-bottom:6px}.v2-hero p{opacity:.9}
+.v2-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0}
+.v2-stat{background:#fff;border-radius:14px;padding:18px;box-shadow:0 2px 12px rgba(0,0,0,.06);border-top:4px solid var(--v2)}
+.v2-stat b{font-size:24px;display:block;margin-top:5px}
+.v2-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+.v2-toolbar .form-group{min-width:150px;flex:1}
+.v2-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}
+.v2-tabs button{border:0;border-radius:999px;padding:9px 14px;background:#eef0f7;cursor:pointer;font-weight:700}
+.v2-tabs button.active{background:var(--v2);color:#fff}
+.v2-secret{background:linear-gradient(135deg,#171b2d,#303653);color:#fff;border-radius:14px;padding:16px;margin-top:18px}
+.v2-secret input{width:150px;border:0;border-radius:7px;padding:9px;margin:0 6px}
+.v2-secret .btn{background:#fff;color:#171b2d}
+.v2-margin{display:none;background:#fff;border-radius:12px;padding:15px;margin-top:12px;color:#222}
+.v2-margin.show{display:block}
+.v2-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.v2-action{border:0;border-radius:12px;padding:16px;color:#fff;font-weight:700;text-align:left;cursor:pointer}
+.v2-action:nth-child(1){background:#5865f2}.v2-action:nth-child(2){background:#16a673}.v2-action:nth-child(3){background:#f39c12}.v2-action:nth-child(4){background:#e74c3c}.v2-action:nth-child(5){background:#8e44ad}.v2-action:nth-child(6){background:#34495e}
+.v2-table input,.v2-table select{width:100%;min-width:90px;padding:7px;border:1px solid #d6d9e0;border-radius:6px}
+.v2-bulk-wrap{overflow:auto;border:1px solid #e3e5eb;border-radius:10px}
+.v2-bulk{min-width:1150px}.v2-bulk th{position:sticky;top:0}.v2-bulk td{padding:5px}
+.v2-barcode-preview{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:15px}
+.v2-label{border:1px dashed #999;background:#fff;padding:7px;text-align:center;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.v2-bars{font-family:monospace;font-size:28px;letter-spacing:1px;line-height:1}
+.v2-checks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.v2-checks label{background:#f7f8fb;padding:9px;border-radius:8px}
+.v2-report-cards{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:15px 0}
+.v2-mini{background:#fff;padding:14px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.v2-mini span{display:block;color:#777;font-size:12px}.v2-mini strong{font-size:19px}
+.v2-order{border-left:5px solid var(--v2);background:#fff;padding:14px;border-radius:10px;margin:8px 0;box-shadow:0 2px 9px rgba(0,0,0,.05)}
+.v2-order.pending{border-color:var(--v2o)}.v2-order.cancelled{border-color:var(--v2r)}.v2-order.accepted{border-color:var(--v2g)}
+.v2-note{font-size:12px;color:#777;background:#f7f8fb;padding:10px;border-radius:8px;margin-top:10px}
+@media(max-width:1100px){.v2-grid{grid-template-columns:repeat(2,1fr)}.v2-report-cards{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.v2-actions{grid-template-columns:1fr 1fr}.v2-grid,.v2-report-cards{grid-template-columns:1fr}.v2-checks{grid-template-columns:1fr}}
+</style>
+
 </head>
 
 <body>
@@ -3300,6 +3343,421 @@ createDemoData();
 
 refreshAll();
 
+</script>
+
+
+<!-- ===== NAMITA STORE v2 PAGES ===== -->
+<section id="seller" class="page">
+  <div class="v2-hero">
+    <h2>🧾 Seller Panel</h2>
+    <p>দ্রুত বিক্রি • Discount • Cash / Online / Credit • Customer • Margin</p>
+  </div>
+  <div class="v2-actions">
+    <button class="v2-action" onclick="showPage('pos')">🛒 New Sale / POS</button>
+    <button class="v2-action" onclick="openCustomerModal()">👤 Add Customer</button>
+    <button class="v2-action" onclick="showPage('purchase')">📥 Purchase Entry</button>
+    <button class="v2-action" onclick="showPage('inventory')">📦 Stock Adjustment</button>
+    <button class="v2-action" onclick="showPage('reports')">📊 Reports</button>
+    <button class="v2-action" onclick="showPage('ecommerce')">🛍️ E-Commerce Orders</button>
+  </div>
+  <div class="panel">
+    <h3>Quick Customer & Sale Setup</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>Customer Name</label><input id="sellerCustomerName" placeholder="Customer name"></div>
+      <div class="form-group"><label>Customer Phone</label><input id="sellerCustomerPhone" placeholder="10 digit phone"></div>
+      <div class="form-group"><label>Payment</label><select id="sellerPayment"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Credit</option></select></div>
+      <div class="form-group"><label>Discount ₹</label><input id="sellerDiscount" type="number" min="0" value="0" oninput="syncSellerSale()"></div>
+      <div class="form-group"><label>Discount %</label><input id="sellerDiscountPct" type="number" min="0" max="100" value="0" oninput="syncSellerSalePct()"></div>
+      <div class="form-group"><label>Customer Due / Credit ₹</label><input id="sellerDue" type="number" min="0" value="0"></div>
+    </div>
+    <div class="actions" style="margin-top:15px">
+      <button class="btn green" onclick="saveSellerCustomer()">Save Customer</button>
+      <button class="btn" onclick="applySellerToPOS()">Apply to POS</button>
+      <button class="btn orange" onclick="showPage('pos')">Continue Billing →</button>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Seller Summary</h3>
+    <div class="v2-grid">
+      <div class="v2-stat"><span>Today Sales</span><b id="sellerTodaySales">₹0</b></div>
+      <div class="v2-stat"><span>Today Profit</span><b id="sellerTodayProfit">₹0</b></div>
+      <div class="v2-stat"><span>Credit Due</span><b id="sellerCredit">₹0</b></div>
+      <div class="v2-stat"><span>Low Stock</span><b id="sellerLow">0</b></div>
+    </div>
+  </div>
+  <div class="v2-secret">
+    🔐 <strong>Secret: Pocket Margin</strong>
+    <input id="marginSecret" type="password" placeholder="Secret code">
+    <button class="btn" onclick="unlockMargins()">View Margin</button>
+    <div id="marginPanel" class="v2-margin">
+      <h3>🔒 Pocket Margin — Selling Price vs Purchase Cost</h3>
+      <div class="table-wrap"><table><thead><tr><th>Product</th><th>Purchase</th><th>Sale</th><th>Margin/Unit</th><th>Margin %</th><th>Max Discount Suggestion</th></tr></thead><tbody id="marginTable"></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<section id="bulkProducts" class="page">
+  <h2>📋 Bulk Product / Purchase Entry</h2>
+  <div class="panel">
+    <div class="v2-toolbar">
+      <button class="btn green" onclick="addBulkRow()">➕ Add Row</button>
+      <button class="btn" onclick="addBulkRows(10)">＋ 10 Rows</button>
+      <button class="btn orange" onclick="saveBulkProducts()">💾 Save All Products</button>
+      <button class="btn light" onclick="clearBulkRows()">Clear</button>
+      <button class="btn dark" onclick="showPage('purchase')">← Purchase</button>
+    </div>
+    <div class="v2-note">Excel-এর মতো একের পর এক row-তে Product, Barcode, Purchase, Sale, MRP, Stock, Supplier এবং Payment দেওয়া যাবে।</div>
+    <div class="v2-bulk-wrap" style="margin-top:15px">
+      <table class="v2-bulk v2-table"><thead><tr>
+        <th>#</th><th>Product Name*</th><th>SKU</th><th>Barcode</th><th>Category</th><th>Purchase</th><th>Sale</th><th>MRP</th><th>Qty</th><th>Min</th><th>GST%</th><th>Supplier</th><th>Payment</th><th>Delete</th>
+      </tr></thead><tbody id="bulkBody"></tbody></table>
+    </div>
+  </div>
+</section>
+
+<section id="adjustments" class="page">
+  <h2>🔧 Inventory Adjustment</h2>
+  <div class="panel">
+    <div class="form-grid">
+      <div class="form-group"><label>Product</label><select id="adjProduct"></select></div>
+      <div class="form-group"><label>Adjustment Qty (+ / -)</label><input id="adjQty" type="number" value="0"></div>
+      <div class="form-group"><label>Reason</label><select id="adjReason"><option>Stock Correction</option><option>Damage</option><option>Expired</option><option>Lost</option><option>Found</option><option>Manual Count</option></select></div>
+      <div class="form-group"><label>Note</label><input id="adjNote" placeholder="Optional note"></div>
+    </div>
+    <button class="btn orange" style="margin-top:15px" onclick="saveAdjustment()">Save Adjustment</button>
+  </div>
+  <div class="panel"><h3>Adjustment History</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Product</th><th>Qty</th><th>Reason</th><th>Note</th></tr></thead><tbody id="adjustmentTable"></tbody></table></div></div>
+</section>
+
+<section id="barcodeDesigner" class="page">
+  <h2>🏷️ Advanced Barcode Designer & Bulk Print</h2>
+  <div class="panel">
+    <div class="form-grid">
+      <div class="form-group"><label>Product</label><select id="bdProduct" onchange="renderBarcodeDesigner()"></select></div>
+      <div class="form-group"><label>Barcode Type</label><select id="bdType" onchange="renderBarcodeDesigner()"><option>CODE128</option><option>EAN-13</option><option>QR CODE</option></select></div>
+      <div class="form-group"><label>Label Size</label><select id="bdSize" onchange="renderBarcodeDesigner()"><option value="25x38">25 × 38 mm</option><option value="20x30">20 × 30 mm</option><option value="15x25">15 × 25 mm</option><option value="custom">Custom</option></select></div>
+      <div class="form-group"><label>Print Quantity</label><input id="bdQty" type="number" min="1" value="1" onchange="renderBarcodeDesigner()"></div>
+      <div class="form-group"><label>Custom Width mm</label><input id="bdW" type="number" value="38" onchange="renderBarcodeDesigner()"></div>
+      <div class="form-group"><label>Custom Height mm</label><input id="bdH" type="number" value="25" onchange="renderBarcodeDesigner()"></div>
+    </div>
+    <h3 style="margin:20px 0 10px">Label-এ কী কী থাকবে?</h3>
+    <div class="v2-checks">
+      <label><input type="checkbox" id="bdStore" checked onchange="renderBarcodeDesigner()"> Company / Store Name</label>
+      <label><input type="checkbox" id="bdName" checked onchange="renderBarcodeDesigner()"> Product Name</label>
+      <label><input type="checkbox" id="bdMrp" checked onchange="renderBarcodeDesigner()"> MRP</label>
+      <label><input type="checkbox" id="bdSale" checked onchange="renderBarcodeDesigner()"> Sale Price</label>
+      <label><input type="checkbox" id="bdSku" onchange="renderBarcodeDesigner()"> SKU</label>
+      <label><input type="checkbox" id="bdCat" onchange="renderBarcodeDesigner()"> Category</label>
+      <label><input type="checkbox" id="bdGst" onchange="renderBarcodeDesigner()"> GST %</label>
+      <label><input type="checkbox" id="bdCode" checked onchange="renderBarcodeDesigner()"> Barcode Number</label>
+      <label><input type="checkbox" id="bdHsn" onchange="renderBarcodeDesigner()"> HSN</label>
+    </div>
+    <div id="designerPreview" class="v2-barcode-preview"></div>
+    <div class="actions" style="margin-top:15px">
+      <button class="btn" onclick="printDesignedBarcodes()">🖨️ Print Labels</button>
+      <button class="btn green" onclick="saveBarcodeTemplate()">💾 Save Template</button>
+      <button class="btn light" onclick="loadBarcodeTemplate()">↻ Load Template</button>
+    </div>
+  </div>
+</section>
+
+<section id="reportsAdvanced" class="page">
+  <h2>📈 Advanced Reports</h2>
+  <div class="panel">
+    <div class="form-grid">
+      <div class="form-group"><label>From Date</label><input id="repFrom" type="date"></div>
+      <div class="form-group"><label>To Date</label><input id="repTo" type="date"></div>
+      <div class="form-group"><label>Report Type</label><select id="repType" onchange="renderAdvancedReports()"><option value="sales">Sales</option><option value="profit">Profit & Loss</option><option value="items">Item-wise</option><option value="customers">Customer-wise</option><option value="suppliers">Supplier-wise</option><option value="payments">Payment-wise</option><option value="receivable">Customer Receivable</option><option value="payable">Supplier Payable</option><option value="cashflow">Cash Flow</option></select></div>
+    </div>
+    <div class="actions" style="margin-top:12px"><button class="btn" onclick="setReportToday()">Today</button><button class="btn light" onclick="setReportMonth()">This Month</button><button class="btn green" onclick="renderAdvancedReports()">Generate Report</button><button class="btn orange" onclick="printAdvancedReport()">🖨️ Print</button></div>
+  </div>
+  <div id="advancedReportCards" class="v2-report-cards"></div>
+  <div class="panel"><div class="table-wrap"><table><thead id="advancedHead"></thead><tbody id="advancedBody"></tbody></table></div></div>
+</section>
+
+<section id="ecommerce" class="page">
+  <div class="v2-hero"><h2>🛍️ E-Commerce Center</h2><p>Order accept • pending • cancel • customer details • payment • fulfilment</p></div>
+  <div class="panel">
+    <div class="actions">
+      <button class="btn orange" onclick="addDemoOrder('Pending')">＋ Test Pending Order</button>
+      <button class="btn green" onclick="addDemoOrder('Accepted')">＋ Test Accepted Order</button>
+      <button class="btn red" onclick="addDemoOrder('Cancelled')">＋ Test Cancelled Order</button>
+      <button class="btn" onclick="syncEcommerce()">🔄 Sync Orders</button>
+    </div>
+    <div class="v2-note">Real Shopify/WooCommerce/Amazon/Flipkart-এর live order sync করতে API credentials + server/webhook দরকার। এই single-file version-এ order management, status, customer, payment ও sync-ready data structure রাখা হয়েছে।</div>
+  </div>
+  <div class="panel">
+    <div class="form-grid"><div class="form-group"><label>Filter</label><select id="orderFilter" onchange="renderOrders()"><option>All</option><option>Pending</option><option>Accepted</option><option>Cancelled</option><option>Shipped</option><option>Delivered</option></select></div></div>
+    <div id="orderList"></div>
+  </div>
+</section>
+
+<!-- Add supplier directly from purchase -->
+<div class="modal" id="quickSupplierModal"><div class="modal-box"><div class="modal-head"><h3>Quick Add Supplier</h3><button class="close" onclick="closeModal('quickSupplierModal')">×</button></div>
+<div class="form-grid"><div class="form-group"><label>Name *</label><input id="qsName"></div><div class="form-group"><label>Phone</label><input id="qsPhone"></div><div class="form-group"><label>Address</label><input id="qsAddress"></div></div>
+<div style="margin-top:20px;text-align:right"><button class="btn green" onclick="quickSaveSupplier()">Save Supplier</button></div></div></div>
+
+
+<script>
+/* ===== NAMITA STORE v2 EXTENSION ===== */
+let adjustments = JSON.parse(localStorage.getItem("ns_adjustments") || "[]");
+let payments = JSON.parse(localStorage.getItem("ns_payments") || "[]");
+let ecommerceOrders = JSON.parse(localStorage.getItem("ns_ecommerce_orders") || "[]");
+let barcodeTemplate = JSON.parse(localStorage.getItem("ns_barcode_template") || "{}");
+let sellerSecret = settings.marginSecret || "2580";
+
+function v2Save(){
+  saveDB();
+  localStorage.setItem("ns_adjustments",JSON.stringify(adjustments));
+  localStorage.setItem("ns_payments",JSON.stringify(payments));
+  localStorage.setItem("ns_ecommerce_orders",JSON.stringify(ecommerceOrders));
+  localStorage.setItem("ns_barcode_template",JSON.stringify(barcodeTemplate));
+}
+function v2Money(n){return money(Number(n||0));}
+function v2DateOnly(d){return new Date(d).toISOString().slice(0,10);}
+function v2InRange(d,a,b){let x=v2DateOnly(d);return (!a||x>=a)&&(!b||x<=b);}
+function q(id){return document.getElementById(id);}
+
+function v2InitMenu(){
+  const ul=document.querySelector(".menu");
+  if(!ul || ul.dataset.v2) return;
+  ul.dataset.v2="1";
+  const items=[
+    ["seller","🧾 Seller Panel"],["bulkProducts","📋 Bulk Entry"],["adjustments","🔧 Stock Adjustment"],
+    ["barcodeDesigner","🎨 Barcode Designer"],["reportsAdvanced","📊 Detailed Reports"],["ecommerce","🛍️ E-Commerce"]
+  ];
+  const wrap=document.createElement("div");wrap.className="v2-menu";
+  items.forEach(([p,t])=>{const li=document.createElement("li");li.innerHTML=`<button onclick="showPage('${p}',this)">${t}</button>`;wrap.appendChild(li)});
+  ul.appendChild(wrap);
+  // Direct supplier button on purchase panel
+  const ps=document.getElementById("purchaseSupplier");
+  if(ps && !q("quickSupplierBtn")){const b=document.createElement("button");b.id="quickSupplierBtn";b.className="btn light";b.textContent="＋ Supplier";b.style.marginTop="8px";b.onclick=()=>openModal("quickSupplierModal");ps.parentElement.appendChild(b);}
+}
+function v2EnhancePOS(){
+  const pm=q("paymentMethod");
+  if(pm && ![...pm.options].some(o=>o.value==="Bank Transfer"))pm.insertAdjacentHTML("beforeend",'<option>Bank Transfer</option>');
+  const box=q("pos")?.querySelector(".panel:last-child");
+  if(box && !q("posCustomerName")){
+    const d=document.createElement("div");d.style.marginTop="12px";
+    d.innerHTML=`<div class="form-group"><label>Customer Name</label><input id="posCustomerName" placeholder="Walk-in / customer"></div>
+    <div class="form-group" style="margin-top:8px"><label>Customer Phone</label><input id="posCustomerPhone" placeholder="Phone"></div>
+    <div class="form-group" style="margin-top:8px"><label>Credit / Due ₹ (for Credit sales)</label><input id="posDue" type="number" min="0" value="0"></div>`;
+    box.insertBefore(d,box.querySelector(".btn.green"));
+  }
+}
+function applySellerToPOS(){
+  v2EnhancePOS();
+  q("posCustomerName").value=q("sellerCustomerName").value;
+  q("posCustomerPhone").value=q("sellerCustomerPhone").value;
+  q("paymentMethod").value=q("sellerPayment").value;
+  q("discount").value=q("sellerDiscount").value||0;
+  showPage("pos");
+  renderCart();
+}
+function syncSellerSale(){ if(q("sellerDiscount")){q("sellerDiscountPct").value=0;} applySellerDiscountPreview(); }
+function syncSellerSalePct(){ if(q("sellerDiscountPct")){let s=cart.reduce((a,i)=>{let p=products.find(x=>x.id===i.productId);return a+(p?p.sale*i.qty:0)},0);q("sellerDiscount").value=(s*Number(q("sellerDiscountPct").value||0)/100).toFixed(2);} }
+function applySellerDiscountPreview(){/* amount is applied when Apply to POS is pressed */}
+
+function saveSellerCustomer(){
+  const name=q("sellerCustomerName").value.trim(), phone=q("sellerCustomerPhone").value.trim();
+  if(!name){toast("Customer name required.");return;}
+  let c=customers.find(x=>phone && x.phone===phone);
+  if(c){c.name=name;} else customers.push({id:id(),name,phone,address:"",credit:Number(q("sellerDue").value||0)});
+  saveDB();renderCustomers();toast("Customer saved.");
+}
+
+function unlockMargins(){
+  if(q("marginSecret").value!==sellerSecret){toast("Wrong secret code.");return;}
+  q("marginPanel").classList.add("show");
+  q("marginTable").innerHTML=products.map(p=>{
+    const m=Number(p.sale||0)-Number(p.purchase||0), pct=p.purchase?m/p.purchase*100:0;
+    const max=Math.max(0,m);
+    return `<tr><td>${escapeHtml(p.name)}</td><td>${v2Money(p.purchase)}</td><td>${v2Money(p.sale)}</td><td>${v2Money(m)}</td><td>${pct.toFixed(1)}%</td><td>${v2Money(max)} / unit</td></tr>`;
+  }).join("");
+}
+function saveSellerSettings(){settings.marginSecret=sellerSecret;saveDB();}
+
+function addBulkRow(data={}){
+  const body=q("bulkBody"), tr=document.createElement("tr");
+  const vals={name:"",sku:"",barcode:generateBarcodeNumber(),category:"General",purchase:"",sale:"",mrp:"",qty:1,min:5,gst:0,supplier:"",payment:"Cash",...data};
+  tr.innerHTML=`<td></td>
+  <td><input class="bn" value="${escapeHtml(vals.name)}"></td><td><input class="bsku" value="${escapeHtml(vals.sku)}"></td><td><input class="bbc" value="${escapeHtml(vals.barcode)}"></td>
+  <td><input class="bcat" value="${escapeHtml(vals.category)}"></td><td><input class="bpur" type="number" value="${vals.purchase}"></td><td><input class="bsale" type="number" value="${vals.sale}"></td><td><input class="bmrp" type="number" value="${vals.mrp}"></td>
+  <td><input class="bqty" type="number" min="0" value="${vals.qty}"></td><td><input class="bmin" type="number" min="0" value="${vals.min}"></td><td><input class="bgst" type="number" min="0" value="${vals.gst}"></td>
+  <td><select class="bsup">${suppliers.map(s=>`<option ${s.name===vals.supplier?"selected":""}>${escapeHtml(s.name)}</option>`).join("")}<option value="">None</option></select></td>
+  <td><select class="bpay"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Credit</option></select></td>
+  <td><button class="btn red" style="padding:5px 8px" onclick="this.closest('tr').remove();numberBulkRows()">×</button></td>`;
+  body.appendChild(tr);numberBulkRows();
+}
+function addBulkRows(n=10){for(let i=0;i<n;i++)addBulkRow();}
+function numberBulkRows(){[...q("bulkBody").rows].forEach((r,i)=>r.cells[0].textContent=i+1);}
+function clearBulkRows(){q("bulkBody").innerHTML="";}
+function saveBulkProducts(){
+  const rows=[...q("bulkBody").rows]; if(!rows.length){toast("No rows.");return;}
+  let count=0;
+  rows.forEach(r=>{
+    const name=r.querySelector(".bn").value.trim(); if(!name)return;
+    const p={id:id(),name,sku:r.querySelector(".bsku").value.trim(),barcode:r.querySelector(".bbc").value.trim()||generateBarcodeNumber(),
+      category:r.querySelector(".bcat").value.trim()||"General",purchase:Number(r.querySelector(".bpur").value||0),sale:Number(r.querySelector(".bsale").value||0),mrp:Number(r.querySelector(".bmrp").value||0),
+      stock:Number(r.querySelector(".bqty").value||0),minStock:Number(r.querySelector(".bmin").value||5),gst:Number(r.querySelector(".bgst").value||0),hsn:"",createdAt:new Date().toISOString()};
+    products.push(p);
+    const supplier=r.querySelector(".bsup").value;
+    if(p.stock>0)purchases.push({id:id(),date:new Date().toISOString(),productId:p.id,product:p.name,qty:p.stock,price:p.purchase,total:p.stock*p.purchase,supplier});
+    if(r.querySelector(".bpay").value==="Credit" && supplier){let s=suppliers.find(x=>x.name===supplier);if(s)s.due=(s.due||0)+p.stock*p.purchase;}
+    count++;
+  });
+  v2Save();refreshAll();clearBulkRows();toast(count+" products saved.");
+}
+
+function renderAdjustments(){
+  const sel=q("adjProduct"); if(!sel)return;
+  sel.innerHTML=`<option value="">Select Product</option>`+products.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} — ${escapeHtml(p.barcode)}</option>`).join("");
+  q("adjustmentTable").innerHTML=adjustments.slice().reverse().map(a=>`<tr><td>${formatDateTime(a.date)}</td><td>${escapeHtml(a.product)}</td><td>${a.qty>0?"+":""}${a.qty}</td><td>${escapeHtml(a.reason)}</td><td>${escapeHtml(a.note||"")}</td></tr>`).join("");
+}
+function saveAdjustment(){
+  const p=products.find(x=>x.id===q("adjProduct").value), qty=Number(q("adjQty").value||0);
+  if(!p||!qty){toast("Select product and adjustment quantity.");return;}
+  p.stock=Math.max(0,Number(p.stock||0)+qty);
+  adjustments.push({id:id(),date:new Date().toISOString(),product:p.name,productId:p.id,qty,reason:q("adjReason").value,note:q("adjNote").value});
+  v2Save();refreshAll();q("adjQty").value=0;q("adjNote").value="";toast("Stock adjusted.");
+}
+
+function getBDProduct(){return products.find(p=>p.id===q("bdProduct")?.value)||products[0];}
+function renderBarcodeDesigner(){
+  const sel=q("bdProduct");if(!sel)return;
+  if(sel.options.length!==products.length+1)sel.innerHTML=`<option value="">Select Product</option>`+products.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("");
+  const p=getBDProduct();if(!p){q("designerPreview").innerHTML="<p>No products.</p>";return;}
+  let [w,h]=q("bdSize").value==="custom"?[Number(q("bdW").value||38),Number(q("bdH").value||25)]:q("bdSize").value.split("x").map(Number);
+  let qty=Math.min(100,Math.max(1,Number(q("bdQty").value||1)));
+  const labels=[];
+  for(let i=0;i<qty;i++) labels.push(`<div class="v2-label" style="width:${w}mm;height:${h}mm">
+    ${q("bdStore").checked?`<strong>${escapeHtml(settings.store||"NAMITA STORE")}</strong>`:""}
+    ${q("bdName").checked?`<div>${escapeHtml(p.name)}</div>`:""}
+    ${q("bdCat").checked?`<small>${escapeHtml(p.category||"")}</small>`:""}
+    <div class="v2-bars">||||||||||||||||||||||||||||</div>
+    ${q("bdCode").checked?`<small>${escapeHtml(p.barcode)}</small>`:""}
+    ${q("bdMrp").checked?`<div>MRP ₹${Number(p.mrp||p.sale).toFixed(2)}</div>`:""}
+    ${q("bdSale").checked?`<div>Sale ₹${Number(p.sale||0).toFixed(2)}</div>`:""}
+    ${q("bdSku").checked?`<small>SKU: ${escapeHtml(p.sku||"")}</small>`:""}
+    ${q("bdGst").checked?`<small>GST: ${Number(p.gst||0)}%</small>`:""}
+    ${q("bdHsn").checked?`<small>HSN: ${escapeHtml(p.hsn||"")}</small>`:""}
+  </div>`);
+  q("designerPreview").innerHTML=labels.join("");
+}
+function saveBarcodeTemplate(){
+  barcodeTemplate={size:q("bdSize").value,w:q("bdW").value,h:q("bdH").value,qty:q("bdQty").value,type:q("bdType").value,
+    fields:["Store","Name","Mrp","Sale","Sku","Cat","Gst","Code","Hsn"].filter(x=>q("bd"+x)?.checked)};
+  localStorage.setItem("ns_barcode_template",JSON.stringify(barcodeTemplate));toast("Barcode template saved.");
+}
+function loadBarcodeTemplate(){
+  if(!barcodeTemplate.size){toast("No saved template.");return;}
+  q("bdSize").value=barcodeTemplate.size;q("bdW").value=barcodeTemplate.w;q("bdH").value=barcodeTemplate.h;q("bdQty").value=barcodeTemplate.qty;q("bdType").value=barcodeTemplate.type;
+  ["Store","Name","Mrp","Sale","Sku","Cat","Gst","Code","Hsn"].forEach(x=>{if(q("bd"+x))q("bd"+x).checked=(barcodeTemplate.fields||[]).includes(x)});renderBarcodeDesigner();
+}
+function printDesignedBarcodes(){q("printArea").innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:3mm">${q("designerPreview").innerHTML}</div>`;window.print();}
+
+function reportDates(){
+  const today=v2DateOnly(new Date());
+  return {a:q("repFrom").value,b:q("repTo").value||today};
+}
+function setReportToday(){let t=v2DateOnly(new Date());q("repFrom").value=t;q("repTo").value=t;renderAdvancedReports();}
+function setReportMonth(){let d=new Date();q("repTo").value=v2DateOnly(d);d.setDate(1);q("repFrom").value=v2DateOnly(d);renderAdvancedReports();}
+function filteredSales(){let {a,b}=reportDates();return sales.filter(s=>v2InRange(s.date,a,b));}
+function renderAdvancedReports(){
+  if(!q("advancedBody"))return;
+  const ss=filteredSales(), type=q("repType").value;
+  const purchaseTotal=purchases.filter(p=>v2InRange(p.date,reportDates().a,reportDates().b)).reduce((a,p)=>a+Number(p.total||0),0);
+  const salesTotal=ss.reduce((a,s)=>a+Number(s.total||0),0);
+  const profit=ss.reduce((a,s)=>a+s.items.reduce((x,i)=>x+(Number(i.sale)-Number(i.purchase))*Number(i.qty),0)-Number(s.discount||0),0);
+  q("advancedReportCards").innerHTML=`<div class="v2-mini"><span>Sales</span><strong>${v2Money(salesTotal)}</strong></div><div class="v2-mini"><span>Purchases</span><strong>${v2Money(purchaseTotal)}</strong></div><div class="v2-mini"><span>Profit</span><strong>${v2Money(profit)}</strong></div><div class="v2-mini"><span>Invoices</span><strong>${ss.length}</strong></div><div class="v2-mini"><span>Cash Sales</span><strong>${v2Money(ss.filter(s=>s.payment==="Cash").reduce((a,s)=>a+s.total,0))}</strong></div><div class="v2-mini"><span>Online Sales</span><strong>${v2Money(ss.filter(s=>["UPI","Card","Bank Transfer"].includes(s.payment)).reduce((a,s)=>a+s.total,0))}</strong></div>`;
+  let head=[],rows=[];
+  if(type==="sales"){head=["Invoice","Date","Customer","Payment","Discount","Total"];rows=ss.map(s=>[s.invoice,formatDateTime(s.date),s.customerName||"Walk-in",s.payment,s.discount,s.total]);}
+  if(type==="profit"){head=["Invoice","Date","Sales","Cost","Discount","Profit"];rows=ss.map(s=>{let cost=s.items.reduce((a,i)=>a+i.purchase*i.qty,0),p=s.items.reduce((a,i)=>a+(i.sale-i.purchase)*i.qty,0)-s.discount;return[s.invoice,formatDate(s.date),s.total,cost,s.discount,p]});}
+  if(type==="items"){head=["Product","Qty","Sales","Cost","Profit"];let m={};ss.forEach(s=>s.items.forEach(i=>{m[i.productId]??={name:i.name,qty:0,sales:0,cost:0};m[i.productId].qty+=i.qty;m[i.productId].sales+=i.sale*i.qty;m[i.productId].cost+=i.purchase*i.qty;}));rows=Object.values(m).map(x=>[x.name,x.qty,x.sales,x.cost,x.sales-x.cost]);}
+  if(type==="customers"){head=["Customer","Phone","Invoices","Sales","Paid/Credit"];let m={};ss.forEach(s=>{let k=s.customerPhone||s.customerName||"Walk-in";m[k]??={name:s.customerName||"Walk-in",phone:s.customerPhone||"",n:0,total:0};m[k].n++;m[k].total+=s.total});rows=Object.values(m).map(x=>[x.name,x.phone,x.n,x.total,"—"]);}
+  if(type==="suppliers"){head=["Supplier","Purchases","Amount","Due"];let m={};purchases.filter(p=>v2InRange(p.date,reportDates().a,reportDates().b)).forEach(p=>{let k=p.supplier||"Unknown";m[k]??={n:0,t:0};m[k].n+=p.qty;m[k].t+=p.total});rows=Object.entries(m).map(([k,x])=>[k,x.n,x.t,(suppliers.find(s=>s.name===k)||{}).due||0]);}
+  if(type==="payments"){head=["Payment Method","Transactions","Amount"];let m={};ss.forEach(s=>{m[s.payment]??={n:0,t:0};m[s.payment].n++;m[s.payment].t+=Number(s.total)});rows=Object.entries(m).map(([k,x])=>[k,x.n,x.t]);}
+  if(type==="receivable"){head=["Customer","Phone","Credit/Due"];rows=customers.filter(c=>Number(c.credit)>0).map(c=>[c.name,c.phone,c.credit]);}
+  if(type==="payable"){head=["Supplier","Phone","Due"];rows=suppliers.filter(s=>Number(s.due)>0).map(s=>[s.name,s.phone,s.due]);}
+  if(type==="cashflow"){head=["Date","Inflow (Sales)","Outflow (Purchases)","Net"];let days={};ss.forEach(s=>{let d=v2DateOnly(s.date);days[d]??={in:0,out:0};days[d].in+=Number(s.total)});purchases.filter(p=>v2InRange(p.date,reportDates().a,reportDates().b)).forEach(p=>{let d=v2DateOnly(p.date);days[d]??={in:0,out:0};days[d].out+=Number(p.total)});rows=Object.entries(days).sort().map(([d,x])=>[d,x.in,x.out,x.in-x.out]);}
+  q("advancedHead").innerHTML="<tr>"+head.map(x=>`<th>${x}</th>`).join("")+"</tr>";
+  q("advancedBody").innerHTML=rows.map(r=>"<tr>"+r.map((x,i)=>`<td>${typeof x==="number"&&i>1?v2Money(x):escapeHtml(x)}</td>`).join("")+"</tr>").join("")||`<tr><td colspan="${head.length||1}" style="text-align:center">No data for selected period</td></tr>`;
+}
+function printAdvancedReport(){q("printArea").innerHTML=`<h1>NAMITA STORE</h1><h2>${escapeHtml(q("repType").value)} Report</h2>${q("advancedReportCards").outerHTML}<table border="1" cellspacing="0" cellpadding="6" style="width:100%">${q("advancedHead").innerHTML}${q("advancedBody").innerHTML}</table>`;window.print();}
+
+function addDemoOrder(status="Pending"){
+  const p=products[0]; if(!p){toast("Add a product first.");return;}
+  ecommerceOrders.push({id:"ORD-"+Date.now(),date:new Date().toISOString(),status,customer:{name:"Online Customer",phone:"9000000000",address:"Customer Address"},items:[{productId:p.id,name:p.name,qty:1,price:p.sale}],total:p.sale,payment:"UPI",source:"Demo / API Ready"});
+  v2Save();renderOrders();toast("Order added.");
+}
+function renderOrders(){
+  const f=q("orderFilter")?.value||"All";let list=ecommerceOrders.filter(o=>f==="All"||o.status===f);
+  q("orderList").innerHTML=list.slice().reverse().map(o=>`<div class="v2-order ${o.status.toLowerCase()}">
+    <div style="display:flex;justify-content:space-between;gap:10px"><strong>${escapeHtml(o.id)}</strong><span class="badge ${o.status==="Accepted"||o.status==="Delivered"?"green":o.status==="Cancelled"?"red":"orange"}">${escapeHtml(o.status)}</span></div>
+    <div><b>${escapeHtml(o.customer.name)}</b> • ${escapeHtml(o.customer.phone)} • ${escapeHtml(o.customer.address)}</div>
+    <div>${o.items.map(i=>`${escapeHtml(i.name)} × ${i.qty}`).join(", ")} — <strong>${v2Money(o.total)}</strong> • ${escapeHtml(o.payment)}</div>
+    <div class="actions" style="margin-top:8px">${o.status==="Pending"?`<button class="btn green" onclick="setOrderStatus('${o.id}','Accepted')">Accept</button><button class="btn red" onclick="setOrderStatus('${o.id}','Cancelled')">Cancel</button>`:""}${o.status==="Accepted"?`<button class="btn" onclick="setOrderStatus('${o.id}','Shipped')">Mark Shipped</button>`:""}${o.status==="Shipped"?`<button class="btn green" onclick="setOrderStatus('${o.id}','Delivered')">Delivered</button>`:""}</div>
+  </div>`).join("")||"<p style='color:#777'>No orders.</p>";
+}
+function setOrderStatus(idv,status){let o=ecommerceOrders.find(x=>x.id===idv);if(o){o.status=status;v2Save();renderOrders();}}
+function syncEcommerce(){toast("Sync-ready: connect your e-commerce API/webhook in Settings.");}
+
+function quickSaveSupplier(){
+  const name=q("qsName").value.trim();if(!name){toast("Supplier name required.");return;}
+  suppliers.push({id:id(),name,phone:q("qsPhone").value,address:q("qsAddress").value,due:0});v2Save();closeModal("quickSupplierModal");refreshAll();toast("Supplier added.");
+}
+
+/* Override sale so seller/customer/payment/due are recorded while keeping old billing behavior. */
+const originalCompleteSale=window.completeSale;
+window.completeSale=function(){
+  if(!cart.length){toast("Cart is empty.");return;}
+  const old=window.printInvoice;
+  window.printInvoice=function(){};
+  let before=sales.length;
+  originalCompleteSale();
+  window.printInvoice=old;
+  if(sales.length>before){
+    const s=sales[sales.length-1];
+    v2EnhancePOS();
+    s.customerName=q("posCustomerName")?.value||q("sellerCustomerName")?.value||"Walk-in";
+    s.customerPhone=q("posCustomerPhone")?.value||q("sellerCustomerPhone")?.value||"";
+    s.customerDue=Number(q("posDue")?.value||q("sellerDue")?.value||0);
+    if(s.customerDue>0){let c=customers.find(c=>(s.customerPhone&&c.phone===s.customerPhone)||(s.customerName&&c.name===s.customerName));if(c)c.credit=(c.credit||0)+s.customerDue;}
+    payments.push({id:id(),date:s.date,type:"sale",method:s.payment,amount:s.total,reference:s.invoice,customer:s.customerName});
+    v2Save();renderSeller();renderAdvancedReports();renderOrders();
+  }
+};
+
+function renderSeller(){
+  if(!q("sellerTodaySales"))return;
+  const t=v2DateOnly(new Date()), ss=sales.filter(s=>v2DateOnly(s.date)===t);
+  q("sellerTodaySales").textContent=v2Money(ss.reduce((a,s)=>a+s.total,0));
+  q("sellerTodayProfit").textContent=v2Money(ss.reduce((a,s)=>a+s.items.reduce((x,i)=>x+(i.sale-i.purchase)*i.qty,0)-s.discount,0));
+  q("sellerCredit").textContent=v2Money(customers.reduce((a,c)=>a+Number(c.credit||0),0));
+  q("sellerLow").textContent=products.filter(p=>p.stock<=p.minStock).length;
+}
+
+const oldRefreshAll=window.refreshAll;
+window.refreshAll=function(){
+  oldRefreshAll();
+  v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesigner();renderAdvancedReports();renderOrders();
+};
+
+const oldClear=window.clearAllData;
+window.clearAllData=function(){
+  oldClear();
+  adjustments=[];payments=[];ecommerceOrders=[];barcodeTemplate={};
+  ["ns_adjustments","ns_payments","ns_ecommerce_orders","ns_barcode_template"].forEach(k=>localStorage.removeItem(k));
+};
+
+const oldExport=window.exportData;
+window.exportData=function(){
+  const data={version:"2.0",exportedAt:new Date().toISOString(),products,customers,suppliers,purchases,sales,settings,adjustments,payments,ecommerceOrders,barcodeTemplate};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download="namita-store-v2-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(url);toast("Full v2 backup downloaded.");
+};
+window.addEventListener("DOMContentLoaded",()=>{v2InitMenu();v2EnhancePOS();addBulkRows(5);renderSeller();renderAdjustments();renderBarcodeDesigner();renderAdvancedReports();renderOrders();});
+v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesigner();renderAdvancedReports();renderOrders();
 </script>
 
 </body>
