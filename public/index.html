@@ -6323,3 +6323,162 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
   setTimeout(final55,150);setTimeout(final55,800);setTimeout(final55,1800);
 })();
 </script>
+
+<style id="final-v56-style">
+/* ===== V56 FINAL SUPPLIER UI / DATA CONNECTIVITY CLEANUP ===== */
+/* Legacy purchase-entry supplier summaries caused duplicate information. */
+#purchaseSupplierDueV46,
+#purchaseSupplierDueV47,
+#purchaseSupplierDueV48,
+#p51SupplierHistory{display:none!important}
+#v56SupplierPreviousDue{display:block!important;margin-top:8px;padding:9px 12px;border:1px dashed #cfd6e6;border-radius:8px;background:#fafcff;font-size:14px}
+.v56-supplier-history-actions{display:flex;gap:6px;flex-wrap:wrap}
+</style>
+<script id="final-v56-script">
+(function(){
+  const $=id=>document.getElementById(id);
+  const N=v=>Number(v)||0;
+  const E=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'');
+  const money=v=>'₹'+N(v).toFixed(2);
+  const today=()=>new Date().toISOString().slice(0,10);
+
+  /* Keep localStorage as one source for all ledgers. */
+  function persist(){
+    try{
+      if(typeof saveDB==='function')saveDB();
+      localStorage.setItem('ns_payments',JSON.stringify(window.payments||[]));
+      localStorage.setItem('ns_adjustments',JSON.stringify(window.adjustments||[]));
+    }catch(e){}
+  }
+
+  /* ---------- PURCHASE ENTRY: ONLY PREVIOUS DUE ---------- */
+  function selectedSupplier(){
+    const idv=$('purchaseSupplierTop')?.value||$('purchaseSupplier')?.value||'';
+    return (window.suppliers||[]).find(s=>String(s.id)===String(idv))||null;
+  }
+  function cleanSupplierEntry(){
+    const top=$('purchaseSupplierTop');
+    if(!top)return;
+    /* Hide every old supplier summary created by V46/V47/V48/V51. */
+    ['purchaseSupplierDueV46','purchaseSupplierDueV47','purchaseSupplierDueV48'].forEach(idv=>{
+      const x=$(idv);if(x){x.style.display='none';x.setAttribute('aria-hidden','true');}
+    });
+    /* Hide any old due element directly associated with the supplier field. */
+    top.parentElement?.querySelectorAll('.v47-due,.v46-supplier-due,.v48-supplier-due').forEach(x=>{
+      if(x.id!=='v56SupplierPreviousDue')x.style.display='none';
+    });
+    let box=$('v56SupplierPreviousDue');
+    if(!box){
+      box=document.createElement('div');box.id='v56SupplierPreviousDue';
+      top.insertAdjacentElement('afterend',box);
+    }
+    const s=selectedSupplier();
+    box.innerHTML=`আগের বকেয়া: <b>${money(s?.due||0)}</b>`;
+  }
+  window.v56CleanSupplierEntry=cleanSupplierEntry;
+
+  /* Any old change handler may run after ours, so enforce the final display after the event. */
+  function bindSupplierClean(){
+    const top=$('purchaseSupplierTop');
+    if(top&&!top.dataset.v56){
+      top.dataset.v56='1';
+      top.addEventListener('change',()=>setTimeout(cleanSupplierEntry,0));
+      top.addEventListener('input',()=>setTimeout(cleanSupplierEntry,0));
+    }
+    cleanSupplierEntry();
+  }
+
+  /* ---------- PURCHASE PAYMENT: authoritative calculation ---------- */
+  function purchaseCalc56(){
+    const rows=(window.purchaseRowsV44||[]).filter(r=>String(r.name||'').trim());
+    const total=rows.reduce((a,r)=>a+N(r.purchase)*Math.max(1,N(r.qty)),0);
+    const cash=N($('purchaseCashPaidV48')?.value), upi=N($('purchaseUpiPaidV48')?.value), card=N($('purchaseCardPaidV48')?.value);
+    const paid=cash+upi+card, credit=Math.max(0,total-paid), change=Math.max(0,paid-total);
+    const set=(id,v)=>{const x=$(id);if(x)x.textContent=money(v)};
+    set('purchaseGrandTotalV44',total);set('purchasePayBillV48',total);set('purchasePayPaidV48',paid);set('purchasePayCreditV48',credit);set('purchasePayChangeV48',change);
+    set('purchaseSummaryTotal46',total);set('purchaseSummaryCash46',cash);set('purchaseSummaryOnline46',upi+card);set('purchaseSummaryDue46',credit);
+    cleanSupplierEntry();
+    return {rows,total,cash,upi,card,paid,credit,change};
+  }
+  function bindPayment56(){
+    ['purchaseCashPaidV48','purchaseUpiPaidV48','purchaseCardPaidV48'].forEach(idv=>{
+      const x=$(idv);if(x&&!x.dataset.v56){x.dataset.v56='1';x.addEventListener('input',purchaseCalc56);x.addEventListener('change',purchaseCalc56)}
+    });
+    purchaseCalc56();
+  }
+
+  /* ---------- SUPPLIER HISTORY: one clean ledger ---------- */
+  function injectHistory56(){
+    const page=$('suppliers');if(!page||$('v56SupplierHistory'))return;
+    const panel=document.createElement('div');panel.id='v56SupplierHistory';panel.className='panel v54-supplier-history';
+    panel.innerHTML=`<h3>🏭 Supplier Purchase & Payment History</h3>
+      <div class="v54-tools">
+        <label>Supplier<select id="v56Sup"><option value="">Select Supplier</option></select></label>
+        <label>From Date<input id="v56From" type="date"></label>
+        <label>To Date<input id="v56To" type="date"></label>
+        <button class="btn light" type="button" id="v56Clear">Clear</button>
+      </div>
+      <div id="v56Cards" class="v54-history-cards"></div>
+      <div id="v56Table"></div>`;
+    page.appendChild(panel);
+    $('v56Sup').addEventListener('change',renderHistory56);
+    $('v56From').addEventListener('change',renderHistory56);
+    $('v56To').addEventListener('change',renderHistory56);
+    $('v56Clear').onclick=()=>{$('v56From').value='';$('v56To').value='';renderHistory56()};
+  }
+  function renderHistory56(){
+    injectHistory56();
+    const sel=$('v56Sup');if(!sel)return;
+    const old=sel.value;
+    sel.innerHTML='<option value="">Select Supplier</option>'+(window.suppliers||[]).map(s=>`<option value="${E(s.id)}">${E(s.name)}</option>`).join('');
+    if((window.suppliers||[]).some(s=>String(s.id)===String(old)))sel.value=old;
+    const s=(window.suppliers||[]).find(x=>String(x.id)===String(sel.value));
+    const cards=$('v56Cards'),table=$('v56Table');
+    if(!s){if(cards)cards.innerHTML='';if(table)table.innerHTML='<p style="color:#777">Supplier নির্বাচন করুন।</p>';return}
+    const from=$('v56From')?.value||'',to=$('v56To')?.value||'';
+    const inRange=x=>(!from||String(x.date||'').slice(0,10)>=from)&&(!to||String(x.date||'').slice(0,10)<=to);
+    const pur=(window.purchases||[]).filter(x=>(String(x.supplierId||'')===String(s.id)||String(x.supplier||'')===String(s.name))&&inRange(x)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    const pay=(window.payments||[]).filter(x=>(x.type==='supplier_pay'||x.type==='purchase_pay')&&(String(x.supplierId||'')===String(s.id)||String(x.supplier||x.party||'')===String(s.name))&&inRange(x)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    const purchaseTotal=pur.reduce((a,x)=>a+N(x.total),0), paymentTotal=pay.reduce((a,x)=>a+N(x.amount),0);
+    if(cards)cards.innerHTML=`<div class="v54-history-card"><small>Current Due</small><strong>${money(s.due)}</strong></div><div class="v54-history-card"><small>Purchase Total</small><strong>${money(purchaseTotal)}</strong></div><div class="v54-history-card"><small>Payment Total</small><strong>${money(paymentTotal)}</strong></div><div class="v54-history-card"><small>Current Unpaid</small><strong>${money(s.due)}</strong></div>`;
+    const ph=pur.map(x=>`<tr><td>${E(new Date(x.date).toLocaleDateString('en-IN'))}</td><td>${E(x.product||'')}</td><td>${N(x.qty)}</td><td>${money(x.price)}</td><td>${money(x.total)}</td><td>${E(x.supplier||s.name)}</td></tr>`).join('')||'<tr><td colspan="6">No purchase history.</td></tr>';
+    const payh=pay.map(x=>`<tr><td>${E(new Date(x.date).toLocaleDateString('en-IN'))}</td><td>${E(x.type==='purchase_pay'?'Purchase Payment':'Supplier Payment')}</td><td>${E(x.method||'')}</td><td>${money(x.amount)}</td><td>${E(x.reference||'')}</td></tr>`).join('')||'<tr><td colspan="5">No payment history.</td></tr>';
+    if(table)table.innerHTML=`<div class="table-wrap"><h4 style="margin:10px 0">Purchase History</h4><table><thead><tr><th>Date</th><th>Product</th><th>Qty</th><th>Price</th><th>Total</th><th>Supplier</th></tr></thead><tbody>${ph}</tbody></table></div><div class="table-wrap" style="margin-top:18px"><h4 style="margin:10px 0">Payment History</h4><table><thead><tr><th>Date</th><th>Type</th><th>Method</th><th>Amount</th><th>Reference</th></tr></thead><tbody>${payh}</tbody></table></div>`;
+  }
+
+  /* ---------- CUSTOMER/SUPPLIER PAYMENT PERSISTENCE ---------- */
+  const oldSaveDB56=window.saveDB;
+  if(typeof oldSaveDB56==='function'&&!oldSaveDB56.__v56){
+    const wrapped=function(){oldSaveDB56();try{localStorage.setItem('ns_payments',JSON.stringify(window.payments||[]));localStorage.setItem('ns_adjustments',JSON.stringify(window.adjustments||[]))}catch(e){}};
+    wrapped.__v56=true;window.saveDB=wrapped;
+  }
+
+  /* ---------- DASHBOARD STOCK FILTER ---------- */
+  function openStock56(type){
+    window.v54StockFilter=type;
+    if(typeof showPage==='function')showPage('inventory');
+    setTimeout(()=>{if(typeof window.renderInventory==='function')window.renderInventory();},50);
+  }
+  function bindDashboard56(){
+    [['lowStock','low'],['dashboardInStock','in'],['dashboardOutStock','out']].forEach(([idv,type])=>{
+      const el=$(idv)?.closest('.card');
+      if(el&&!el.dataset.v56){el.dataset.v56='1';el.style.cursor='pointer';el.addEventListener('click',()=>openStock56(type));}
+    });
+  }
+
+  /* ---------- BOOT / REASSERT AFTER LEGACY PATCHES ---------- */
+  function boot56(){
+    try{bindSupplierClean()}catch(e){}
+    try{bindPayment56()}catch(e){}
+    try{injectHistory56();renderHistory56()}catch(e){}
+    try{bindDashboard56()}catch(e){}
+  }
+  const oldRefresh56=window.refreshAll;
+  if(typeof oldRefresh56==='function'&&!oldRefresh56.__v56){
+    const wrapped=function(){try{oldRefresh56()}catch(e){}setTimeout(boot56,50)};wrapped.__v56=true;window.refreshAll=wrapped;
+  }
+  document.addEventListener('change',e=>{if(e.target?.id==='purchaseSupplierTop')setTimeout(cleanSupplierEntry,0)},true);
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(boot56,300));
+  setTimeout(boot56,500);setTimeout(boot56,1500);setInterval(()=>{if($('purchase')?.classList.contains('active'))cleanSupplierEntry()},500);
+})();
+</script>
