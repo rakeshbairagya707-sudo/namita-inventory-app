@@ -645,61 +645,15 @@ th{
 
 <!-- DASHBOARD -->
 <section id="dashboard" class="page active">
-
 <h2>Dashboard</h2>
 <p style="color:#777;margin-top:5px;">NAMITA STORE Business Management System</p>
-
 <div class="cards">
-
-<div class="card blue">
-<div class="label">Today's Sales</div>
-<div class="value" id="todaySales">₹0</div>
+  <div class="card red"><div class="label">Low Stock</div><div class="value" id="lowStock">0</div></div>
+  <div class="card green"><div class="label">In Stock</div><div class="value" id="dashboardInStock">0</div></div>
+  <div class="card orange"><div class="label">Out of Stock</div><div class="value" id="dashboardOutStock">0</div></div>
 </div>
-
-<div class="card green">
-<div class="label">Total Products</div>
-<div class="value" id="totalProducts">0</div>
-</div>
-
-<div class="card orange">
-<div class="label">Stock Items</div>
-<div class="value" id="stockItems">0</div>
-</div>
-
-<div class="card red">
-<div class="label">Low Stock</div>
-<div class="value" id="lowStock">0</div>
-</div>
-
-</div>
-
-
-<div class="grid2">
-
-<div class="panel">
-<h3>Quick Actions</h3>
-
-<div class="actions">
-<button class="btn" onclick="showPage('pos')">➕ New Sale</button>
-<button class="btn green" onclick="openProductModal()">➕ Add Product</button>
-<button class="btn orange" onclick="showPage('purchase')">📥 Purchase Entry</button>
-<button class="btn dark" onclick="showPage('barcode')">🏷️ Barcode</button>
-</div>
-
-</div>
-
-<div class="panel">
-
-<h3>Low Stock Products</h3>
-
-<div id="dashboardLowStock"></div>
-
-</div>
-
-</div>
-
+<div class="panel" style="margin-top:18px"><h3>Low Stock Products</h3><div id="dashboardLowStock"></div></div>
 </section>
-
 
 <!-- POS -->
 <section id="pos" class="page">
@@ -1224,14 +1178,14 @@ Data is stored locally in this browser.
     <p>দ্রুত বিক্রি • Discount • Cash / Online / Credit • Customer • Margin</p>
   </div>
   <div class="v2-actions">
+    <button class="v2-action" onclick="showPage('customerPayments')">💰 Customer Payment Receive</button>
+    <button class="v2-action" onclick="showPage('supplierPayments')">💸 Supplier Payment</button>
     <button class="v2-action" onclick="showPage('pos')">🛒 New Sale / POS</button>
     <button class="v2-action" onclick="openCustomerModal()">👤 Add Customer</button>
     <button class="v2-action" onclick="showPage('purchase')">📥 Purchase Entry</button>
     <button class="v2-action" onclick="showPage('inventory')">📦 Stock Adjustment</button>
     <button class="v2-action" onclick="showPage('reportsAdvanced')">📊 Reports</button>
     <button class="v2-action" onclick="showPage('ecommerce')">🛍️ E-Commerce Orders</button>
-    <button class="v2-action" onclick="showPage('customerPayments')">💰 Customer Payment Receive</button>
-    <button class="v2-action" onclick="showPage('supplierPayments')">💸 Supplier Payment</button>
   </div>
   <div class="panel">
     <h3>Quick Customer & Sale Setup</h3>
@@ -1290,6 +1244,7 @@ Data is stored locally in this browser.
 
 <section id="adjustments" class="page">
   <h2>🔧 Inventory Adjustment</h2>
+  <div class="v3-inventory-search"><input id="adjustmentSearch3" type="search" placeholder="🔎 Search product — barcode / product name / category" oninput="filterAdjustmentProducts3(this.value)"><button class="btn light" onclick="document.getElementById('adjustmentSearch3').value='';filterAdjustmentProducts3('')">Clear</button></div>
   <div class="panel">
     <div class="form-grid">
       <div class="form-group"><label>Product</label><select id="adjProduct"></select></div>
@@ -3862,7 +3817,9 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
     ];
     const wrap=document.createElement("div");wrap.className="v3-menu";
     items.forEach(([p,t])=>{const li=document.createElement("li");li.innerHTML='<button onclick="showPage(\''+p+'\',this)">'+t+'</button>';wrap.appendChild(li)});
-    ul.appendChild(wrap);
+    // Seller Panel stays immediately under Dashboard instead of at the bottom.
+    const dashboardLi=ul.querySelector('li:first-child');
+    if(dashboardLi) dashboardLi.insertAdjacentElement('afterend',wrap); else ul.appendChild(wrap);
   }
 
   /* Purchase page: product add, bulk, and barcode queue */
@@ -4142,22 +4099,37 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
   }
 
   function addProductToPurchaseRowV41(product, qty){
+    const ctx=v41PurchaseContext||{};
+    const finalQty=Math.max(1,num(qty)||num(ctx.qty)||1);
+    const finalPrice=num(ctx.price)>0?num(ctx.price):num(product.purchase);
     showPage('bulkProducts');
     setTimeout(function(){
       const body=q3('bulkBody'); if(!body)return;
       const row=document.createElement('tr');
-      row.innerHTML='<td class="bno"></td><td><input class="bn" value="'+esc(product.name)+'"></td><td><input class="bsku" value="'+esc(product.sku||'')+'"></td><td><input class="bbc" value="'+esc(product.barcode||'')+'"></td><td><input class="bcat" value="'+esc(product.category||'General')+'"></td><td><input class="bpur" type="number" min="0" value="'+num(product.purchase)+'"></td><td><input class="bsale" type="number" min="0" value="'+num(product.sale)+'"></td><td><input class="bmrp" type="number" min="0" value="'+num(product.mrp)+'"></td><td><input class="bqty" type="number" min="0" value="'+num(qty)+'"></td><td><input class="bmin" type="number" min="0" value="'+num(product.minStock||5)+'"></td><td><input class="bgst" type="number" min="0" value="'+num(product.gst)+'"></td><td><input class="bsup"></td><td><select class="bpay"><option>Cash</option><option>Credit</option><option>UPI</option><option>Card</option><option>Bank Transfer</option></select></td><td><button class="btn red" type="button" onclick="this.closest(\'tr\').remove();renumberBulkV41()">×</button></td>';
+      row.innerHTML='<td class="bno"></td><td><input class="bn" value="'+esc(product.name)+'"></td><td><input class="bsku" value="'+esc(product.sku||'')+'"></td><td><input class="bbc" value="'+esc(product.barcode||'')+'"></td><td><input class="bcat" value="'+esc(product.category||'General')+'"></td><td><input class="bpur" type="number" min="0" value="'+finalPrice+'"></td><td><input class="bsale" type="number" min="0" value="'+num(product.sale)+'"></td><td><input class="bmrp" type="number" min="0" value="'+num(product.mrp)+'"></td><td><input class="bqty" type="number" min="0" value="'+finalQty+'"></td><td><input class="bmin" type="number" min="0" value="'+num(product.minStock||5)+'"></td><td><input class="bgst" type="number" min="0" value="'+num(product.gst)+'"></td><td><input class="bsup" value="'+esc(ctx.supplier||'')+'"></td><td><select class="bpay"><option>Cash</option><option>Credit</option><option>UPI</option><option>Card</option><option>Bank Transfer</option></select></td><td><button class="btn red" type="button" onclick="this.closest(\'tr\').remove();renumberBulkV41()">×</button></td>';
       body.appendChild(row); renumberBulkV41();
       const first=row.querySelector('.bn'); if(first){first.focus();first.select()}
       toast('Product added to Purchase row. Enter next product in the next row.');
     },30);
   }
+  // Preserve the currently selected Purchase supplier/qty/price when adding a new product.
+  let v41PurchaseContext={supplier:"",qty:1,price:0};
+  let v41FromPurchase=false;
+  window.capturePurchaseContextV41=function(){
+    v41PurchaseContext={
+      supplier:q3('purchaseSupplier')?.value||'',
+      qty:Math.max(1,num(q3('purchaseQty')?.value)||1),
+      price:Math.max(0,num(q3('purchasePrice')?.value)||0)
+    };
+  };
   window.renumberBulkV41=function(){
     document.querySelectorAll('#bulkBody tr').forEach((r,i)=>{const n=r.querySelector('.bno');if(n)n.textContent=i+1;});
   };
 
   const v41OriginalOpenProductModal=window.openProductModal;
   window.openProductModal=function(){
+    v41FromPurchase=(document.querySelector('.page.active')?.id==='purchase');
+    if(v41FromPurchase) capturePurchaseContextV41(); else v41PurchaseContext={supplier:"",qty:1,price:0};
     v41OriginalOpenProductModal();
     setTimeout(function(){
       const ids=['productName','productSku','productBarcode','productCategory','productPurchase','productSale','productMrp','productStock','productMinStock','productGst','productHsn'];
@@ -4171,7 +4143,7 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
     let p=V3.editId?products.find(x=>x.id===V3.editId):null;
     if(p){Object.assign(p,data);save3();closeModal('productModal');refresh3();toast('Product updated.');return}
     p={id:id(),...data,createdAt:new Date().toISOString()}; products.push(p); save3(); closeModal('productModal');
-    addProductToPurchaseRowV41(p,num(q3('productStock').value));
+    if(v41FromPurchase) addProductToPurchaseRowV41(p,v41PurchaseContext.qty||num(q3('productStock').value)||1);
   };
 
   window.saveProduct=window.saveProductV41;
@@ -4216,6 +4188,80 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
   window.refreshAll=function(){try{oldRefresh()}catch(e){};refresh3()};
   document.addEventListener("DOMContentLoaded",function(){initMenu3();enhancePurchase();enhancePOS3();refresh3()});
   setTimeout(function(){initMenu3();enhancePurchase();enhancePOS3();refresh3()},50);
+})();
+</script>
+
+<script>
+/* ===== V4.2 FINAL UX FIXES ===== */
+(function(){
+  function q(id){return document.getElementById(id)}
+  function n(v){return Number(v||0)}
+  function e(v){return escapeHtml(v)}
+
+  // Dashboard intentionally stays minimal: Low Stock / In Stock / Out of Stock only.
+  window.renderDashboard=function(){
+    const low=products.filter(p=>n(p.stock)>0 && n(p.stock)<=n(p.minStock));
+    const out=products.filter(p=>n(p.stock)<=0);
+    const ins=products.filter(p=>n(p.stock)>n(p.minStock));
+    if(q('lowStock'))q('lowStock').textContent=low.length;
+    if(q('dashboardInStock'))q('dashboardInStock').textContent=ins.length;
+    if(q('dashboardOutStock'))q('dashboardOutStock').textContent=out.length;
+    if(q('dashboardLowStock'))q('dashboardLowStock').innerHTML=low.length?low.slice(0,10).map(p=>'<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #eee"><span>'+e(p.name)+'</span><strong style="color:#e74c3c">'+n(p.stock)+'</strong></div>').join(''):'<p style="color:#777">No low stock products.</p>';
+  };
+
+  // Adjustment search: barcode, product name, category, SKU. Keep the selected product list filtered.
+  let adjSearch='';
+  window.filterAdjustmentProducts3=function(v){adjSearch=String(v||'').toLowerCase().trim();renderAdjProductOptions3();};
+  function renderAdjProductOptions3(){
+    const sel=q('adjProduct');if(!sel)return;
+    const current=sel.value;
+    const list=products.filter(p=>!adjSearch || [p.barcode,p.name,p.category,p.sku].some(x=>String(x||'').toLowerCase().includes(adjSearch)));
+    sel.innerHTML=list.map(p=>'<option value="'+e(p.id)+'">'+e(p.name)+' — '+e(p.barcode||'')+' — '+e(p.category||'General')+' (Stock: '+n(p.stock)+')</option>').join('');
+    if(list.some(p=>String(p.id)===String(current)))sel.value=current;
+  }
+  const oldRenderAdjustments=window.renderAdjustments;
+  window.renderAdjustments=function(){try{oldRenderAdjustments()}catch(err){};renderAdjProductOptions3()};
+
+  // When adding a product from Purchase Entry, keep the current supplier and purchase fields.
+  const oldEnhancePurchaseV42=window.enhancePurchase;
+  window.enhancePurchase=function(){
+    try{oldEnhancePurchaseV42()}catch(err){}
+    const page=q('purchase'); if(!page)return;
+    const add=page.querySelector('button[onclick="openProductModal()"]');
+    if(add && !add.dataset.v42){add.dataset.v42='1';add.onclick=function(){window.openProductModal()};}
+  };
+
+  // Product modal: Enter always advances. Last field saves and sends the new product to the next Purchase row.
+  function wireProductEnterV42(){
+    const ids=['productName','productSku','productBarcode','productCategory','productPurchase','productSale','productMrp','productStock','productMinStock','productGst','productHsn'];
+    ids.forEach((id,i)=>{const el=q(id);if(!el||el.dataset.v42)return;el.dataset.v42='1';el.addEventListener('keydown',function(ev){if(ev.key!=='Enter')return;ev.preventDefault();if(i<ids.length-1){const next=q(ids[i+1]);next?.focus();next?.select?.()}else window.saveProductV41()})});
+  }
+  // Bulk sheet: Enter moves cell-to-cell; last cell creates a fresh row below automatically.
+  function wireBulkRowsV42(){
+    const body=q('bulkBody');if(!body||body.dataset.v42)return;body.dataset.v42='1';
+    body.addEventListener('keydown',function(ev){
+      if(ev.key!=='Enter')return;const t=ev.target;if(!t.matches('input,select'))return;ev.preventDefault();
+      const row=t.closest('tr');if(!row)return;const cells=[...row.querySelectorAll('input,select')];const i=cells.indexOf(t);
+      if(i<cells.length-1){cells[i+1].focus();cells[i+1].select?.();return;}
+      const rows=[...body.rows],ri=rows.indexOf(row);
+      if(ri===rows.length-1){window.addBulkRow();setTimeout(()=>{window.renumberBulkV41?.();const nr=body.rows[body.rows.length-1];nr?.querySelector('input,select')?.focus()},20)}
+      else rows[ri+1].querySelector('input,select')?.focus();
+    });
+  }
+
+  // Put the V3/V4 Seller Panel directly below Dashboard in the sidebar.
+  function placeSellerMenu(){
+    const ul=document.querySelector('.menu');if(!ul)return;
+    const seller=ul.querySelector('.v3-menu');if(!seller)return;
+    const first=ul.querySelector('li:first-child');if(first && first.nextElementSibling!==seller)first.insertAdjacentElement('afterend',seller);
+  }
+
+  function boot(){
+    placeSellerMenu();wireProductEnterV42();wireBulkRowsV42();renderAdjProductOptions3();window.renderDashboard?.();
+    setTimeout(placeSellerMenu,100);
+  }
+  document.addEventListener('DOMContentLoaded',boot);
+  setTimeout(boot,100);
 })();
 </script>
 </body>
