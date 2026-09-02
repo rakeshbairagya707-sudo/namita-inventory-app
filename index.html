@@ -4505,12 +4505,21 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
     const grid=$('purchaseQuickGrid'); if(!grid || $('purchaseFooterV44'))return;
     const f=document.createElement('div'); f.id='purchaseFooterV44'; f.className='v44-purchase-footer';
     f.innerHTML=`<div class="v44-total"><span>Total Purchase Amount</span><strong id="purchaseGrandTotalV44">₹0.00</strong></div>
-      <div class="v44-paygrid">
+      <div class="v44-paygrid v48-payment-entry">
         <div><label>Payment Date *</label><input id="purchasePayDateV44" type="date" required></div>
-        <div><label>Payment Method</label><select id="purchasePayMethodV44"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Credit</option></select></div>
-        <div><label>Amount Paid</label><input id="purchasePaidV44" type="number" min="0" step="0.01" value="0"></div>
+        <div class="v48-money-field"><label>💵 Cash Paid</label><input id="purchaseCashPaidV48" type="number" min="0" step="0.01" inputmode="decimal" value="0" placeholder="0.00"></div>
+        <div class="v48-money-field"><label>📱 PhonePe / UPI Paid</label><input id="purchaseUpiPaidV48" type="number" min="0" step="0.01" inputmode="decimal" value="0" placeholder="0.00"></div>
+        <div class="v48-money-field"><label>💳 Card / Online Paid</label><input id="purchaseCardPaidV48" type="number" min="0" step="0.01" inputmode="decimal" value="0" placeholder="0.00"></div>
         <div><label>Reference / Note</label><input id="purchasePayNoteV44" placeholder="Optional"></div>
       </div>
+      <div class="v48-payment-result">
+        <div><span>মোট বিল</span><b id="purchasePayBillV48">₹0.00</b></div>
+        <div><span>মোট Paid</span><b id="purchasePayPaidV48">₹0.00</b></div>
+        <div><span>ধার / Credit</span><b id="purchasePayCreditV48">₹0.00</b></div>
+        <div><span>ফেরত / Change</span><b id="purchasePayChangeV48">₹0.00</b></div>
+      </div>
+      <input id="purchasePaidV44" type="hidden" value="0">
+      <select id="purchasePayMethodV44" style="display:none"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Credit</option></select>
       <div class="v44-footer-actions"><button class="btn green" type="button" onclick="savePurchaseExcelV44Final()">💾 Save Purchase + Payment</button><button class="btn" type="button" onclick="printPurchaseBarcodesV44()">🖨️ Print Barcodes</button></div>`;
     grid.appendChild(f); $('purchasePayDateV44').value=today();
     $('purchasePaidV44').addEventListener('input',updatePurchaseFooterV44);
@@ -4668,9 +4677,26 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
   function refreshCategoryInputs(){
     ensureCategories();
     const opts=settings.categories.map(c=>`<option value="${E(c)}">${E(c)}</option>`).join('');
-    const inp=$('productCategory');
-    if(inp){inp.setAttribute('list','categoryMasterDatalist');let dl=$('categoryMasterDatalist');if(!dl){dl=document.createElement('datalist');dl.id='categoryMasterDatalist';document.body.appendChild(dl)}dl.innerHTML=opts;}
-    document.querySelectorAll('.bcat,.px-cat').forEach(x=>x.setAttribute('list','categoryMasterDatalist'));
+    const makeSelect=(el)=>{
+      if(!el)return;
+      const current=String(el.value||'');
+      if(el.tagName!=='SELECT'){
+        const sel=document.createElement('select');
+        [...el.attributes].forEach(a=>{if(a.name!=='list' && a.name!=='value')sel.setAttribute(a.name,a.value)});
+        sel.className=el.className;
+        sel.innerHTML=opts;
+        if(current && !settings.categories.includes(current))sel.insertAdjacentHTML('afterbegin',`<option value="${E(current)}">${E(current)}</option>`);
+        sel.value=current || (settings.categories.includes('General')?'General':'');
+        el.replaceWith(sel);
+      }else{
+        const old=el.value;
+        el.innerHTML=opts;
+        if(old && !settings.categories.includes(old))el.insertAdjacentHTML('afterbegin',`<option value="${E(old)}">${E(old)}</option>`);
+        el.value=old || (settings.categories.includes('General')?'General':'');
+      }
+    };
+    makeSelect($('productCategory'));
+    document.querySelectorAll('.bcat,.px-cat').forEach(makeSelect);
   }
   window.addCategory45=function(){
     ensureCategories();const v=prompt('নতুন Category-এর নাম লিখুন:','');if(v===null)return;const name=v.trim();if(!name)return toast('Category name required.');
@@ -5005,8 +5031,24 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
   function boot(){
     const pg=$('purchase');if(!pg)return;
     syncSuppliers();hideDuplicateTop();fixSave();normalizeRows();render();addUpdateButton();
-    $('purchaseSupplierTop')?.addEventListener('change',()=>{if($('purchaseSupplier'))$('purchaseSupplier').value=$('purchaseSupplierTop').value;updateDue()});
-    $('purchaseDateTop')?.addEventListener('change',()=>{rows().forEach(r=>r.date=$('purchaseDateTop').value);render()});
+  function calcPay(){
+    let total=0,rowCash=0,rowOnline=0,rowCredit=0;
+    rows().forEach(r=>{if(!String(r.name||'').trim())return;const a=N(r.purchase)*Math.max(0,N(r.qty)||0);total+=a;const m=String(r.payment||'Cash').toLowerCase();if(m==='credit')rowCredit+=a;else if(['upi','card','bank transfer','online'].includes(m))rowOnline+=a;else rowCash+=a});
+    const cash=N($('purchaseCashPaidV48')?.value), upi=N($('purchaseUpiPaidV48')?.value), card=N($('purchaseCardPaidV48')?.value);
+    const paid=cash+upi+card, credit=Math.max(0,total-paid), change=Math.max(0,paid-total);
+    if($('purchasePaidV44'))$('purchasePaidV44').value=Math.min(total,paid).toFixed(2);
+    return {total,cash,upi,card,online:upi+card,credit,paid,change,rowCash,rowOnline,rowCredit};
+  }
+  function updatePayUI(){
+    const x=calcPay();
+    const set=(id,v)=>{const el=$(id);if(el)el.textContent='₹'+v.toFixed(2)};
+    set('purchaseGrandTotalV44',x.total);set('purchaseSummaryTotal46',x.total);set('purchaseSummaryCash46',x.cash);set('purchaseSummaryOnline46',x.online);set('purchaseSummaryDue46',x.credit);
+    set('purchasePayBillV48',x.total);set('purchasePayPaidV48',x.paid);set('purchasePayCreditV48',x.credit);set('purchasePayChangeV48',x.change);
+    let box=$('purchaseMixV48'),f=$('purchaseFooterV44');
+    if(f&&!box){box=document.createElement('div');box.id='purchaseMixV48';box.className='v48-pay-summary';f.insertBefore(box,f.firstChild)}
+    if(box)box.innerHTML=`<div class="v48-pay-card"><small>মোট Purchase</small><strong>₹${x.total.toFixed(2)}</strong></div><div class="v48-pay-card"><small>Cash Paid</small><strong>₹${x.cash.toFixed(2)}</strong></div><div class="v48-pay-card"><small>PhonePe / Online</small><strong>₹${x.online.toFixed(2)}</strong></div><div class="v48-pay-card"><small>ধার / Credit</small><strong>₹${x.credit.toFixed(2)}</strong></div><div class="v48-pay-card"><small>Change</small><strong>₹${x.change.toFixed(2)}</strong></div>`;
+    renderSupplierDue();
+  }
   }
   document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,900));setTimeout(boot,1200);
 })();
@@ -5049,18 +5091,21 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
     box.innerHTML=s?`Supplier: <b>${E(s.name)}</b> &nbsp; | &nbsp; আগের বকেয়া: <b>₹${N(s.due).toFixed(2)}</b> &nbsp; | &nbsp; এই Purchase ধার: <b>₹${sums.credit.toFixed(2)}</b> &nbsp; | &nbsp; Paid: <b>₹${sums.paid.toFixed(2)}</b> &nbsp; | &nbsp; আনুমানিক নতুন বকেয়া: <b>₹${Math.max(0,N(s.due)+sums.credit-sums.paid).toFixed(2)}</b>`:'আগের বকেয়া: <b>₹0.00</b>';
   }
   function calcPay(){
-    let total=0,cash=0,online=0,credit=0;
-    rows().forEach(r=>{if(!String(r.name||'').trim())return;const a=N(r.purchase)*Math.max(0,N(r.qty)||0);total+=a;const m=String(r.payment||'Cash').toLowerCase();if(m==='credit')credit+=a;else if(['upi','card','bank transfer','online'].includes(m))online+=a;else cash+=a});
-    const paidEl=$('purchasePaidV44'); const paid=paidEl?Math.min(total,Math.max(0,N(paidEl.value))):cash+online;
-    return {total,cash,online,credit,paid};
+    let total=0,rowCash=0,rowOnline=0,rowCredit=0;
+    rows().forEach(r=>{if(!String(r.name||'').trim())return;const a=N(r.purchase)*Math.max(0,N(r.qty)||0);total+=a;const m=String(r.payment||'Cash').toLowerCase();if(m==='credit')rowCredit+=a;else if(['upi','card','bank transfer','online'].includes(m))rowOnline+=a;else rowCash+=a});
+    const cash=N($('purchaseCashPaidV48')?.value), upi=N($('purchaseUpiPaidV48')?.value), card=N($('purchaseCardPaidV48')?.value);
+    const paid=cash+upi+card, credit=Math.max(0,total-paid), change=Math.max(0,paid-total);
+    if($('purchasePaidV44'))$('purchasePaidV44').value=Math.min(total,paid).toFixed(2);
+    return {total,cash,upi,card,online:upi+card,credit,paid,change,rowCash,rowOnline,rowCredit};
   }
   function updatePayUI(){
     const x=calcPay();
     const set=(id,v)=>{const el=$(id);if(el)el.textContent='₹'+v.toFixed(2)};
     set('purchaseGrandTotalV44',x.total);set('purchaseSummaryTotal46',x.total);set('purchaseSummaryCash46',x.cash);set('purchaseSummaryOnline46',x.online);set('purchaseSummaryDue46',x.credit);
+    set('purchasePayBillV48',x.total);set('purchasePayPaidV48',x.paid);set('purchasePayCreditV48',x.credit);set('purchasePayChangeV48',x.change);
     let box=$('purchaseMixV48'),f=$('purchaseFooterV44');
     if(f&&!box){box=document.createElement('div');box.id='purchaseMixV48';box.className='v48-pay-summary';f.insertBefore(box,f.firstChild)}
-    if(box)box.innerHTML=`<div class="v48-pay-card"><small>মোট Purchase</small><strong>₹${x.total.toFixed(2)}</strong></div><div class="v48-pay-card"><small>Cash</small><strong>₹${x.cash.toFixed(2)}</strong></div><div class="v48-pay-card"><small>Online</small><strong>₹${x.online.toFixed(2)}</strong></div><div class="v48-pay-card"><small>ধার / Credit</small><strong>₹${x.credit.toFixed(2)}</strong></div><div class="v48-pay-card"><small>Paid Now</small><strong>₹${x.paid.toFixed(2)}</strong></div>`;
+    if(box)box.innerHTML=`<div class="v48-pay-card"><small>মোট Purchase</small><strong>₹${x.total.toFixed(2)}</strong></div><div class="v48-pay-card"><small>Cash Paid</small><strong>₹${x.cash.toFixed(2)}</strong></div><div class="v48-pay-card"><small>PhonePe / Online</small><strong>₹${x.online.toFixed(2)}</strong></div><div class="v48-pay-card"><small>ধার / Credit</small><strong>₹${x.credit.toFixed(2)}</strong></div><div class="v48-pay-card"><small>Change</small><strong>₹${x.change.toFixed(2)}</strong></div>`;
     renderSupplierDue();
   }
   function normalize(){
@@ -5096,13 +5141,21 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
   function addExisting(pid){const p=(products||[]).find(x=>String(x.id)===String(pid));if(!p)return;addRow({name:p.name,sku:p.sku||'',barcode:p.barcode||genUnique(),category:p.category||'General',purchase:N(p.purchase),mrp:N(p.mrp)||N(p.sale),discount:N(p.mrp)>0?Math.max(0,100-(N(p.sale)/N(p.mrp)*100)):0,sale:N(p.sale)||N(p.mrp)});const q=$('purchaseProductSearch');if(q)q.value='';const b=$('purchaseSearchResultsV43');if(b)b.innerHTML=''}
   window.addExistingProductToPurchaseV44=addExisting;window.addExistingPurchaseV44=addExisting;
   function purchaseSave(){
-    const rs=rows().filter(r=>String(r.name||'').trim());if(!rs.length){toast('কমপক্ষে ১টি Product দিন।');return}const s=supplier();if(!s){toast('Supplier নির্বাচন করুন।');$('purchaseSupplierTop')?.focus();return}const date=$('purchaseDateTop')?.value||$('purchaseDate')?.value;if(!date){toast('Purchase Date দিন।');return}
-    let total=0,credit=0;const batch=[];
-    rs.forEach(r=>{const qty=Math.max(1,N(r.qty)),pur=N(r.purchase),mrp=N(r.mrp),disc=Math.min(100,Math.max(0,N(r.discount))),sale=mrp>0?mrp*(1-disc/100):N(r.sale);let p=(products||[]).find(x=>(r.barcode&&String(x.barcode)===String(r.barcode))||(r.sku&&String(x.sku)===String(r.sku)));if(!p){p={id:id(),name:r.name,sku:r.sku||'',barcode:r.barcode||genUnique(),category:r.category||'General',purchase:pur,mrp,sale,discount:disc,stock:0,minStock:5,gst:0,hsn:'',createdAt:new Date().toISOString()};products.push(p)}else Object.assign(p,{name:r.name,sku:r.sku||p.sku,barcode:r.barcode||p.barcode,category:r.category||p.category,purchase:pur,mrp,sale,discount:disc});p.stock=N(p.stock)+qty;const amt=qty*pur;total+=amt;if(String(r.payment)==='Credit')credit+=amt;const rec={id:id(),date:new Date(date+'T12:00:00').toISOString(),productId:p.id,product:p.name,qty,price:pur,total:amt,supplier:s.name,supplierId:s.id,barcode:p.barcode,payment:r.payment||'Cash',discount:disc};purchases.push(rec);batch.push({...r,barcode:p.barcode,qty});});
-    const paid=Math.min(total,Math.max(0,N($('purchasePaidV44')?.value))),method=$('purchasePayMethodV44')?.value||'Cash',pd=$('purchasePayDateV44')?.value||date;
-    s.due=N(s.due)+credit-paid;
-    if(paid>0)payments.push({id:id(),date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method,amount:paid,reference:$('purchasePayNoteV44')?.value||'',party:s.name,supplier:s.name});
-    saveDB();localStorage.setItem('ns_payments',JSON.stringify(payments));window.purchaseBarcodeBatchV44=batch;window.purchaseRowsV44=[{name:'',sku:'',barcode:genUnique(),category:'General',purchase:0,mrp:0,discount:0,sale:0,qty:1,date,payment:'Cash'}];renderGrid();refreshAll();syncSupplierNow();toast('Purchase saved. Total ₹'+total.toFixed(2));
+    const rs=rows().filter(r=>String(r.name||'').trim());if(!rs.length){toast('কমপক্ষে ১টি Product দিন।');return}
+    const s=supplier();if(!s){toast('Supplier নির্বাচন করুন।');$('purchaseSupplierTop')?.focus();return}
+    const date=$('purchaseDateTop')?.value||$('purchaseDate')?.value;if(!date){toast('Purchase Date দিন।');return}
+    const cash=N($('purchaseCashPaidV48')?.value),upi=N($('purchaseUpiPaidV48')?.value),card=N($('purchaseCardPaidV48')?.value);
+    let total=0;rs.forEach(r=>total+=N(r.purchase)*Math.max(1,N(r.qty)));
+    const paid=cash+upi+card, credit=Math.max(0,total-paid), change=Math.max(0,paid-total);
+    let previousDue=N(s.due);const batch=[];
+    rs.forEach(r=>{const qty=Math.max(1,N(r.qty)),pur=N(r.purchase),mrp=N(r.mrp),disc=Math.min(100,Math.max(0,N(r.discount))),sale=mrp>0?mrp*(1-disc/100):N(r.sale);let p=(products||[]).find(x=>(r.barcode&&String(x.barcode)===String(r.barcode))||(r.sku&&String(x.sku)===String(r.sku)));if(!p){p={id:id(),name:r.name,sku:r.sku||'',barcode:r.barcode||genUnique(),category:r.category||'General',purchase:pur,mrp,sale,discount:disc,stock:0,minStock:5,gst:0,hsn:'',createdAt:new Date().toISOString()};products.push(p)}else Object.assign(p,{name:r.name,sku:r.sku||p.sku,barcode:r.barcode||p.barcode,category:r.category||p.category,purchase:pur,mrp,sale,discount:disc});p.stock=N(p.stock)+qty;const amt=qty*pur;purchases.push({id:id(),date:new Date(date+'T12:00:00').toISOString(),productId:p.id,product:p.name,qty,price:pur,total:amt,supplier:s.name,supplierId:s.id,barcode:p.barcode,payment:r.payment||'Cash',discount:disc});batch.push({...r,barcode:p.barcode,qty});});
+    s.due=previousDue+credit;
+    const pd=$('purchasePayDateV44')?.value||date, ref=$('purchasePayNoteV44')?.value||'';
+    if(cash>0)payments.push({id:id(),date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'Cash',amount:cash,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
+    if(upi>0)payments.push({id:id(),date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'UPI',amount:upi,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
+    if(card>0)payments.push({id:id(),date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'Card / Online',amount:card,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
+    saveDB();localStorage.setItem('ns_payments',JSON.stringify(payments));window.purchaseBarcodeBatchV44=batch;window.purchaseRowsV44=[{name:'',sku:'',barcode:genUnique(),category:'General',purchase:0,mrp:0,discount:0,sale:0,qty:1,date,payment:'Cash'}];
+    ['purchaseCashPaidV48','purchaseUpiPaidV48','purchaseCardPaidV48'].forEach(x=>{if($(x))$(x).value='0'});renderGrid();refreshAll();syncSupplierNow();updatePayUI();toast(`Purchase saved. Total ₹${total.toFixed(2)} | Paid ₹${paid.toFixed(2)} | Credit ₹${credit.toFixed(2)}${change>0?' | Change ₹'+change.toFixed(2):''}`);
   }
   window.savePurchaseExcelV44Final=purchaseSave;
   function editPurchase(idv){const p=purchases.find(x=>x.id===idv);if(!p)return;const q=prompt('Quantity:',p.qty);if(q===null)return;const pr=prompt('Purchase Price:',p.price);if(pr===null)return;const oldQty=N(p.qty),newQty=Math.max(0,N(q)),oldPrice=N(p.price),newPrice=Math.max(0,N(pr));const prod=products.find(x=>x.id===p.productId);if(prod)prod.stock=Math.max(0,N(prod.stock)-oldQty+newQty);const s=suppliers.find(x=>String(x.id)===String(p.supplierId)||x.name===p.supplier);if(p.payment==='Credit'&&s)s.due=Math.max(0,N(s.due)-oldQty*oldPrice+newQty*newPrice);p.qty=newQty;p.price=newPrice;p.total=newQty*newPrice;p.supplier=s?.name||p.supplier;p.supplierId=s?.id||p.supplierId;saveDB();localStorage.setItem('ns_payments',JSON.stringify(payments));refreshAll();toast('Purchase updated.');}
@@ -5132,3 +5185,12 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
 </script>
 </body>
 </html>
+<style>
+.v48-payment-entry{grid-template-columns:repeat(5,1fr)!important;align-items:end}
+.v48-money-field input{font-size:18px!important;font-weight:700;min-height:44px;border:2px solid #5865f2!important;background:#fbfcff!important}
+.v48-payment-result{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0;padding:12px;background:#f7f8fb;border-radius:10px}
+.v48-payment-result>div{background:#fff;border:1px solid #e3e6ee;border-radius:8px;padding:10px;text-align:center}
+.v48-payment-result span{display:block;color:#666;font-size:12px;margin-bottom:5px}.v48-payment-result b{font-size:19px}
+@media(max-width:1000px){.v48-payment-entry{grid-template-columns:repeat(2,1fr)!important}.v48-payment-result{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.v48-payment-entry,.v48-payment-result{grid-template-columns:1fr!important}}
+</style>
