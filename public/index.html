@@ -6084,3 +6084,242 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
   setTimeout(refresh53,1000);
 })();
 </script>
+
+<style id="final-v54-style">
+/* ===== FINAL V54 STABILITY / CONNECTIVITY FIX ===== */
+.v54-hidden{display:none!important}
+.v54-supplier-history{margin-top:18px}
+.v54-supplier-history .v54-tools{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:10px;align-items:end;margin:12px 0}
+.v54-supplier-history label{display:flex;flex-direction:column;gap:5px;font-weight:700;font-size:13px}
+.v54-supplier-history select,.v54-supplier-history input{padding:10px;border:1px solid #d6d9e0;border-radius:8px;background:#fff}
+.v54-history-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+.v54-history-card{background:#fff;border:1px solid #e2e6ed;border-radius:10px;padding:12px;text-align:center}
+.v54-history-card small{display:block;color:#666}.v54-history-card strong{font-size:19px}
+.v54-stock-filter-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+@media(max-width:900px){.v54-supplier-history .v54-tools{grid-template-columns:1fr 1fr}.v54-history-cards{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.v54-supplier-history .v54-tools,.v54-history-cards{grid-template-columns:1fr}}
+</style>
+<script id="final-v54-script">
+(function(){
+  const $=id=>document.getElementById(id);
+  const N=v=>Number(v)||0;
+  const E=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'');
+  const money54=v=>'₹'+N(v).toFixed(2);
+  const today54=()=>new Date().toISOString().slice(0,10);
+
+  /* ---- IMPORTANT: bind window.* aliases to the original global data arrays ----
+     Earlier V43-V53 code used window.products/window.suppliers/etc, while the
+     original application declared them with top-level let. This disconnect is
+     why several new features were not actually working. Getters keep both
+     access paths connected even if the original code reassigns an array. */
+  function linkGlobal(name){
+    try{
+      Object.defineProperty(window,name,{configurable:true,enumerable:true,get(){return eval(name)},set(v){eval(name+' = v')}});
+    }catch(e){ try{window[name]=eval(name)}catch(_){} }
+  }
+  ['products','customers','suppliers','purchases','sales','settings','adjustments','payments','ecommerceOrders','barcodeTemplate'].forEach(linkGlobal);
+  function sync54(){
+    try{window.products=products;window.customers=customers;window.suppliers=suppliers;window.purchases=purchases;window.sales=sales;window.settings=settings;window.adjustments=adjustments;window.payments=payments;window.ecommerceOrders=ecommerceOrders;window.barcodeTemplate=barcodeTemplate}catch(e){}
+  }
+  sync54();
+
+  /* ---- Supplier selection: ONLY previous due is shown in Purchase Entry ---- */
+  function currentSupplier54(){
+    const idv=$('purchaseSupplierTop')?.value||$('purchaseSupplier')?.value||'';
+    return (suppliers||[]).find(s=>String(s.id)===String(idv))||null;
+  }
+  function showOnlyPreviousDue54(){
+    sync54();
+    const top=$('purchaseSupplierTop');
+    const box=$('purchaseSupplierDueV47');
+    if(box){
+      const s=currentSupplier54();
+      box.innerHTML=s?`আগের বকেয়া: <b>${money54(s.due)}</b>`:'আগের বকেয়া: <b>₹0.00</b>';
+    }
+    /* History must not appear inside Purchase Entry. It is moved to Suppliers. */
+    const h=$('p51SupplierHistory');
+    if(h)h.classList.add('v54-hidden');
+  }
+
+  /* ---- Purchase payment: one source of truth, live on every field ---- */
+  function purchaseCalc54(){
+    sync54();
+    const rs=(window.purchaseRowsV44||[]).filter(r=>String(r.name||'').trim());
+    const total=rs.reduce((a,r)=>a+N(r.purchase)*Math.max(1,N(r.qty)),0);
+    const cash=N($('purchaseCashPaidV48')?.value),upi=N($('purchaseUpiPaidV48')?.value),card=N($('purchaseCardPaidV48')?.value);
+    const paid=cash+upi+card,credit=Math.max(0,total-paid),change=Math.max(0,paid-total);
+    const set=(id,v)=>{const el=$(id);if(el)el.textContent=money54(v)};
+    set('purchaseGrandTotalV44',total);set('purchasePayBillV48',total);set('purchasePayPaidV48',paid);set('purchasePayCreditV48',credit);set('purchasePayChangeV48',change);
+    set('purchaseSummaryTotal46',total);set('purchaseSummaryCash46',cash);set('purchaseSummaryOnline46',upi+card);set('purchaseSummaryDue46',credit);
+    const hid=$('purchasePaidV44');if(hid)hid.value=Math.min(total,paid).toFixed(2);
+    showOnlyPreviousDue54();
+    return {rs,total,cash,upi,card,paid,credit,change};
+  }
+  function bindPurchasePayment54(){
+    ['purchaseCashPaidV48','purchaseUpiPaidV48','purchaseCardPaidV48'].forEach(idv=>{
+      const el=$(idv);if(!el||el.dataset.v54)return;el.dataset.v54='1';el.addEventListener('input',purchaseCalc54);el.addEventListener('change',purchaseCalc54);
+    });
+    const top=$('purchaseSupplierTop');if(top&&!top.dataset.v54sup){top.dataset.v54sup='1';top.addEventListener('change',()=>{if($('purchaseSupplier'))$('purchaseSupplier').value=top.value;purchaseCalc54();});}
+    purchaseCalc54();
+  }
+
+  /* ---- Final purchase save. All payment methods + supplier due + stock + history stay connected. ---- */
+  function group54(batchId){
+    sync54();let g=purchases.filter(x=>String(x.batchId||'')===String(batchId));
+    if(!g.length){const one=purchases.find(x=>String(x.id)===String(batchId));if(one)g=[one]}
+    return g;
+  }
+  function reversePurchase54(g){
+    if(!g.length)return;
+    const s=suppliers.find(x=>String(x.id)===String(g[0].supplierId)||x.name===g[0].supplier);
+    const batchId=g[0].batchId;
+    const total=g.reduce((a,x)=>a+N(x.total),0);
+    const paid=payments.filter(x=>x.type==='purchase_pay'&&batchId&&String(x.batchId)===String(batchId)).reduce((a,x)=>a+N(x.amount),0);
+    const legacyCredit=batchId?0:g.filter(x=>String(x.payment||'')==='Credit').reduce((a,x)=>a+N(x.total),0);
+    g.forEach(x=>{const p=products.find(z=>String(z.id)===String(x.productId));if(p)p.stock=Math.max(0,N(p.stock)-N(x.qty))});
+    if(s)s.due=Math.max(0,N(s.due)-Math.max(0,batchId?total-paid:legacyCredit));
+    for(let i=purchases.length-1;i>=0;i--)if(g.some(x=>String(x.id)===String(purchases[i].id)))purchases.splice(i,1);
+    if(batchId)for(let i=payments.length-1;i>=0;i--){const x=payments[i];if(x.type==='purchase_pay'&&String(x.batchId)===String(batchId))payments.splice(i,1)}
+  }
+  function finalPurchaseSave54(){
+    sync54();
+    const calc=purchaseCalc54();
+    if(!calc.rs.length){toast('কমপক্ষে ১টি Product দিন।');return}
+    const s=currentSupplier54();if(!s){toast('Supplier নির্বাচন করুন।');$('purchaseSupplierTop')?.focus();return}
+    const date=$('purchaseDateTop')?.value||$('purchaseDate')?.value||today54();
+    if(!date){toast('Purchase Date দিন।');return}
+    const payDate=$('purchasePayDateV44')?.value||date;
+    const note=$('purchasePayNoteV44')?.value||'';
+    const editId=window.purchaseEditBatchV52||window.purchaseEditBatchV51||'';
+    if(editId)reversePurchase54(group54(editId));
+    const batchId='PB-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
+    const batchRows=[];let total=0;
+    calc.rs.forEach(r=>{
+      const qty=Math.max(1,N(r.qty)),pur=N(r.purchase),mrp=N(r.mrp),disc=Math.min(100,Math.max(0,N(r.discount))),sale=mrp>0?mrp*(1-disc/100):N(r.sale);
+      let p=products.find(z=>(r.barcode&&String(z.barcode)===String(r.barcode))||(r.sku&&String(z.sku)===String(r.sku))||(String(z.name||'').trim().toLowerCase()===String(r.name||'').trim().toLowerCase()&&String(r.name||'').trim()));
+      if(!p){p={id:id(),name:r.name,sku:r.sku||'',barcode:r.barcode||('' + Date.now()).slice(-12),category:r.category||'General',purchase:pur,mrp,sale,discount:disc,stock:0,minStock:5,gst:N(r.gst),hsn:r.hsn||'',createdAt:new Date().toISOString()};products.push(p)}
+      else Object.assign(p,{name:r.name,sku:r.sku||p.sku,barcode:r.barcode||p.barcode,category:r.category||p.category,purchase:pur,mrp,sale,discount:disc});
+      p.stock=N(p.stock)+qty;
+      const amt=qty*pur;total+=amt;
+      purchases.push({id:id(),batchId,date:new Date(date+'T12:00:00').toISOString(),productId:p.id,product:p.name,qty,price:pur,total:amt,supplier:s.name,supplierId:s.id,barcode:p.barcode,payment:r.payment||'Cash',discount:disc,mrp,sale,sku:p.sku||'',category:p.category||''});
+      batchRows.push({...r,barcode:p.barcode,qty});
+    });
+    s.due=N(s.due)+calc.credit;
+    const addPay=(amount,method)=>{if(N(amount)>0)payments.push({id:id(),batchId,date:new Date(payDate+'T12:00:00').toISOString(),type:'purchase_pay',method,amount:N(amount),reference:note,party:s.name,supplier:s.name,supplierId:s.id})};
+    addPay(calc.cash,'Cash');addPay(calc.upi,'UPI');addPay(calc.card,'Card / Online');
+    saveDB();localStorage.setItem('ns_payments',JSON.stringify(payments));
+    window.purchaseLastBatch53=batchId;window.purchaseBarcodeBatchV44=batchRows;window.purchaseEditBatchV52='';window.purchaseEditBatchV51='';
+    window.purchaseRowsV44=[{name:'',sku:'',barcode:'',category:'General',purchase:0,mrp:0,discount:0,sale:0,qty:1,date,payment:'Cash'}];
+    ['purchaseCashPaidV48','purchaseUpiPaidV48','purchaseCardPaidV48'].forEach(k=>{if($(k))$(k).value='0'});
+    if(typeof renderGrid==='function')renderGrid();
+    sync54();
+    if(typeof refreshAll==='function')refreshAll();
+    setTimeout(()=>{bindPurchasePayment54();showOnlyPreviousDue54();renderSupplierHistory54();},80);
+    toast(`${editId?'Purchase updated':'Purchase saved'} • Total ${money54(total)} • Paid ${money54(calc.paid)} • Credit ${money54(calc.credit)}`);
+  }
+  window.savePurchaseExcelV44Final=finalPurchaseSave54;
+  window.addPurchase=finalPurchaseSave54;
+
+  /* ---- Product table barcode button + barcode printing ---- */
+  function printProductBarcode54(pid,qty){
+    sync54();const p=products.find(x=>String(x.id)===String(pid));if(!p)return toast('Product পাওয়া যায়নি।');
+    const q=Math.min(999,Math.max(1,N(qty)||1));
+    const svg=typeof window.code128Svg==='function'?window.code128Svg(String(p.barcode||'')):`<div style="font-size:18px">${E(p.barcode||'')}</div>`;
+    const pa=$('printArea');if(!pa)return;
+    pa.innerHTML=Array.from({length:q},()=>`<div class="v54-print-one"><strong>${E(settings?.store||'NAMITA STORE')}</strong><div>${E(p.name)}</div><div style="width:92%">${svg}</div><small>${E(p.barcode||'')}</small><b>₹${N(p.sale).toFixed(2)}</b></div>`).join('');
+    let st=$('v54ProductPrintStyle');if(st)st.remove();st=document.createElement('style');st.id='v54ProductPrintStyle';st.textContent='@media print{body *{visibility:hidden!important}#printArea,#printArea *{visibility:visible!important}#printArea{position:absolute!important;left:0!important;top:0!important;width:50mm!important}.v54-print-one{width:50mm!important;height:25mm!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;box-sizing:border-box!important;padding:1.5mm!important;font:8px Arial!important;page-break-after:always!important}.v54-print-one svg{width:46mm!important;height:9mm!important}}';document.head.appendChild(st);window.print();setTimeout(()=>{st.remove();pa.innerHTML=''},1200);
+  }
+  window.printProductBarcode53=printProductBarcode54;
+  window.renderProducts=function(filter){
+    sync54();const tb=$('productTable');if(!tb)return;const f=String(filter||'').trim().toLowerCase();
+    const list=products.filter(p=>!f||[p.name,p.barcode,p.sku,p.category].some(v=>String(v||'').toLowerCase().includes(f)));
+    tb.innerHTML=list.map(p=>`<tr><td>${E(p.barcode||'')}</td><td><strong>${E(p.name||'')}</strong></td><td>${E(p.category||'')}</td><td>${money54(p.purchase)}</td><td>${money54(p.sale)}</td><td>${money54(p.mrp)}</td><td><strong>${N(p.stock)}</strong></td><td><div class="v53-product-actions"><button class="btn light" onclick="editProduct3('${E(p.id)}')">Edit</button><button class="btn red" onclick="deleteProduct('${E(p.id)}')">Delete</button><button class="btn" onclick="printProductBarcode53('${E(p.id)}',1)">🖨️ Barcode</button></div></td></tr>`).join('')||'<tr><td colspan="8" style="text-align:center;padding:18px;color:#777">No products found.</td></tr>';
+  };
+
+  /* ---- Dashboard stock cards: render the filter after every normal refresh ---- */
+  function renderInventory54(){
+    sync54();const tb=$('inventoryTable');if(!tb)return;const f=window.v54StockFilter||'';
+    const list=products.filter(p=>f==='low'?N(p.stock)>0&&N(p.stock)<=N(p.minStock):f==='out'?N(p.stock)<=0:f==='in'?N(p.stock)>N(p.minStock):true);
+    tb.innerHTML=list.map(p=>`<tr><td>${E(p.barcode||'')}</td><td><strong>${E(p.name||'')}</strong></td><td>${E(p.category||'')}</td><td><strong>${N(p.stock)}</strong></td><td>${N(p.minStock)}</td><td><span class="badge ${N(p.stock)<=0?'red':N(p.stock)<=N(p.minStock)?'orange':'green'}">${N(p.stock)<=0?'Out of Stock':N(p.stock)<=N(p.minStock)?'Low Stock':'In Stock'}</span></td><td><button class="btn light" onclick="editProduct3('${E(p.id)}')">Edit</button> <button class="btn" onclick="openAdjustForProduct('${E(p.id)}')">Adjust</button></td></tr>`).join('')||'<tr><td colspan="7" style="text-align:center;padding:18px;color:#777">No products in this category.</td></tr>';
+    const h=tb.closest('table')?.querySelector('thead tr');if(h&&!h.querySelector('.v54InvAct'))h.insertAdjacentHTML('beforeend','<th class="v54InvAct">Actions</th>');
+  }
+  window.renderInventory=renderInventory54;
+  function openStock54(type){window.v54StockFilter=type;showPage('inventory');setTimeout(renderInventory54,40)}
+  [['lowStock','low'],['dashboardInStock','in'],['dashboardOutStock','out']].forEach(([idv,type])=>{const el=$(idv)?.closest('.card');if(el){el.style.cursor='pointer';el.onclick=()=>openStock54(type)}});
+
+  /* ---- Supplier history moved to Suppliers page ---- */
+  function injectSupplierHistory54(){
+    const page=$('suppliers');if(!page||$('v54SupplierHistory'))return;
+    const panel=document.createElement('div');panel.id='v54SupplierHistory';panel.className='panel v54-supplier-history';
+    panel.innerHTML=`<h3>🏭 Supplier Purchase & Payment History</h3><div class="v54-tools"><label>Supplier<select id="v54SupSelect"><option value="">Select Supplier</option></select></label><label>From Date<input id="v54From" type="date"></label><label>To Date<input id="v54To" type="date"></label><button class="btn light" id="v54Clear">Clear</button></div><div id="v54SupCards" class="v54-history-cards"></div><div id="v54SupHistoryTable"></div>`;
+    page.appendChild(panel);
+    $('v54SupSelect').addEventListener('change',renderSupplierHistory54);$('v54From').addEventListener('change',renderSupplierHistory54);$('v54To').addEventListener('change',renderSupplierHistory54);$('v54Clear').onclick=()=>{$('v54From').value='';$('v54To').value='';renderSupplierHistory54()};
+  }
+  function renderSupplierHistory54(){
+    sync54();injectSupplierHistory54();const sel=$('v54SupSelect');if(!sel)return;const old=sel.value;sel.innerHTML='<option value="">Select Supplier</option>'+suppliers.map(s=>`<option value="${E(s.id)}">${E(s.name)}</option>`).join('');if(suppliers.some(s=>String(s.id)===String(old)))sel.value=old;else if(currentSupplier54())sel.value=currentSupplier54().id;
+    const s=suppliers.find(x=>String(x.id)===String(sel.value));const cards=$('v54SupCards'),table=$('v54SupHistoryTable');if(!s){if(cards)cards.innerHTML='';if(table)table.innerHTML='<p style="color:#777">Supplier নির্বাচন করুন, তারপর তার Purchase ও Payment History এখানে দেখুন।</p>';return}
+    const from=$('v54From')?.value||'',to=$('v54To')?.value||'';
+    const pur=purchases.filter(x=>(String(x.supplierId||'')===String(s.id)||String(x.supplier||'')===String(s.name))&&(!from||String(x.date).slice(0,10)>=from)&&(!to||String(x.date).slice(0,10)<=to)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    const pays=payments.filter(x=>(x.type==='supplier_pay'||x.type==='purchase_pay')&&(String(x.supplierId||'')===String(s.id)||String(x.supplier||x.party||'')===String(s.name))&&(!from||String(x.date).slice(0,10)>=from)&&(!to||String(x.date).slice(0,10)<=to)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    const ptotal=pur.reduce((a,x)=>a+N(x.total),0),paid=pays.reduce((a,x)=>a+N(x.amount),0);
+    if(cards)cards.innerHTML=`<div class="v54-history-card"><small>Current Due</small><strong>${money54(s.due)}</strong></div><div class="v54-history-card"><small>Purchase Total</small><strong>${money54(ptotal)}</strong></div><div class="v54-history-card"><small>Payment Total</small><strong>${money54(paid)}</strong></div><div class="v54-history-card"><small>Unpaid</small><strong>${money54(Math.max(0,s.due))}</strong></div>`;
+    if(table)table.innerHTML=`<div class="table-wrap"><h4 style="margin:10px 0">Purchase History</h4><table><thead><tr><th>Date</th><th>Product</th><th>Qty</th><th>Price</th><th>Total</th><th>Supplier</th></tr></thead><tbody>${pur.map(x=>`<tr><td>${E(new Date(x.date).toLocaleDateString('en-IN'))}</td><td>${E(x.product)}</td><td>${N(x.qty)}</td><td>${money54(x.price)}</td><td>${money54(x.total)}</td><td>${E(x.supplier||s.name)}</td></tr>`).join('')||'<tr><td colspan="6">No purchase history.</td></tr>'}</tbody></table></div><div class="table-wrap" style="margin-top:18px"><h4 style="margin:10px 0">Payment History</h4><table><thead><tr><th>Date</th><th>Method</th><th>Amount</th><th>Reference</th></tr></thead><tbody>${pays.map(x=>`<tr><td>${E(new Date(x.date).toLocaleDateString('en-IN'))}</td><td>${E(x.method||'')}</td><td>${money54(x.amount)}</td><td>${E(x.reference||'')}</td></tr>`).join('')||'<tr><td colspan="4">No payment history.</td></tr>'}</tbody></table></div>`;
+  }
+
+  /* ---- Supplier payment / customer payment are always saved + reflected immediately ---- */
+  function savePartyPayment54(type,partyId,amount,method,note,date){
+    sync54();amount=N(amount);const arr=type==='customer_receive'?customers:suppliers,party=arr.find(x=>String(x.id)===String(partyId));if(!party||amount<=0)return false;
+    const fld=type==='customer_receive'?'credit':'due';party[fld]=Math.max(0,N(party[fld])-amount);
+    payments.push({id:id(),date:new Date((date||today54())+'T12:00:00').toISOString(),type,method:method||'Cash',amount,reference:note||'',party:party.name,[type==='customer_receive'?'customer':'supplier']:party.name,[type==='customer_receive'?'customerId':'supplierId']:party.id});
+    saveDB();localStorage.setItem('ns_payments',JSON.stringify(payments));sync54();return true;
+  }
+  window.receiveCustomerPayment=function(){const ok=savePartyPayment54('customer_receive',$('cpCustomer')?.value,$('cpAmount')?.value,$('cpMethod')?.value,$('cpNote')?.value,$('cpDate')?.value);if(!ok)return toast('Customer এবং valid payment amount দিন।');$('cpAmount').value='';$('cpNote').value='';if(typeof refreshAll==='function')refreshAll();toast('Customer payment recorded এবং due update হয়েছে।')};
+  window.paySupplier=function(){const ok=savePartyPayment54('supplier_pay',$('spSupplier')?.value,$('spAmount')?.value,$('spMethod')?.value,$('spNote')?.value,$('spDate')?.value);if(!ok)return toast('Supplier এবং valid payment amount দিন।');$('spAmount').value='';$('spNote').value='';if(typeof refreshAll==='function')refreshAll();setTimeout(renderSupplierHistory54,80);toast('Supplier payment recorded এবং due update হয়েছে।')};
+
+  /* ---- Bulk adjustment: ensure it is present and connected to the same stock array ---- */
+  function refreshBulk54(){try{injectBulkAdjustment53();renderBulkAdjustment53()}catch(e){}}
+
+  function finalRefresh54(){
+    sync54();
+    try{bindPurchasePayment54()}catch(e){}
+    try{showOnlyPreviousDue54()}catch(e){}
+    try{injectBulkAdjustment53();renderBulkAdjustment53()}catch(e){}
+    try{injectSupplierHistory54();renderSupplierHistory54()}catch(e){}
+    try{window.renderProducts?.()}catch(e){}
+    if(window.v54StockFilter)try{renderInventory54()}catch(e){}
+  }
+  const oldRefresh54=window.refreshAll;
+  window.refreshAll=function(){try{oldRefresh54?.()}catch(e){}sync54();setTimeout(finalRefresh54,80)};
+  setTimeout(finalRefresh54,1200);
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(finalRefresh54,300));
+})();
+</script>
+
+<style id="final-v55-style">
+/* Final cleanup: supplier entry shows only previous due; history lives on Suppliers page. */
+#p51SupplierHistory{display:none!important}
+</style>
+<script id="final-v55-script">
+(function(){
+  /* Explicitly bridge the original top-level let variables to window.* for all later patches. */
+  try{
+    Object.defineProperty(window,'products',{configurable:true,get:()=>products,set:v=>{products=v}});
+    Object.defineProperty(window,'customers',{configurable:true,get:()=>customers,set:v=>{customers=v}});
+    Object.defineProperty(window,'suppliers',{configurable:true,get:()=>suppliers,set:v=>{suppliers=v}});
+    Object.defineProperty(window,'purchases',{configurable:true,get:()=>purchases,set:v=>{purchases=v}});
+    Object.defineProperty(window,'sales',{configurable:true,get:()=>sales,set:v=>{sales=v}});
+    Object.defineProperty(window,'settings',{configurable:true,get:()=>settings,set:v=>{settings=v}});
+    Object.defineProperty(window,'adjustments',{configurable:true,get:()=>adjustments,set:v=>{adjustments=v}});
+    Object.defineProperty(window,'payments',{configurable:true,get:()=>payments,set:v=>{payments=v}});
+    Object.defineProperty(window,'ecommerceOrders',{configurable:true,get:()=>ecommerceOrders,set:v=>{ecommerceOrders=v}});
+    Object.defineProperty(window,'barcodeTemplate',{configurable:true,get:()=>barcodeTemplate,set:v=>{barcodeTemplate=v}});
+  }catch(e){}
+  function final55(){
+    try{window.p51SupplierHistory?.classList?.add('v54-hidden')}catch(e){}
+    try{if(typeof showOnlyPreviousDue54==='function')showOnlyPreviousDue54()}catch(e){}
+    try{if(typeof bindPurchasePayment54==='function')bindPurchasePayment54()}catch(e){}
+    try{if(typeof renderSupplierHistory54==='function')renderSupplierHistory54()}catch(e){}
+  }
+  setTimeout(final55,150);setTimeout(final55,800);setTimeout(final55,1800);
+})();
+</script>
