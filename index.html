@@ -5148,12 +5148,14 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
     let total=0;rs.forEach(r=>total+=N(r.purchase)*Math.max(1,N(r.qty)));
     const paid=cash+upi+card, credit=Math.max(0,total-paid), change=Math.max(0,paid-total);
     let previousDue=N(s.due);const batch=[];
-    rs.forEach(r=>{const qty=Math.max(1,N(r.qty)),pur=N(r.purchase),mrp=N(r.mrp),disc=Math.min(100,Math.max(0,N(r.discount))),sale=mrp>0?mrp*(1-disc/100):N(r.sale);let p=(products||[]).find(x=>(r.barcode&&String(x.barcode)===String(r.barcode))||(r.sku&&String(x.sku)===String(r.sku)));if(!p){p={id:id(),name:r.name,sku:r.sku||'',barcode:r.barcode||genUnique(),category:r.category||'General',purchase:pur,mrp,sale,discount:disc,stock:0,minStock:5,gst:0,hsn:'',createdAt:new Date().toISOString()};products.push(p)}else Object.assign(p,{name:r.name,sku:r.sku||p.sku,barcode:r.barcode||p.barcode,category:r.category||p.category,purchase:pur,mrp,sale,discount:disc});p.stock=N(p.stock)+qty;const amt=qty*pur;purchases.push({id:id(),date:new Date(date+'T12:00:00').toISOString(),productId:p.id,product:p.name,qty,price:pur,total:amt,supplier:s.name,supplierId:s.id,barcode:p.barcode,payment:r.payment||'Cash',discount:disc});batch.push({...r,barcode:p.barcode,qty});});
+    rs.forEach(r=>{const qty=Math.max(1,N(r.qty)),pur=N(r.purchase),mrp=N(r.mrp),disc=Math.min(100,Math.max(0,N(r.discount))),sale=mrp>0?mrp*(1-disc/100):N(r.sale);let p=(products||[]).find(x=>(r.barcode&&String(x.barcode)===String(r.barcode))||(r.sku&&String(x.sku)===String(r.sku)));if(!p){p={id:id(),name:r.name,sku:r.sku||'',barcode:r.barcode||genUnique(),category:r.category||'General',purchase:pur,mrp,sale,discount:disc,stock:0,minStock:5,gst:0,hsn:'',createdAt:new Date().toISOString()};products.push(p)}else Object.assign(p,{name:r.name,sku:r.sku||p.sku,barcode:r.barcode||p.barcode,category:r.category||p.category,purchase:pur,mrp,sale,discount:disc});p.stock=N(p.stock)+qty;const amt=qty*pur;purchases.push({id:id(),date:new Date(date+'T12:00:00').toISOString(),productId:p.id,product:p.name,sku:p.sku||r.sku||'',category:p.category||r.category||'General',qty,price:pur,total:amt,supplier:s.name,supplierId:s.id,barcode:p.barcode,payment:r.payment||'Cash',discount:disc,mrp,mrpPrice:mrp,sale, _pendingBatch:true});batch.push({...r,barcode:p.barcode,qty});});
     s.due=previousDue+credit;
-    const pd=$('purchasePayDateV44')?.value||date, ref=$('purchasePayNoteV44')?.value||'';
-    if(cash>0)payments.push({id:id(),date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'Cash',amount:cash,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
-    if(upi>0)payments.push({id:id(),date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'UPI',amount:upi,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
-    if(card>0)payments.push({id:id(),date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'Card / Online',amount:card,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
+    const batchId=id(), pd=$('purchasePayDateV44')?.value||date, ref=$('purchasePayNoteV44')?.value||'';
+    purchases.filter(x=>x._pendingBatch).forEach(x=>{x.batchId=batchId;delete x._pendingBatch});
+    batch.forEach(x=>x.batchId=batchId);
+    if(cash>0)payments.push({id:id(),batchId,date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'Cash',amount:cash,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
+    if(upi>0)payments.push({id:id(),batchId,date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'UPI',amount:upi,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
+    if(card>0)payments.push({id:id(),batchId,date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'Card / Online',amount:card,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
     saveDB();localStorage.setItem('ns_payments',JSON.stringify(payments));window.purchaseBarcodeBatchV44=batch;window.purchaseRowsV44=[{name:'',sku:'',barcode:genUnique(),category:'General',purchase:0,mrp:0,discount:0,sale:0,qty:1,date,payment:'Cash'}];
     ['purchaseCashPaidV48','purchaseUpiPaidV48','purchaseCardPaidV48'].forEach(x=>{if($(x))$(x).value='0'});renderGrid();refreshAll();syncSupplierNow();updatePayUI();toast(`Purchase saved. Total ₹${total.toFixed(2)} | Paid ₹${paid.toFixed(2)} | Credit ₹${credit.toFixed(2)}${change>0?' | Change ₹'+change.toFixed(2):''}`);
   }
@@ -5181,6 +5183,124 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
   const oldOrdersV48=window.renderOrders;window.renderOrders=function(){oldOrdersV48?.();const box=$('orderList');if(!box)return;box.querySelectorAll('.v48-order-actions').forEach(x=>x.remove());(ecommerceOrders||[]).forEach(o=>{const cards=[...box.children];const card=cards.find(c=>String(c.innerHTML||'').includes(String(o.id)));if(card&&!card.querySelector('.v48-order-actions')){const a=document.createElement('div');a.className='v48-order-actions';a.style.cssText='margin-top:8px;display:flex;gap:6px';a.innerHTML=`<button class="btn light" onclick="editEcommerceOrderV48('${E(o.id)}')">Edit</button><button class="btn red" onclick="deleteEcommerceOrderV48('${E(o.id)}')">Delete</button>`;card.appendChild(a)}})};
   const oldRefresh=window.refreshAll;window.refreshAll=function(){try{oldRefresh?.()}catch(e){};setTimeout(()=>{patchSupplierDropdown();renderGrid();updatePayUI();bindGrid();},50)};
   document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,1500));setTimeout(boot,1800);
+})();
+</script>
+
+<script>
+/* ===== V4.9 FINAL FIX: LIVE PAYMENT CALC + DASHBOARD FILTER + PURCHASE BATCH CRUD ===== */
+(function(){
+  const $=id=>document.getElementById(id), N=v=>Number(v||0);
+  const esc=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'');
+  const rows=()=>window.purchaseRowsV44||(window.purchaseRowsV44=[]);
+
+  // Live payment calculation: every amount field immediately recalculates total/credit/change.
+  function livePayment(){
+    try{
+      const total=rows().filter(r=>String(r.name||'').trim()).reduce((a,r)=>a+N(r.purchase)*Math.max(1,N(r.qty)),0);
+      const cash=N($('purchaseCashPaidV48')?.value), upi=N($('purchaseUpiPaidV48')?.value), card=N($('purchaseCardPaidV48')?.value);
+      const paid=cash+upi+card, credit=Math.max(0,total-paid), change=Math.max(0,paid-total);
+      const set=(id,v)=>{const el=$(id);if(el)el.textContent='₹'+v.toFixed(2)};
+      set('purchaseGrandTotalV44',total);set('purchaseSummaryTotal46',total);set('purchaseSummaryCash46',cash);set('purchaseSummaryOnline46',upi+card);set('purchaseSummaryDue46',credit);
+      set('purchasePayBillV48',total);set('purchasePayPaidV48',paid);set('purchasePayCreditV48',credit);set('purchasePayChangeV48',change);
+      if($('purchasePaidV44'))$('purchasePaidV44').value=Math.min(total,paid).toFixed(2);
+      if(typeof renderSupplierDue==='function')try{renderSupplierDue()}catch(_){ }
+    }catch(_){ }
+  }
+  function bindPayment(){
+    ['purchaseCashPaidV48','purchaseUpiPaidV48','purchaseCardPaidV48'].forEach(id=>{
+      const el=$(id);if(!el||el.dataset.v49live)return;el.dataset.v49live='1';
+      ['input','change','keyup'].forEach(ev=>el.addEventListener(ev,livePayment));
+      el.addEventListener('focus',()=>el.select?.());
+    });
+    livePayment();
+  }
+
+  // Dashboard cards are clickable and open Inventory with the corresponding filter.
+  function dashboardLinks(){
+    const defs=[['lowStock','low'],['dashboardInStock','in'],['dashboardOutStock','out']];
+    defs.forEach(([id,type])=>{
+      const el=$(id)?.closest('.card');if(!el||el.dataset.v49click)return;el.dataset.v49click='1';el.style.cursor='pointer';el.title='Click to view products';
+      el.addEventListener('click',()=>{
+        window.v49StockFilter=type;
+        showPage('inventory');
+        setTimeout(()=>renderFilteredInventory(),60);
+      });
+    });
+  }
+  function renderFilteredInventory(){
+    const tb=$('inventoryTable');if(!tb)return;
+    const f=window.v49StockFilter||'';
+    const list=(products||[]).filter(p=>f==='low'?N(p.stock)>0&&N(p.stock)<=N(p.minStock):f==='out'?N(p.stock)<=0:f==='in'?N(p.stock)>N(p.minStock):true);
+    const esc2=esc;
+    tb.innerHTML=list.map(p=>{
+      const status=N(p.stock)<=0?'Out of Stock':(N(p.stock)<=N(p.minStock)?'Low Stock':'In Stock');
+      const cls=N(p.stock)<=0?'red':(N(p.stock)<=N(p.minStock)?'orange':'green');
+      return `<tr><td>${esc2(p.barcode||'')}</td><td><strong>${esc2(p.name||'')}</strong></td><td>${esc2(p.category||'')}</td><td><strong>${N(p.stock)}</strong></td><td>${N(p.minStock)}</td><td><span class="badge ${cls}">${status}</span></td><td><div class="v3-inline"><button class="btn light" onclick="editProduct3('${esc2(p.id)}')">Edit</button><button class="btn red" onclick="deleteProduct('${esc2(p.id)}')">Delete</button><button class="btn" onclick="openAdjustForProduct('${esc2(p.id)}')">Adjust</button></div></td></tr>`;
+    }).join('')||'<tr><td colspan="7" style="text-align:center;padding:18px;color:#777">No products found in this stock category.</td></tr>';
+  }
+
+  // Reverse one complete purchase batch: stock, supplier due and payment ledger.
+  function reverseBatch(batchId, ask=true){
+    const list=(purchases||[]).filter(p=>String(p.batchId||p.id)===String(batchId));
+    if(!list.length)return false;
+    const payList=(payments||[]).filter(p=>p.type==='purchase_pay' && String(p.batchId||'')===String(batchId));
+    const supplierId=list[0].supplierId, supplierName=list[0].supplier;
+    let total=list.reduce((a,p)=>a+N(p.total),0), paid=payList.reduce((a,p)=>a+N(p.amount),0);
+    // Legacy records without batchId: only reverse the individual purchase, not unrelated payments.
+    if(!list[0].batchId){ paid=0; }
+    const credit=Math.max(0,total-paid);
+    if(ask && !confirm(`এই পুরো Purchase Entry delete/update করলে ${list.length}টি row-এর stock ও supplier হিসাব reverse হবে। Continue?`))return false;
+    list.forEach(p=>{const prod=(products||[]).find(x=>String(x.id)===String(p.productId));if(prod)prod.stock=Math.max(0,N(prod.stock)-N(p.qty));});
+    const s=(suppliers||[]).find(x=>String(x.id)===String(supplierId)||x.name===supplierName);
+    if(s){ if(list[0].batchId) s.due=Math.max(0,N(s.due)-credit); else if(list[0].payment==='Credit')s.due=Math.max(0,N(s.due)-total); }
+    for(let i=purchases.length-1;i>=0;i--)if(String(purchases[i].batchId||purchases[i].id)===String(batchId))purchases.splice(i,1);
+    if(list[0].batchId)for(let i=payments.length-1;i>=0;i--)if(payments[i].type==='purchase_pay'&&String(payments[i].batchId||'')===String(batchId))payments.splice(i,1);
+    return true;
+  }
+  window.deletePurchaseBatchV49=function(batchId){
+    if(!reverseBatch(batchId,true))return;
+    saveDB();localStorage.setItem('ns_payments',JSON.stringify(payments));refreshAll();toast('পুরো Purchase Entry deleted.');
+  };
+  let editingBatchId=null;
+  window.editPurchaseBatchV49=function(batchId){
+    const list=(purchases||[]).filter(p=>String(p.batchId||p.id)===String(batchId));if(!list.length)return;
+    const first=list[0];
+    if(!confirm('এই পুরো Purchase Entry Edit করার জন্য Purchase Entry-তে load করা হবে। আগের entry replace করে Save করবেন। Continue?'))return;
+    const payList=(payments||[]).filter(p=>p.type==='purchase_pay'&&String(p.batchId||'')===String(batchId));
+    if(!reverseBatch(batchId,false))return;
+    editingBatchId=batchId;
+    window.purchaseRowsV44=list.map(p=>({name:p.product||'',sku:p.sku||'',barcode:p.barcode||'',category:p.category||'General',purchase:N(p.price),mrp:N(p.mrp)||N(p.mrpPrice)||0,discount:N(p.discount)||0,sale:N(p.sale)||N(p.mrp)||N(p.mrpPrice)||0,qty:N(p.qty)||1,date:(p.date||'').slice(0,10),payment:p.payment||'Cash'}));
+    const top=$('purchaseSupplierTop');if(top)top.value=first.supplierId||'';
+    const dt=$('purchaseDateTop');if(dt)dt.value=(first.date||'').slice(0,10);
+    ['purchaseCashPaidV48','purchaseUpiPaidV48','purchaseCardPaidV48'].forEach(id=>{if($(id))$(id).value='0'});
+    payList.forEach(p=>{if(p.method==='Cash'&&$('purchaseCashPaidV48'))$('purchaseCashPaidV48').value=N(p.amount);else if(p.method==='UPI'&&$('purchaseUpiPaidV48'))$('purchaseUpiPaidV48').value=N(p.amount);else if($('purchaseCardPaidV48'))$('purchaseCardPaidV48').value=N($('purchaseCardPaidV48').value)+N(p.amount)});
+    showPage('purchase');setTimeout(()=>{try{renderGrid()}catch(_){};bindPayment();livePayment();toast('Purchase loaded for editing. Save Purchase to create the updated entry.');},100);
+  };
+  // Wrap save so an edit first removes the original batch (stock/due/payments were already reversed above).
+  const baseSave=window.savePurchaseExcelV44Final;
+  if(baseSave&&!baseSave.__v49wrap){
+    const wrapped=function(){
+      editingBatchId=null;
+      return baseSave();
+    };wrapped.__v49wrap=true;window.savePurchaseExcelV44Final=wrapped;
+  }
+
+  // Add full-batch buttons to Purchase History. Existing legacy rows remain individually editable/deletable.
+  function purchaseHistoryButtons(){
+    const tb=$('purchaseTable');if(!tb)return;
+    const list=(purchases||[]).slice().reverse();
+    [...tb.rows].forEach((row,i)=>{
+      const p=list[i];if(!p)return;
+      let cell=row.querySelector('.v49BatchActions');if(!cell){cell=row.insertCell(-1);cell.className='v49BatchActions'}
+      const bid=p.batchId||p.id;
+      cell.innerHTML=`<button class="btn light" onclick="editPurchaseBatchV49('${esc(bid)}')">Edit Entry</button> <button class="btn red" onclick="deletePurchaseBatchV49('${esc(bid)}')">Delete Entry</button>`;
+    });
+    const h=tb.closest('table')?.querySelector('thead tr');if(h&&!h.querySelector('.v49BatchHead'))h.insertAdjacentHTML('beforeend','<th class="v49BatchHead">Full Entry</th>');
+  }
+  function boot(){bindPayment();dashboardLinks();purchaseHistoryButtons();}
+  const oldRefresh=window.refreshAll;
+  window.refreshAll=function(){try{oldRefresh?.()}catch(_){};setTimeout(()=>{bindPayment();dashboardLinks();purchaseHistoryButtons();if(window.v49StockFilter)renderFilteredInventory();},60)};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,1200));setTimeout(boot,1600);
 })();
 </script>
 </body>
