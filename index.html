@@ -1268,7 +1268,7 @@ Data is stored locally in this browser.
     <div class="v2-note">Excel-এর মতো একের পর এক row-তে Product, Barcode, Purchase, Sale, MRP, Stock, Supplier এবং Payment দেওয়া যাবে।</div>
     <div class="v2-bulk-wrap" style="margin-top:15px">
       <table class="v2-bulk v2-table"><thead><tr>
-        <th>#</th><th>Product Name*</th><th>SKU</th><th>Barcode</th><th>Category</th><th>Purchase</th><th>Sale</th><th>MRP</th><th>Qty</th><th>Min</th><th>GST%</th><th>Supplier</th><th>Payment</th><th>Delete</th>
+        <th>#</th><th>Product Name*</th><th>SKU</th><th>Barcode</th><th>Category</th><th>Purchase</th><th>MRP</th><th>Discount %</th><th>Sale Price</th><th>Qty</th><th>Min</th><th>GST%</th><th>Supplier</th><th>Payment</th><th>Delete</th>
       </tr></thead><tbody id="bulkBody"></tbody></table>
     </div>
   </div>
@@ -1438,18 +1438,23 @@ Data is stored locally in this browser.
 </div>
 
 <div class="form-group">
-<label>Purchase Price</label>
-<input id="productPurchase" type="number" min="0">
+<label>MRP *</label>
+<input id="productMrp" type="number" min="0" step="0.01" placeholder="প্রথমে MRP দিন">
+</div>
+
+<div class="form-group">
+<label>Discount %</label>
+<input id="productDiscount" type="number" min="0" max="100" step="0.01" value="0" placeholder="যেমন 10">
 </div>
 
 <div class="form-group">
 <label>Selling Price</label>
-<input id="productSale" type="number" min="0">
+<input id="productSale" type="number" min="0" step="0.01" readonly placeholder="MRP ও Discount অনুযায়ী">
 </div>
 
 <div class="form-group">
-<label>MRP</label>
-<input id="productMrp" type="number" min="0">
+<label>Purchase Price</label>
+<input id="productPurchase" type="number" min="0" step="0.01">
 </div>
 
 <div class="form-group">
@@ -3627,19 +3632,49 @@ function unlockMargins(){
     return `<tr><td>${escapeHtml(p.name)}</td><td>${v2Money(p.purchase)}</td><td>${v2Money(p.sale)}</td><td>${v2Money(m)}</td><td>${pct.toFixed(1)}%</td><td>${v2Money(max)} / unit</td></tr>`;
   }).join("");
 }
+function updateProductSaleFromDiscount3(){
+  const mrp=Number(q("productMrp")?.value||0);
+  const disc=Math.min(100,Math.max(0,Number(q("productDiscount")?.value||0)));
+  const sale=q("productSale");
+  if(sale) sale.value=mrp ? (mrp*(1-disc/100)).toFixed(2) : "";
+}
+function bindProductPrice3(){
+  ["productMrp","productDiscount"].forEach(id3=>{
+    const el=q(id3); if(el && !el.dataset.priceBound3){el.addEventListener("input",updateProductSaleFromDiscount3);el.dataset.priceBound3="1";}
+  });
+}
+function bindExcelEnter3(tr){
+  const inputs=[...tr.querySelectorAll("input,select")];
+  inputs.forEach((el,i)=>{
+    if(el.dataset.enterBound3)return;
+    el.dataset.enterBound3="1";
+    el.addEventListener("keydown",e=>{
+      if(e.key!=="Enter")return;
+      e.preventDefault();
+      if(i<inputs.length-1){inputs[i+1].focus();inputs[i+1].select?.();return;}
+      const body=q("bulkBody"), rows=[...body.rows];
+      if(tr===rows[rows.length-1]){addBulkRow();const nr=body.rows[body.rows.length-1];setTimeout(()=>nr.querySelector("input,select")?.focus(),0);}
+      else rows[rows.indexOf(tr)+1]?.querySelector("input,select")?.focus();
+    });
+  });
+}
 function saveSellerSettings(){settings.marginSecret=sellerSecret;saveDB();}
 
 function addBulkRow(data={}){
   const body=q("bulkBody"), tr=document.createElement("tr");
-  const vals={name:"",sku:"",barcode:generateBarcodeNumber(),category:"General",purchase:"",sale:"",mrp:"",qty:1,min:5,gst:0,supplier:"",payment:"Cash",...data};
+  const vals={name:"",sku:"",barcode:generateBarcodeNumber(),category:"General",purchase:"",sale:"",mrp:"",discount:0,qty:1,min:5,gst:0,supplier:"",payment:"Cash",...data};
   tr.innerHTML=`<td></td>
   <td><input class="bn" value="${escapeHtml(vals.name)}"></td><td><input class="bsku" value="${escapeHtml(vals.sku)}"></td><td><input class="bbc" value="${escapeHtml(vals.barcode)}"></td>
-  <td><input class="bcat" value="${escapeHtml(vals.category)}"></td><td><input class="bpur" type="number" value="${vals.purchase}"></td><td><input class="bsale" type="number" value="${vals.sale}"></td><td><input class="bmrp" type="number" value="${vals.mrp}"></td>
+  <td><input class="bcat" value="${escapeHtml(vals.category)}"></td><td><input class="bpur" type="number" min="0" step="0.01" value="${vals.purchase}"></td><td><input class="bmrp" type="number" min="0" step="0.01" value="${vals.mrp}"></td><td><input class="bdisc" type="number" min="0" max="100" step="0.01" value="${vals.discount||0}" placeholder="%"></td><td><input class="bsale" type="number" min="0" step="0.01" value="${vals.sale}" readonly></td>
   <td><input class="bqty" type="number" min="0" value="${vals.qty}"></td><td><input class="bmin" type="number" min="0" value="${vals.min}"></td><td><input class="bgst" type="number" min="0" value="${vals.gst}"></td>
   <td><select class="bsup">${suppliers.map(s=>`<option ${s.name===vals.supplier?"selected":""}>${escapeHtml(s.name)}</option>`).join("")}<option value="">None</option></select></td>
   <td><select class="bpay"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Credit</option></select></td>
   <td><button class="btn red" style="padding:5px 8px" onclick="this.closest('tr').remove();numberBulkRows()">×</button></td>`;
   body.appendChild(tr);numberBulkRows();
+  const mrp=tr.querySelector(".bmrp"), disc=tr.querySelector(".bdisc"), sale=tr.querySelector(".bsale");
+  const calc=()=>{ const m=Number(mrp.value||0), d=Math.min(100,Math.max(0,Number(disc.value||0))); sale.value=m ? (m*(1-d/100)).toFixed(2) : ""; };
+  mrp.addEventListener("input",calc); disc.addEventListener("input",calc); calc();
+  bindExcelEnter3(tr);
 }
 function addBulkRows(n=10){for(let i=0;i<n;i++)addBulkRow();}
 function numberBulkRows(){[...q("bulkBody").rows].forEach((r,i)=>r.cells[0].textContent=i+1);}
@@ -4446,5 +4481,163 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
   document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,100));setTimeout(boot,200);
 })();
 </script>
+
+<script>
+/* ===== V4.4 PURCHASE WORKFLOW + UI CLEANUP ===== */
+(function(){
+  const $=id=>document.getElementById(id), N=v=>Number(v||0), esc=v=>escapeHtml(v);
+  const today=()=>new Date().toISOString().slice(0,10);
+
+  function addPurchaseHeaderControls(){
+    const pg=$('purchase'); if(!pg || pg.dataset.v44)return; pg.dataset.v44='1';
+    const h=pg.querySelector(':scope > h2');
+    if(h){
+      const bar=document.createElement('div'); bar.className='v44-purchase-head';
+      bar.innerHTML='<div><strong>Supplier *</strong><select id="purchaseSupplierTop"></select></div><div><strong>Purchase Date *</strong><input id="purchaseDateTop" type="date" required></div>';
+      h.insertAdjacentElement('afterend',bar);
+      const oldS=$('purchaseSupplier'), oldD=$('purchaseDate');
+      const sync=()=>{ if(oldS && $('purchaseSupplierTop')) $('purchaseSupplierTop').value=oldS.value; if(oldD&&$('purchaseDateTop')) $('purchaseDateTop').value=oldD.value||today(); };
+      const copy=()=>{if(oldS)$('purchaseSupplierTop').value=oldS.value;if(oldD)$('purchaseDateTop').value=oldD.value||today()};
+      $('purchaseSupplierTop').onchange=e=>{if(oldS){oldS.value=e.target.value;oldS.dispatchEvent(new Event('change',{bubbles:true}));}};
+      $('purchaseDateTop').onchange=e=>{if(oldD){oldD.value=e.target.value;oldD.dispatchEvent(new Event('change',{bubbles:true}));}};
+      sync(); setTimeout(sync,100);
+    }
+  }
+
+  function ensurePurchaseFooter(){
+    const grid=$('purchaseQuickGrid'); if(!grid || $('purchaseFooterV44'))return;
+    const f=document.createElement('div'); f.id='purchaseFooterV44'; f.className='v44-purchase-footer';
+    f.innerHTML=`<div class="v44-total"><span>Total Purchase Amount</span><strong id="purchaseGrandTotalV44">₹0.00</strong></div>
+      <div class="v44-paygrid">
+        <div><label>Payment Date *</label><input id="purchasePayDateV44" type="date" required></div>
+        <div><label>Payment Method</label><select id="purchasePayMethodV44"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Credit</option></select></div>
+        <div><label>Amount Paid</label><input id="purchasePaidV44" type="number" min="0" step="0.01" value="0"></div>
+        <div><label>Reference / Note</label><input id="purchasePayNoteV44" placeholder="Optional"></div>
+      </div>
+      <div class="v44-footer-actions"><button class="btn green" type="button" onclick="savePurchaseExcelV44Final()">💾 Save Purchase + Payment</button><button class="btn" type="button" onclick="printPurchaseBarcodesV44()">🖨️ Print Barcodes</button></div>`;
+    grid.appendChild(f); $('purchasePayDateV44').value=today();
+    $('purchasePaidV44').addEventListener('input',updatePurchaseFooterV44);
+  }
+
+  function getRows(){return Array.isArray(window.purchaseRowsV44)?window.purchaseRowsV44:[]}
+  function updatePurchaseFooterV44(){
+    const total=getRows().reduce((a,r)=>a+N(r.purchase)*Math.max(0,N(r.qty)),0);
+    if($('purchaseGrandTotalV44'))$('purchaseGrandTotalV44').textContent='₹'+total.toFixed(2);
+    if($('purchasePaidV44') && !$('purchasePaidV44').dataset.manual)$('purchasePaidV44').value=total.toFixed(2);
+  }
+  window.updatePurchaseFooterV44=updatePurchaseFooterV44;
+
+  /* Replace the internal purchase row store with a globally accessible one and keep Excel behavior. */
+  if(!Array.isArray(window.purchaseRowsV44))window.purchaseRowsV44=[];
+  function rows(){return window.purchaseRowsV44}
+  function selectedSupplier(){return $('purchaseSupplier')?.value||$('purchaseSupplierTop')?.value||''}
+
+  function rowHtml44(r,i){
+    const sups=(window.suppliers||[]).map(s=>`<option value="${esc(s.name)}">${esc(s.name)}</option>`).join('');
+    return `<tr data-i="${i}"><td>${i+1}</td>
+      <td><input class="px-name" value="${esc(r.name||'')}" placeholder="Product" required></td>
+      <td><input class="px-sku" value="${esc(r.sku||'')}" placeholder="SKU"></td>
+      <td><input class="px-barcode" value="${esc(r.barcode||'')}" placeholder="Scan barcode"></td>
+      <td><input class="px-cat" value="${esc(r.category||'General')}" placeholder="Category"></td>
+      <td><input class="px-pur" type="number" min="0" step="0.01" value="${N(r.purchase)}" required></td>
+      <td><input class="px-mrp" type="number" min="0" step="0.01" value="${N(r.mrp)}" required></td>
+      <td><input class="px-sale" type="number" min="0" step="0.01" value="${N(r.sale)}" required></td>
+      <td><input class="px-qty" type="number" min="1" value="${Math.max(1,N(r.qty)||1)}" required></td>
+      <td><select class="px-sup"><option value="">Select</option>${sups}</select></td>
+      <td><input class="px-date" type="date" value="${r.date||today()}" required></td>
+      <td><select class="px-pay"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Credit</option></select></td>
+      <td><button class="btn red" type="button" onclick="removePurchaseExcelRowV44(${i})">×</button></td></tr>`;
+  }
+  function render44(){
+    const body=$('purchaseExcelBodyV43');if(!body)return;
+    body.innerHTML=rows().map(rowHtml44).join('');
+    rows().forEach((r,i)=>{const tr=body.rows[i];if(!tr)return;tr.querySelector('.px-sup').value=r.supplier||selectedSupplier();tr.querySelector('.px-pay').value=r.payment||'Cash';});
+    wire44();updatePurchaseFooterV44();
+  }
+  window.addPurchaseExcelRowV44=function(data={}){rows().push({name:'',sku:'',barcode:'',category:'General',purchase:0,mrp:0,sale:0,qty:1,supplier:selectedSupplier(),date:$('purchaseDate')?.value||today(),payment:'Cash',...data});render44();setTimeout(()=>{const b=$('purchaseExcelBodyV43');b?.rows?.[b.rows.length-1]?.querySelector('.px-name')?.focus()},20)};
+  window.removePurchaseExcelRowV44=function(i){rows().splice(i,1);render44()};
+
+  function wire44(){
+    const body=$('purchaseExcelBodyV43');if(!body||body.dataset.v44)return;body.dataset.v44='1';
+    body.addEventListener('keydown',e=>{
+      if(e.key!=='Enter')return;const t=e.target;if(!t.matches('input,select'))return;e.preventDefault();
+      const tr=t.closest('tr'), cells=[...tr.querySelectorAll('input,select')],idx=cells.indexOf(t);
+      if(idx<cells.length-1){cells[idx+1].focus();cells[idx+1].select?.();return}
+      const ri=[...body.rows].indexOf(tr);if(ri===body.rows.length-1)window.addPurchaseExcelRowV44();else body.rows[ri+1].querySelector('input,select')?.focus();
+    });
+    body.addEventListener('input',e=>{
+      const tr=e.target.closest('tr');if(!tr)return;const i=Number(tr.dataset.i), map={'px-name':'name','px-sku':'sku','px-barcode':'barcode','px-cat':'category','px-pur':'purchase','px-mrp':'mrp','px-sale':'sale','px-qty':'qty','px-date':'date'};
+      for(const c in map)if(e.target.classList.contains(c))rows()[i][map[c]]=e.target.value;updatePurchaseFooterV44();
+    });
+    body.addEventListener('change',e=>{const tr=e.target.closest('tr');if(!tr)return;const i=Number(tr.dataset.i);if(e.target.classList.contains('px-sup'))rows()[i].supplier=e.target.value;if(e.target.classList.contains('px-pay'))rows()[i].payment=e.target.value;if(e.target.classList.contains('px-date'))rows()[i].date=e.target.value;});
+  }
+
+  /* Search/scan: exact barcode + Enter adds row; otherwise search list. */
+  window.searchPurchaseProductV44=function(){
+    const inp=$('purchaseProductSearch'),box=$('purchaseSearchResultsV43');if(!inp||!box)return;const q=inp.value.trim().toLowerCase();
+    if(!q){box.innerHTML='';return}
+    const exact=products.find(p=>String(p.barcode||'').toLowerCase()===q);if(exact){addExisting44(exact);return}
+    const list=products.filter(p=>[p.barcode,p.name,p.sku,p.category].some(v=>String(v||'').toLowerCase().includes(q))).slice(0,15);
+    box.innerHTML=list.map(p=>`<button type="button" class="v2-action" style="margin:4px" onclick="addExistingPurchaseV44('${esc(p.id)}')">${esc(p.name)} — ${esc(p.barcode||'')}</button>`).join('')||'<p style="padding:10px">No product found.</p>';
+  };
+  function addExisting44(p){rows().push({name:p.name,sku:p.sku||'',barcode:p.barcode||'',category:p.category||'General',purchase:p.purchase||0,mrp:p.mrp||0,sale:p.sale||0,qty:1,supplier:selectedSupplier(),date:$('purchaseDate')?.value||today(),payment:'Cash'});render44();$('purchaseProductSearch').value='';$('purchaseSearchResultsV43').innerHTML='';setTimeout(()=>{$('purchaseExcelBodyV43')?.rows?.[rows().length-1]?.querySelector('.px-qty')?.focus()},20)}
+  window.addExistingPurchaseV44=addExisting44;window.addExistingProductToPurchaseV43=pid=>{const p=products.find(x=>x.id===pid);if(p)addExisting44(p)};
+  window.addExistingProductToPurchaseV44=pid=>{const p=products.find(x=>x.id===pid);if(p)addExisting44(p)};
+
+  /* Product modal from Purchase stays on Purchase and creates a row, not a separate bulk page. */
+  let fromPurchase44=false;
+  const oldOpen44=window.openProductModal;
+  window.openProductModal=function(){fromPurchase44=document.querySelector('.page.active')?.id==='purchase';oldOpen44();};
+  const oldSave44=window.saveProduct;
+  window.saveProduct=function(){
+    if(!fromPurchase44)return oldSave44();
+    const name=$('productName')?.value.trim();if(!name){toast('Product name is required.');$('productName')?.focus();return}
+    const p={id:id(),name,sku:$('productSku')?.value.trim()||'',barcode:$('productBarcode')?.value.trim()||generateBarcodeNumber(),category:$('productCategory')?.value.trim()||'General',purchase:N($('productPurchase')?.value),sale:N($('productSale')?.value),mrp:N($('productMrp')?.value),stock:0,minStock:N($('productMinStock')?.value)||5,gst:N($('productGst')?.value),hsn:$('productHsn')?.value.trim()||'',createdAt:new Date().toISOString()};
+    products.push(p);saveDB();closeModal('productModal');
+    rows().push({name:p.name,sku:p.sku,barcode:p.barcode,category:p.category,purchase:p.purchase,mrp:p.mrp,sale:p.sale,qty:Math.max(1,N($('productStock')?.value)||1),supplier:selectedSupplier(),date:$('purchaseDate')?.value||today(),payment:'Cash'});
+    fromPurchase44=false;render44();setTimeout(()=>{$('purchaseExcelBodyV43')?.rows?.[rows().length-1]?.querySelector('.px-name')?.focus()},30);toast('Product added to the next Purchase row.');
+  };
+
+  /* Save all rows + payment + barcode print data. */
+  window.savePurchaseExcelV44Final=function(){
+    const rs=rows().filter(r=>String(r.name||'').trim());if(!rs.length){toast('Add at least one product.');return}
+    const date=$('purchaseDate')?.value||$('purchaseDateTop')?.value;if(!date){toast('Purchase Date is required.');return}
+    const supplier=selectedSupplier();if(!supplier){toast('Supplier is required.');return}
+    const payDate=$('purchasePayDateV44')?.value;if(!payDate){toast('Payment Date is required.');return}
+    let total=0,count=0;
+    rs.forEach(r=>{const qty=Math.max(1,N(r.qty)),pur=N(r.purchase),sale=N(r.sale),mrp=N(r.mrp);let p=products.find(x=>(r.barcode&&x.barcode===r.barcode)||(r.sku&&r.sku===r.sku));
+      if(!p){p={id:id(),name:r.name,sku:r.sku||'',barcode:r.barcode||generateBarcodeNumber(),category:r.category||'General',purchase:pur,sale,mrp,stock:0,minStock:5,gst:0,hsn:'',createdAt:new Date().toISOString()};products.push(p)}
+      else{p.name=r.name;p.sku=r.sku||p.sku;p.barcode=r.barcode||p.barcode;p.category=r.category||p.category;p.purchase=pur;p.sale=sale;p.mrp=mrp}
+      p.stock=N(p.stock)+qty;total+=qty*pur;
+      purchases.push({id:id(),date:new Date(date+'T12:00:00').toISOString(),productId:p.id,product:p.name,qty,price:pur,total:qty*pur,supplier,barcode:p.barcode,payment:r.payment||'Cash'});
+      if((r.payment||'Cash')==='Credit'){const sp=suppliers.find(x=>x.name===supplier);if(sp)sp.due=N(sp.due)+qty*pur}
+      count++;
+    });
+    const paid=N($('purchasePaidV44')?.value), method=$('purchasePayMethodV44')?.value||'Cash';
+    if(paid>0){payments.push({id:id(),date:new Date(payDate+'T12:00:00').toISOString(),type:'purchase_pay',method,amount:paid,reference:$('purchasePayNoteV44')?.value||'',party:supplier,supplier});}
+    saveDB();localStorage.setItem('ns_payments',JSON.stringify(payments));
+    window.purchaseBarcodeBatchV44=rs.map(r=>({...r,qty:Math.max(1,N(r.qty)),barcode:r.barcode}));
+    window.purchaseRowsV44=[];render44();if($('purchasePaidV44'))$('purchasePaidV44').dataset.manual='';refreshAll();toast(count+' purchase rows saved. Total ₹'+total.toFixed(2));
+  };
+
+  window.printPurchaseBarcodesV44=function(){
+    const rs=(window.purchaseBarcodeBatchV44||[]).filter(r=>N(r.qty)>0);if(!rs.length){toast('Save a purchase first to print its barcodes.');return}
+    const area=$('printArea')||document.body;let html='';rs.forEach(r=>{const p=products.find(x=>x.barcode===r.barcode)||r;for(let i=0;i<Math.max(0,N(r.qty));i++)html+=`<div class="v44-label"><strong>${esc(settings.store||'NAMITA STORE')}</strong><div>${esc(p.name||r.name)}</div><svg class="v44-svg" data-code="${esc(p.barcode||r.barcode||'')}"></svg><small>${esc(p.barcode||r.barcode||'')}</small><b>₹${N(p.sale).toFixed(2)}</b></div>`});
+    area.innerHTML=html;area.style.display='block';document.querySelectorAll('.v44-svg').forEach(svg=>{try{svg.outerHTML=code128Svg(svg.dataset.code)}catch(e){}});window.print();setTimeout(()=>{area.style.display='';},500);
+  };
+
+  function boot44(){addPurchaseHeaderControls();ensurePurchaseFooter();wire44();updatePurchaseFooterV44();
+    const inp=$('purchaseProductSearch');if(inp&&!inp.dataset.v44){inp.dataset.v44='1';inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();window.searchPurchaseProductV44()}})}
+  }
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(boot44,150));setTimeout(boot44,300);
+})();
+</script>
+<style>
+.v44-purchase-head{display:grid;grid-template-columns:1fr 260px;gap:12px;background:#fff;border:1px solid #e5e7ef;border-radius:12px;padding:12px 15px;margin:10px 0 15px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.v44-purchase-head div{display:flex;flex-direction:column;gap:5px}.v44-purchase-head strong,.v44-paygrid label{font-size:12px;color:#555}.v44-purchase-head select,.v44-purchase-head input,.v44-paygrid input,.v44-paygrid select{padding:9px;border:1px solid #d6d9e0;border-radius:7px;background:#fff}
+.v44-purchase-footer{margin-top:15px;border-top:2px solid #e9ebf2;padding-top:15px}.v44-total{display:flex;justify-content:space-between;align-items:center;background:#f7f8fb;border-radius:10px;padding:15px;margin-bottom:12px}.v44-total strong{font-size:24px}.v44-paygrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.v44-paygrid>div{display:flex;flex-direction:column;gap:5px}.v44-footer-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.v44-label{width:38mm;height:25mm;border:1px solid #111;padding:2mm;text-align:center;display:flex;flex-direction:column;justify-content:center;font:10px Arial;page-break-inside:avoid}.v44-label svg{width:34mm;height:9mm;margin:1mm auto}.v44-label small{font-size:8px}
+@media(max-width:800px){.v44-purchase-head,.v44-paygrid{grid-template-columns:1fr}.v44-total{flex-direction:column;align-items:flex-start;gap:5px}}
+</style>
 </body>
 </html>
