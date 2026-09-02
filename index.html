@@ -1,518 +1,157 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NAMITA STORE - POS & Inventory</title>
-
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;}
-body{background:#f4f6f9;color:#222;}
-button,input,select,textarea{font:inherit;}
-button{cursor:pointer;}
-.app{display:flex;min-height:100vh;}
-.sidebar{width:245px;background:#171b2d;color:white;padding:20px 12px;position:fixed;left:0;top:0;bottom:0;overflow-y:auto;z-index:10;}
-.logo{text-align:center;padding:10px 5px 25px;border-bottom:1px solid #33384d;margin-bottom:15px;}
-.logo h2{color:#fff;font-size:22px;}
-.logo small{color:#aeb5ca;}
-.menu{list-style:none;}
-.menu li{margin:5px 0;}
-.menu button{width:100%;border:0;background:transparent;color:#dce1ef;padding:13px 15px;text-align:left;border-radius:8px;transition:.2s;}
-.menu button:hover,.menu button.active{background:#5865f2;color:#fff;}
-.main{margin-left:245px;width:calc(100% - 245px);min-height:100vh;}
-.topbar{height:65px;background:white;border-bottom:1px solid #ddd;display:flex;align-items:center;justify-content:space-between;padding:0 25px;position:sticky;top:0;z-index:5;}
-.store-status{display:flex;align-items:center;gap:10px;color:#555;}
-.dot{width:10px;height:10px;background:#20b26b;border-radius:50%;}
-.content{padding:25px;}
-.page{display:none;}
-.page.active{display:block;}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:20px 0;}
-.card{background:white;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.06);cursor:pointer;}
-.card .label{color:#777;font-size:14px;}
-.card .value{font-size:28px;font-weight:bold;margin-top:8px;}
-.card.blue{border-left:5px solid #5865f2;}
-.card.green{border-left:5px solid #16a673;}
-.card.orange{border-left:5px solid #f39c12;}
-.card.red{border-left:5px solid #e74c3c;}
-.panel{background:white;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.06);margin-bottom:20px;}
-.btn{border:0;border-radius:7px;padding:10px 15px;color:white;background:#5865f2;}
-.btn.green{background:#16a673;}.btn.red{background:#e74c3c;}.btn.light{background:#edf0f5;color:#333;}
-.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;}
-.form-group{display:flex;flex-direction:column;gap:6px;}
-.form-group input,.form-group select,.search{border:1px solid #d6d9e0;border-radius:7px;padding:10px;outline:none;}
-.table-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;}
-th,td{padding:11px 10px;border-bottom:1px solid #eee;text-align:left;font-size:14px;}
-th{background:#f7f8fb;color:#555;}
-.badge{display:inline-block;padding:5px 8px;border-radius:20px;font-size:12px;}
-.badge.green{background:#dff7ec;color:#087f4d;}
-.badge.red{background:#fde2e2;color:#b42318;}
-.badge.orange{background:#fff0d5;color:#9a6200;}
-.pos-layout{display:grid;grid-template-columns:1.7fr 1fr;gap:20px;}
-.pos-search{display:flex;gap:8px;margin-bottom:15px;}
-.pos-search input{flex:1;padding:13px;border:1px solid #ddd;border-radius:7px;}
-.product-results{max-height:300px;overflow:auto;border:1px solid #eee;}
-.product-item{padding:12px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;}
-.cart{min-height:250px;}
-.cart-row{display:grid;grid-template-columns:1fr 70px 80px 35px;gap:5px;align-items:center;border-bottom:1px solid #eee;padding:10px 0;font-size:13px;}
-.qty-control{display:flex;gap:3px;align-items:center;}
-.qty-control button{width:24px;height:24px;border:0;background:#edf0f5;border-radius:4px;}
-.total-row{display:flex;justify-content:space-between;margin:8px 0;}
-.grand-total{font-size:22px;font-weight:bold;}
-.v3-inline{display:flex;gap:6px;align-items:center;}
-.v3-smallbtn{border:0;border-radius:6px;padding:6px 9px;cursor:pointer;color:#fff;}
-.v3-plus{background:#16a673;}.v3-minus{background:#e74c3c;}
-.toast{position:fixed;right:20px;bottom:20px;background:#222;color:white;padding:13px 18px;border-radius:8px;display:none;z-index:200;}
-.toast.show{display:block;}
-.v2-bulk-wrap{overflow:auto;border:1px solid #e3e5eb;border-radius:10px;}
-.v2-bulk{min-width:1000px;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAMITA STORE - Inventory Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-gray-100 p-6">
 
-<body>
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold mb-4 text-center">NAMITA STORE - Inventory</h1>
 
-<div class="app">
-
-<aside class="sidebar">
-<div class="logo"><h2>NAMITA STORE</h2><small>POS & Inventory</small></div>
-<ul class="menu">
-<li><button class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</button></li>
-<li><button onclick="showPage('products',this)">📦 Products</button></li>
-<li><button onclick="showPage('pos',this)">🛒 POS Billing</button></li>
-<li><button onclick="showPage('purchase',this)">🚚 Purchase</button></li>
-<li><button onclick="showPage('inventory',this)">📊 Inventory</button></li>
-<li><button onclick="showPage('customers',this)">👥 Customers</button></li>
-<li><button onclick="showPage('suppliers',this)">🏭 Suppliers</button></li>
-<li><button onclick="showPage('reports',this)">📈 Reports</button></li>
-</ul>
-</aside>
-
-<main class="main">
-<header class="topbar">
-<h3 id="pageTitle">DASHBOARD</h3>
-<div class="store-status"><span class="dot"></span><span>System Online</span></div>
-</header>
-
-<div class="content">
-
-<!-- DASHBOARD -->
-<section id="dashboard" class="page active">
-<h2>Dashboard</h2>
-<p style="color:#777;margin-top:5px;">NAMITA STORE Business Management System</p>
-<div class="cards">
-  <div class="card red" onclick="filterProductsByStatus('low')"><div class="label">Low Stock</div><div class="value" id="lowStock">0</div></div>
-  <div class="card green" onclick="filterProductsByStatus('in')"><div class="label">In Stock</div><div class="value" id="dashboardInStock">0</div></div>
-  <div class="card orange" onclick="filterProductsByStatus('out')"><div class="label">Out of Stock</div><div class="value" id="dashboardOutStock">0</div></div>
-</div>
-</section>
-
-<!-- POS -->
-<section id="pos" class="page">
-<h2>POS Billing</h2>
-<div class="pos-layout">
-<div class="panel">
-<div class="pos-search">
-<input id="posSearch" placeholder="Scan barcode or search product..." oninput="searchPOS()">
-<button class="btn" onclick="searchPOS()">Search</button>
-</div>
-<div id="posResults" class="product-results"></div>
-</div>
-<div class="panel">
-<h3>Current Cart</h3>
-<div class="form-group" style="margin:10px 0"><label>Sale Date *</label><input id="saleDate" type="date"></div>
-<div id="cart" class="cart"></div>
-<div style="border-top:2px solid #eee;margin-top:15px;padding-top:15px;">
-<div class="total-row"><span>Subtotal</span><strong id="subtotal">₹0</strong></div>
-<div class="total-row"><span>Discount</span><input id="discount" type="number" value="0" style="width:90px;padding:5px" oninput="renderCart()"></div>
-<div class="total-row grand-total"><span>Total</span><strong id="grandTotal">₹0</strong></div>
-<div class="form-group" style="margin-top:15px;">
-<label>Payment Method</label>
-<select id="paymentMethod"><option>Cash</option><option>UPI</option><option>Card</option><option>Credit</option></select>
-</div>
-<button class="btn green" style="width:100%;margin-top:15px;padding:13px;" onclick="completeSale()">💰 Complete Sale</button>
-<button class="btn light" style="width:100%;margin-top:8px;" onclick="clearCart()">Clear Cart</button>
-</div>
-</div>
-</div>
-</section>
-
-<!-- PRODUCTS -->
-<section id="products" class="page">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-<h2>Product Management</h2>
-<button class="btn green" onclick="openAddProductPrompt()">➕ Add Product</button>
-</div>
-<div class="panel">
-<input class="search" style="width:100%;margin-bottom:15px;" placeholder="Search product..." oninput="renderProducts(this.value)">
-<div class="table-wrap">
-<table>
-<thead><tr><th>Barcode</th><th>Product</th><th>Category</th><th>Purchase</th><th>Sale Price</th><th>MRP</th><th>Stock</th><th>Action</th></tr></thead>
-<tbody id="productTable"></tbody>
-</table>
-</div>
-</div>
-</section>
-
-<!-- PURCHASE -->
-<section id="purchase" class="page">
-<h2>Purchase Entry</h2>
-<div class="panel">
-<h3>Purchase Entry — Excel Style</h3>
-<div class="v2-bulk-wrap" style="margin-top:12px">
-<table class="v2-bulk">
-<thead><tr><th>Product Name *</th><th>Barcode</th><th>Category</th><th>Purchase Price</th><th>Sale Price</th><th>Qty *</th><th>Supplier</th><th>Date</th></tr></thead>
-<tbody id="purchaseExcelBody">
-<tr>
-<td><input type="text" class="p-name" placeholder="Name"></td>
-<td><input type="text" class="p-barcode" placeholder="Barcode"></td>
-<td><input type="text" class="p-cat" placeholder="Category"></td>
-<td><input type="number" class="p-purchase" placeholder="0"></td>
-<td><input type="number" class="p-sale" placeholder="0"></td>
-<td><input type="number" class="p-qty" value="1"></td>
-<td><input type="text" class="p-supplier" placeholder="Supplier"></td>
-<td><input type="date" class="p-date"></td>
-</tr>
-</tbody>
-</table>
-</div>
-<button class="btn green" style="margin-top:15px;" onclick="addPurchase()">📥 Save Purchase</button>
-</div>
-<div class="panel">
-<h3>Purchase History</h3>
-<div class="table-wrap">
-<table>
-<thead><tr><th>Date</th><th>Product</th><th>Quantity</th><th>Price</th><th>Total</th></tr></thead>
-<tbody id="purchaseTable"></tbody>
-</table>
-</div>
-</div>
-</section>
-
-<!-- INVENTORY -->
-<section id="inventory" class="page">
-<h2>Inventory / Stock</h2>
-<div class="panel">
-<input class="search" style="width:100%;margin-bottom:15px;" placeholder="Filter inventory..." oninput="renderInventory(this.value)">
-<div class="table-wrap">
-<table>
-<thead><tr><th>Barcode</th><th>Product</th><th>Category</th><th>Stock</th><th>Status</th></tr></thead>
-<tbody id="inventoryTable"></tbody>
-</table>
-</div>
-</div>
-</section>
-
-<!-- CUSTOMERS -->
-<section id="customers" class="page">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-<h2>Customers</h2>
-<button class="btn green" onclick="openCustomerModal()">➕ Add Customer</button>
-</div>
-<div class="panel">
-<div class="table-wrap"><table><thead><tr><th>Name</th><th>Phone</th><th>Action</th></tr></thead><tbody id="customerTable"></tbody></table></div>
-</div>
-</section>
-
-<!-- SUPPLIERS -->
-<section id="suppliers" class="page">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-<h2>Suppliers</h2>
-<button class="btn green" onclick="openSupplierModal()">➕ Add Supplier</button>
-</div>
-<div class="panel">
-<div class="table-wrap"><table><thead><tr><th>Name</th><th>Phone</th><th>Action</th></tr></thead><tbody id="supplierTable"></tbody></table></div>
-</div>
-</section>
-
-<!-- REPORTS -->
-<section id="reports" class="page">
-<h2>Reports</h2>
-<div class="cards">
-<div class="card blue"><div class="label">Total Sales</div><div class="value" id="reportSales">₹0</div></div>
-<div class="card green"><div class="label">Total Purchases</div><div class="value" id="reportPurchases">₹0</div></div>
-<div class="card orange"><div class="label">Transactions</div><div class="value" id="reportTransactions">0</div></div>
-<div class="card red"><div class="label">Estimated Profit</div><div class="value" id="reportProfit">₹0</div></div>
-</div>
-</section>
-
-</div>
-</main>
-</div>
-
-<script>
-let state = {
-  products: JSON.parse(localStorage.getItem('ns_products')) || [],
-  purchases: JSON.parse(localStorage.getItem('ns_purchases')) || [],
-  sales: JSON.parse(localStorage.getItem('ns_sales')) || [],
-  customers: JSON.parse(localStorage.getItem('ns_customers')) || [],
-  suppliers: JSON.parse(localStorage.getItem('ns_suppliers')) || [],
-  cart: []
-};
-
-function saveData() {
-  localStorage.setItem('ns_products', JSON.stringify(state.products));
-  localStorage.setItem('ns_purchases', JSON.stringify(state.purchases));
-  localStorage.setItem('ns_sales', JSON.stringify(state.sales));
-  localStorage.setItem('ns_customers', JSON.stringify(state.customers));
-  localStorage.setItem('ns_suppliers', JSON.stringify(state.suppliers));
-  updateDashboard();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const today = new Date().toISOString().split('T')[0];
-  if (document.getElementById('saleDate')) document.getElementById('saleDate').value = today;
-  document.querySelectorAll('.p-date').forEach(e => e.value = today);
-
-  renderProducts();
-  renderInventory();
-  renderPurchases();
-  renderCustomers();
-  renderSuppliers();
-  updateDashboard();
-});
-
-function showPage(pageId, btnElement) {
-  document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-  document.querySelectorAll('.menu button').forEach(btn => btn.classList.remove('active'));
-  const targetPage = document.getElementById(pageId);
-  if (targetPage) targetPage.classList.add('active');
-  if (btnElement) btnElement.classList.add('active');
-  document.getElementById('pageTitle').innerText = pageId.toUpperCase();
-}
-
-function showToast(msg) {
-  let toast = document.querySelector('.toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.className = 'toast';
-    document.body.appendChild(toast);
-  }
-  toast.innerText = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-function updateDashboard() {
-  const lowStock = state.products.filter(p => p.stock > 0 && p.stock <= 5);
-  const inStock = state.products.filter(p => p.stock > 5);
-  const outStock = state.products.filter(p => p.stock <= 0);
-
-  document.getElementById('lowStock').innerText = lowStock.length;
-  document.getElementById('dashboardInStock').innerText = inStock.length;
-  document.getElementById('dashboardOutStock').innerText = outStock.length;
-
-  const totalSales = state.sales.reduce((sum, s) => sum + Number(s.grandTotal || 0), 0);
-  const totalPurchases = state.purchases.reduce((sum, p) => sum + (Number(p.price || 0) * Number(p.qty || 0)), 0);
-
-  document.getElementById('reportSales').innerText = '₹' + totalSales;
-  document.getElementById('reportPurchases').innerText = '₹' + totalPurchases;
-  document.getElementById('reportTransactions').innerText = state.sales.length;
-  document.getElementById('reportProfit').innerText = '₹' + (totalSales - totalPurchases);
-}
-
-function filterProductsByStatus(status) {
-  showPage('products');
-  let filtered = [];
-  if (status === 'low') filtered = state.products.filter(p => p.stock > 0 && p.stock <= 5);
-  if (status === 'in') filtered = state.products.filter(p => p.stock > 5);
-  if (status === 'out') filtered = state.products.filter(p => p.stock <= 0);
-  renderProductsCustom(filtered);
-}
-
-function renderProducts(query = '') {
-  const filtered = state.products.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
-  renderProductsCustom(filtered);
-}
-
-function renderProductsCustom(list) {
-  const tbody = document.getElementById('productTable');
-  if (!tbody) return;
-  tbody.innerHTML = list.map(p => `
-    <tr>
-      <td><code>${p.barcode || 'N/A'}</code></td>
-      <td><b>${p.name}</b></td>
-      <td>${p.category || 'General'}</td>
-      <td>₹${p.purchasePrice || 0}</td>
-      <td>₹${p.salePrice || 0}</td>
-      <td>₹${p.mrp || 0}</td>
-      <td>
-        <div class="v3-inline">
-          <button class="v3-smallbtn v3-minus" onclick="adjustStock('${p.id}', -1)">-</button>
-          <b>${p.stock}</b>
-          <button class="v3-smallbtn v3-plus" onclick="adjustStock('${p.id}', 1)">+</button>
+        <!-- Customer Section -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Customers</h2>
+                <button onclick="openCustomerModal()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Customer</button>
+            </div>
+            <table class="w-full text-left border-collapse border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="border p-2">Name</th>
+                        <th class="border p-2">Phone</th>
+                        <th class="border p-2">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="customerTable"></tbody>
+            </table>
         </div>
-      </td>
-      <td>
-        <button class="btn light" onclick="printSingleBarcode('${p.id}')">🏷️ Print</button>
-        <button class="btn red" onclick="deleteProduct('${p.id}')">🗑️</button>
-      </td>
-    </tr>
-  `).join('');
-}
 
-function adjustStock(id, amount) {
-  const product = state.products.find(p => p.id === id);
-  if (product) {
-    product.stock = Math.max(0, Number(product.stock || 0) + amount);
-    saveData();
-    renderProducts();
-    renderInventory();
-  }
-}
-
-function deleteProduct(id) {
-  if (confirm("Delete product?")) {
-    state.products = state.products.filter(p => p.id !== id);
-    saveData();
-    renderProducts();
-  }
-}
-
-function openAddProductPrompt() {
-  const name = prompt("Enter Product Name:");
-  const price = prompt("Enter Sale Price:");
-  const stock = prompt("Enter Initial Stock:");
-  if (name && price) {
-    state.products.push({
-      id: 'PROD-' + Date.now(),
-      name: name,
-      salePrice: Number(price),
-      purchasePrice: Number(price) * 0.8,
-      stock: Number(stock) || 0,
-      barcode: 'BC' + Math.floor(100000 + Math.random() * 900000)
-    });
-    saveData();
-    renderProducts();
-  }
-}
-
-function searchPOS() {
-  const query = document.getElementById('posSearch').value.toLowerCase().trim();
-  const resultsContainer = document.getElementById('posResults');
-  const matches = state.products.filter(p => p.name.toLowerCase().includes(query) || (p.barcode && p.barcode.toLowerCase() === query));
-  
-  resultsContainer.innerHTML = matches.map(p => `
-    <div class="product-item" onclick="addToCart('${p.id}')">
-      <div><strong>${p.name}</strong><br><small>Stock: ${p.stock} | ₹${p.salePrice}</small></div>
-      <button class="btn green">Add</button>
+        <!-- Supplier Section -->
+        <div>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Suppliers</h2>
+                <button onclick="openSupplierModal()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Add Supplier</button>
+            </div>
+            <table class="w-full text-left border-collapse border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="border p-2">Name</th>
+                        <th class="border p-2">Phone</th>
+                        <th class="border p-2">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="supplierTable"></tbody>
+            </table>
+        </div>
     </div>
-  `).join('');
-}
 
-function addToCart(productId) {
-  const product = state.products.find(p => p.id === productId);
-  if (!product || product.stock <= 0) return showToast("Out of stock!");
-  const existing = state.cart.find(item => item.id === productId);
-  if (existing) existing.qty++;
-  else state.cart.push({ id: product.id, name: product.name, price: Number(product.salePrice), qty: 1 });
-  renderCart();
-}
+    <!-- JavaScript Code -->
+    <script>
+        // Global State
+        const state = {
+            customers: [],
+            suppliers: []
+        };
 
-function renderCart() {
-  const cartDiv = document.getElementById('cart');
-  if (state.cart.length === 0) {
-    cartDiv.innerHTML = '<p style="text-align:center;color:#777;">Cart is empty</p>';
-    document.getElementById('subtotal').innerText = '₹0';
-    document.getElementById('grandTotal').innerText = '₹0';
-    return;
-  }
-  cartDiv.innerHTML = state.cart.map(item => `
-    <div class="cart-row">
-      <div><b>${item.name}</b></div>
-      <div class="qty-control"><span>${item.qty}</span></div>
-      <div><b>₹${item.price * item.qty}</b></div>
-    </div>
-  `).join('');
-  const subtotal = state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-  const discount = Number(document.getElementById('discount')?.value || 0);
-  document.getElementById('subtotal').innerText = '₹' + subtotal;
-  document.getElementById('grandTotal').innerText = '₹' + Math.max(0, subtotal - discount);
-}
+        // Helper Functions
+        function savedData() {
+            localStorage.setItem('namita_customers', JSON.stringify(state.customers));
+            localStorage.setItem('namita_suppliers', JSON.stringify(state.suppliers));
+        }
 
-function clearCart() { state.cart = []; renderCart(); }
+        function loadData() {
+            const savedCustomers = localStorage.getItem('namita_customers');
+            const savedSuppliers = localStorage.getItem('namita_suppliers');
+            
+            if (savedCustomers) state.customers = JSON.parse(savedCustomers);
+            if (savedSuppliers) state.suppliers = JSON.parse(savedSuppliers);
+            
+            renderCustomers();
+            renderSuppliers();
+        }
 
-function completeSale() {
-  if (state.cart.length === 0) return;
-  const grandTotal = parseFloat(document.getElementById('grandTotal').innerText.replace('₹', '')) || 0;
-  state.cart.forEach(cartItem => {
-    const product = state.products.find(p => p.id === cartItem.id);
-    if (product) product.stock = Math.max(0, product.stock - cartItem.qty);
-  });
-  state.sales.push({ id: 'SALE-' + Date.now(), grandTotal: grandTotal });
-  saveData();
-  renderProducts();
-  renderInventory();
-  clearCart();
-  showToast("Sale Completed!");
-}
+        // Print Window Function
+        function printBarcode(product) {
+            const printWindow = window.open('', '_blank', 'width=300,height=300');
+            if (printWindow) {
+                printWindow.document.write(`
+                    <h3>NAMITA STORE</h3>
+                    <p>${product.name}</p>
+                    <h2>||||||||||||||||||</h2>
+                    <p>${product.barcode}</p>
+                `);
+                printWindow.print();
+                printWindow.close();
+            }
+        }
 
-function addPurchase() {
-  const row = document.querySelector('#purchaseExcelBody tr');
-  const name = row.querySelector('.p-name').value.trim();
-  const qty = Number(row.querySelector('.p-qty').value || 0);
-  const purchasePrice = Number(row.querySelector('.p-purchase').value || 0);
-  const salePrice = Number(row.querySelector('.p-sale').value || 0);
-  const barcode = row.querySelector('.p-barcode').value || 'BC' + Math.floor(100000 + Math.random() * 900000);
+        // Customer Operations
+        function renderCustomers() {
+            const customerTable = document.getElementById('customerTable');
+            if (customerTable) {
+                customerTable.innerHTML = state.customers.map(c => 
+                    `<tr>
+                        <td class="border p-2">${c.name}</td>
+                        <td class="border p-2">${c.phone}</td>
+                        <td class="border p-2"><button onclick="deleteCustomer('${c.id}')" class="bg-red-500 text-white px-2 py-1 rounded">Delete</button></td>
+                    </tr>`
+                ).join('');
+            }
+        }
 
-  if (name && qty > 0) {
-    let product = state.products.find(p => p.name.toLowerCase() === name.toLowerCase());
-    if (product) {
-      product.stock += qty;
-    } else {
-      state.products.push({ id: 'PROD-' + Date.now(), name, barcode, purchasePrice, salePrice, stock: qty });
-    }
-    state.purchases.push({ date: new Date().toISOString().split('T')[0], productName: name, qty, price: purchasePrice, total: qty * purchasePrice });
-    saveData();
-    renderProducts();
-    renderInventory();
-    renderPurchases();
-    showToast("Purchase Saved!");
-  }
-}
+        function openCustomerModal() {
+            const name = prompt("Customer Name:");
+            const phone = prompt("Phone:");
+            if (name) {
+                state.customers.push({ id: 'CUST-' + Date.now(), name, phone });
+                savedData();
+                renderCustomers();
+            }
+        }
 
-function renderPurchases() {
-  const tbody = document.getElementById('purchaseTable');
-  tbody.innerHTML = state.purchases.map(p => `<tr><td>${p.date}</td><td>${p.productName}</td><td>${p.qty}</td><td>₹${p.price}</td><td>₹${p.total}</td></tr>`).join('');
-}
+        function deleteCustomer(id) {
+            state.customers = state.customers.filter(c => c.id !== id);
+            savedData();
+            renderCustomers();
+        }
 
-function renderInventory(query = '') {
-  const tbody = document.getElementById('inventoryTable');
-  tbody.innerHTML = state.products.filter(p => p.name.toLowerCase().includes(query.toLowerCase())).map(p => `
-    <tr>
-      <td>${p.barcode || '-'}</td>
-      <td><b>${p.name}</b></td>
-      <td>${p.category || 'General'}</td>
-      <td><b>${p.stock}</b></td>
-      <td>${p.stock > 0 ? '<span class="badge green">In Stock</span>' : '<span class="badge red">Out of Stock</span>'}</td>
-    </tr>
-  `).join('');
-}
+        // Supplier Operations
+        function renderSuppliers() {
+            const supplierTable = document.getElementById('supplierTable');
+            if (supplierTable) {
+                supplierTable.innerHTML = state.suppliers.map(s => 
+                    `<tr>
+                        <td class="border p-2">${s.name}</td>
+                        <td class="border p-2">${s.phone}</td>
+                        <td class="border p-2"><button onclick="deleteSupplier('${s.id}')" class="bg-red-500 text-white px-2 py-1 rounded">Delete</button></td>
+                    </tr>`
+                ).join('');
+            }
+        }
 
-function printSingleBarcode(productId) {
-  const product = state.products.find(p => p.id === productId);
-  if (!product) return;
-  const printWindow = window.open('', '_blank', 'width=300,height=300');
-  printWindow.document.write(`<h3>NAMITA STORE</h3><p>${product.name}</p><h2>|||||||||||||</h2><p>${product.barcode}</p><script>window.print();setTimeout(()=>window.close(),500);<\/script>`);
-}
+        function openSupplierModal() {
+            const name = prompt("Supplier Name:");
+            const phone = prompt("Phone:");
+            if (name) {
+                state.suppliers.push({ id: 'SUPP-' + Date.now(), name, phone });
+                savedData();
+                renderSuppliers();
+            }
+        }
 
-function renderCustomers() {
-  document.getElementById('customerTable').innerHTML = state.customers.map(c => `<tr><td>${c.name}</td><td>${c.phone}</td><td><button onclick="deleteCustomer('${c.id}')">🗑️</button></td></tr>`).join('');
-}
-function openCustomerModal() {
-  const name = prompt("Customer Name:"); const phone = prompt("Phone:");
-  if (name) { state.customers.push({ id: 'CUST-' + Date.now(), name, phone }); saveData(); renderCustomers(); }
-}
-function deleteCustomer(id) { state.customers = state.customers.filter(c => c.id !== id); saveData(); renderCustomers(); }
+        function deleteSupplier(id) {
+            state.suppliers = state.suppliers.filter(s => s.id !== id);
+            savedData();
+            renderSuppliers();
+        }
 
-function renderSuppliers() {
-  document.getElementById('supplierTable').innerHTML = state.suppliers.map(s => `<tr><td>${s.name}</td><td>${s.phone}</td><td><button onclick="deleteSupplier('${s.id}')">🗑️</button></td></tr>`).join('');
-}
-function openSupplierModal() {
-  const name = prompt("Supplier Name:"); const phone = prompt("Phone:");
-  if (name) { state.suppliers.push({ id: 'SUPP-' + Date.now(), name, phone }); saveData(); renderSuppliers(); }
-}
-function deleteSupplier(id) { state.suppliers = state.suppliers.filter(s => s.id !== id); saveData(); renderSuppliers(); }
-</script>
-
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+        });
+    </script>
 </body>
 </html>
