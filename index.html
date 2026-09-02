@@ -818,11 +818,6 @@ oninput="renderProducts(this.value)">
 <div class="form-grid">
 
 <div class="form-group">
-<label>Product</label>
-<select id="purchaseProduct"></select>
-</div>
-
-<div class="form-group">
 <label>Quantity</label>
 <input id="purchaseQty" type="number" min="1" value="1">
 </div>
@@ -4818,6 +4813,102 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
   }
   document.addEventListener('DOMContentLoaded',()=>setTimeout(boot45,250));
   setTimeout(boot45,500);
+})();
+</script>
+
+
+<style>
+/* V4.6 Purchase UX */
+.v46-supplier-due{font-size:12px;margin-top:5px;font-weight:600}
+.v46-search-results{display:grid;gap:5px;margin-top:6px}
+.v46-product-option{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;padding:9px 11px;border:1px solid #e5e7ef;background:#fff;border-radius:8px;cursor:pointer}
+.v46-product-option:hover{background:#f6f8ff}
+.v46-pay-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+.v46-pay-card{padding:12px;border:1px solid #e5e7ef;border-radius:10px;background:#fff}
+.v46-pay-card small{display:block;color:#777;font-size:11px}.v46-pay-card strong{font-size:18px}
+@media(max-width:800px){.v46-pay-summary{grid-template-columns:1fr 1fr}}
+</style>
+<script>
+(function(){
+  const $=id=>document.getElementById(id), N=v=>Number(v||0), E=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'');
+  const today=()=>new Date().toISOString().slice(0,10);
+  function supplierById(id){return (suppliers||[]).find(s=>String(s.id)===String(id));}
+  function updateSupplierDue46(){
+    const sel=$('purchaseSupplierTop')||$('purchaseSupplier'); if(!sel)return;
+    const box=$('purchaseSupplierDueV46');
+    const s=supplierById(sel.value);
+    if(box)box.innerHTML=s?`আগের বকেয়া: <b>₹${N(s.due).toFixed(2)}</b>`:'আগের বকেয়া: <b>₹0.00</b>';
+  }
+  function ensureSupplierDue46(){
+    const head=$('purchaseSupplierTop'); if(!head)return;
+    let box=$('purchaseSupplierDueV46');
+    if(!box){box=document.createElement('div');box.id='purchaseSupplierDueV46';box.className='v46-supplier-due';head.parentElement?.appendChild(box)}
+    head.removeEventListener('change',updateSupplierDue46); head.addEventListener('change',()=>{updateSupplierDue46();try{window.purchaseRowsV44?.forEach(r=>r.supplier=head.value)}catch(e){};updatePaySummary46()});
+    updateSupplierDue46();
+  }
+  function productMatches46(q){
+    q=String(q||'').trim().toLowerCase(); if(!q)return [];
+    return (products||[]).filter(p=>[p.name,p.barcode,p.sku,p.category].some(v=>String(v||'').toLowerCase().includes(q))).slice(0,20);
+  }
+  function showProductResults46(){
+    const inp=$('purchaseProductSearch'),box=$('purchaseSearchResultsV43'); if(!inp||!box)return;
+    const q=inp.value.trim().toLowerCase(); if(!q){box.innerHTML='';return}
+    const exact=(products||[]).find(p=>String(p.barcode||'').toLowerCase()===q);
+    if(exact){box.innerHTML=`<button type="button" class="v46-product-option" onclick="addExistingProductToPurchaseV44('${E(exact.id)}')"><span><b>${E(exact.name)}</b> — ${E(exact.barcode||'')}</span><span>₹${N(exact.sale).toFixed(2)}</span></button>`;return}
+    const list=productMatches46(q);
+    box.innerHTML=list.map(p=>`<button type="button" class="v46-product-option" onclick="addExistingProductToPurchaseV44('${E(p.id)}')"><span><b>${E(p.name)}</b> <small>SKU: ${E(p.sku||'-')} | Barcode: ${E(p.barcode||'-')}</small></span><span>MRP ₹${N(p.mrp).toFixed(2)}</span></button>`).join('')||'<div style="padding:10px;color:#777">No product found.</div>';
+  }
+  window.searchPurchaseProductV44=function(){
+    const inp=$('purchaseProductSearch'),q=inp?.value.trim().toLowerCase(); if(!q){$('purchaseSearchResultsV43').innerHTML='';return}
+    const exact=(products||[]).find(p=>String(p.barcode||'').toLowerCase()===q);
+    if(exact){window.addExistingProductToPurchaseV44(exact.id);return}
+    showProductResults46();
+  };
+  function bindSearch46(){
+    const inp=$('purchaseProductSearch'); if(!inp||inp.dataset.v46)return; inp.dataset.v46='1';
+    inp.addEventListener('input',showProductResults46);
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){e.preventDefault();window.searchPurchaseProductV44();}
+      else if(e.key==='Escape'){$('purchaseSearchResultsV43').innerHTML='';}
+    });
+  }
+  function addExisting46(pid){
+    const p=(products||[]).find(x=>String(x.id)===String(pid)); if(!p)return;
+    const rows=window.purchaseRowsV44||(window.purchaseRowsV44=[]);
+    rows.push({name:p.name,sku:p.sku||'',barcode:p.barcode||'',category:p.category||'General',purchase:N(p.purchase),mrp:N(p.mrp)||N(p.sale),discount:N(p.discount)||((N(p.mrp)>0)?Math.max(0,100-(N(p.sale)/N(p.mrp)*100)):0),sale:N(p.sale)||N(p.mrp),qty:1,supplier:$('purchaseSupplierTop')?.value||'',date:$('purchaseDateTop')?.value||$('purchaseDate')?.value||today(),payment:'Cash'});
+    window.renderPurchaseRows?.(); window.render44?.();
+    if($('purchaseProductSearch'))$('purchaseProductSearch').value=''; if($('purchaseSearchResultsV43'))$('purchaseSearchResultsV43').innerHTML='';
+    setTimeout(()=>$('purchaseExcelBodyV43')?.rows?.[rows.length-1]?.querySelector('.px-qty')?.focus(),30);
+  }
+  window.addExistingProductToPurchaseV44=addExisting46; window.addExistingPurchaseV44=addExisting46;
+
+  function updatePaySummary46(){
+    const rs=Array.isArray(window.purchaseRowsV44)?window.purchaseRowsV44:[];
+    let total=0,cash=0,online=0,due=0;
+    rs.forEach(r=>{const amt=N(r.purchase)*Math.max(0,N(r.qty)); total+=amt; const m=String(r.payment||'Cash').toLowerCase(); if(m==='credit')due+=amt; else if(['upi','card','bank transfer','online'].includes(m))online+=amt; else cash+=amt;});
+    const ids={total:'purchaseSummaryTotal46',cash:'purchaseSummaryCash46',online:'purchaseSummaryOnline46',due:'purchaseSummaryDue46'};
+    if($(ids.total))$(ids.total).textContent='₹'+total.toFixed(2);if($(ids.cash))$(ids.cash).textContent='₹'+cash.toFixed(2);if($(ids.online))$(ids.online).textContent='₹'+online.toFixed(2);if($(ids.due))$(ids.due).textContent='₹'+due.toFixed(2);
+    const sup=supplierById($('purchaseSupplierTop')?.value||'');const bd=$('purchaseSupplierDueV46');if(bd)bd.innerHTML=sup?`আগের বকেয়া: <b>₹${N(sup.due).toFixed(2)}</b> &nbsp; | &nbsp; এই Purchase-এ Credit: <b>₹${due.toFixed(2)}</b> &nbsp; | &nbsp; আনুমানিক নতুন বকেয়া: <b>₹${(N(sup.due)+due).toFixed(2)}</b>`:'আগের বকেয়া: <b>₹0.00</b>';
+  }
+  function ensurePaySummary46(){
+    const f=$('purchaseFooterV44');if(!f||$('purchasePaySummaryV46'))return;
+    const div=document.createElement('div');div.id='purchasePaySummaryV46';div.className='v46-pay-summary';div.innerHTML=`<div class="v46-pay-card"><small>মোট Purchase</small><strong id="purchaseSummaryTotal46">₹0.00</strong></div><div class="v46-pay-card"><small>Cash</small><strong id="purchaseSummaryCash46">₹0.00</strong></div><div class="v46-pay-card"><small>Online / UPI / Card</small><strong id="purchaseSummaryOnline46">₹0.00</strong></div><div class="v46-pay-card"><small>ধার / Credit</small><strong id="purchaseSummaryDue46">₹0.00</strong></div>`;
+    f.insertBefore(div,f.firstChild);updatePaySummary46();
+  }
+  function hookRows46(){
+    const body=$('purchaseExcelBodyV43');if(!body||body.dataset.v46hook)return;body.dataset.v46hook='1';
+    body.addEventListener('input',()=>setTimeout(updatePaySummary46,0));body.addEventListener('change',()=>setTimeout(updatePaySummary46,0));
+  }
+  function boot46(){
+    ensureSupplierDue46();bindSearch46();ensurePaySummary46();hookRows46();
+    const head=$('purchaseSupplierTop');if(head){head.addEventListener('change',updateSupplierDue46);updateSupplierDue46()}
+    setTimeout(()=>{ensureSupplierDue46();ensurePaySummary46();updatePaySummary46()},100);
+  }
+  const oldRender46=window.renderPurchaseRows;
+  window.renderPurchaseRows=function(){oldRender46?.();setTimeout(()=>{ensureSupplierDue46();ensurePaySummary46();updatePaySummary46()},0)};
+  const oldRender446=window.render44;
+  window.render44=function(){oldRender446?.();setTimeout(()=>{ensureSupplierDue46();ensurePaySummary46();updatePaySummary46()},0)};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(boot46,400));setTimeout(boot46,700);
 })();
 </script>
 
