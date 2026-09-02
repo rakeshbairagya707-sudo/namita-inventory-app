@@ -571,6 +571,27 @@ th{
 @media(max-width:700px){.v2-actions{grid-template-columns:1fr 1fr}.v2-grid,.v2-report-cards{grid-template-columns:1fr}.v2-checks{grid-template-columns:1fr}}
 </style>
 
+
+<style>
+/* ===== V3 PROFESSIONAL OPERATIONS ===== */
+.v3-menu{border-top:1px solid #33384d;margin-top:10px;padding-top:10px}
+.v3-menu button{font-weight:700}
+.v3-section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+.v3-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.v3-kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.v3-kpi .v2-mini{min-height:80px}
+.v3-inline{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.v3-inline input{width:85px;padding:7px;border:1px solid #d6d9e0;border-radius:6px}
+.v3-table input,.v3-table select{width:100%;min-width:85px;padding:7px;border:1px solid #d6d9e0;border-radius:6px}
+.v3-smallbtn{border:0;border-radius:6px;padding:6px 9px;cursor:pointer;color:#fff}
+.v3-plus{background:#16a673}.v3-minus{background:#e74c3c}
+.v3-print-list{max-height:430px;overflow:auto}
+.v3-print-list tr.selected{background:#f0f4ff}
+.v3-change{background:#f7f8fb;border-radius:10px;padding:10px;margin-top:10px;display:flex;justify-content:space-between}
+.v3-change strong{font-size:20px}
+@media(max-width:1100px){.v3-kpi{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.v3-kpi{grid-template-columns:1fr 1fr}}
+</style>
 </head>
 
 <body>
@@ -1191,6 +1212,194 @@ Data is stored locally in this browser.
 </div>
 
 </section>
+
+<!-- ===== NAMITA STORE v2 PAGES ===== -->
+<section id="seller" class="page">
+  <div class="v2-hero">
+    <h2>🧾 Seller Panel</h2>
+    <p>দ্রুত বিক্রি • Discount • Cash / Online / Credit • Customer • Margin</p>
+  </div>
+  <div class="v2-actions">
+    <button class="v2-action" onclick="showPage('pos')">🛒 New Sale / POS</button>
+    <button class="v2-action" onclick="openCustomerModal()">👤 Add Customer</button>
+    <button class="v2-action" onclick="showPage('purchase')">📥 Purchase Entry</button>
+    <button class="v2-action" onclick="showPage('inventory')">📦 Stock Adjustment</button>
+    <button class="v2-action" onclick="showPage('reportsAdvanced')">📊 Reports</button>
+    <button class="v2-action" onclick="showPage('ecommerce')">🛍️ E-Commerce Orders</button>
+  </div>
+  <div class="panel">
+    <h3>Quick Customer & Sale Setup</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>Customer Name</label><input id="sellerCustomerName" placeholder="Customer name"></div>
+      <div class="form-group"><label>Customer Phone</label><input id="sellerCustomerPhone" placeholder="10 digit phone"></div>
+      <div class="form-group"><label>Payment</label><select id="sellerPayment"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Credit</option></select></div>
+      <div class="form-group"><label>Discount ₹</label><input id="sellerDiscount" type="number" min="0" value="0" oninput="syncSellerSale()"></div>
+      <div class="form-group"><label>Discount %</label><input id="sellerDiscountPct" type="number" min="0" max="100" value="0" oninput="syncSellerSalePct()"></div>
+      <div class="form-group"><label>Customer Due / Credit ₹</label><input id="sellerDue" type="number" min="0" value="0"></div>
+    </div>
+    <div class="actions" style="margin-top:15px">
+      <button class="btn green" onclick="saveSellerCustomer()">Save Customer</button>
+      <button class="btn" onclick="applySellerToPOS()">Apply to POS</button>
+      <button class="btn orange" onclick="showPage('pos')">Continue Billing →</button>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Seller Summary</h3>
+    <div class="v2-grid">
+      <div class="v2-stat"><span>Today Sales</span><b id="sellerTodaySales">₹0</b></div>
+      <div class="v2-stat"><span>Today Profit</span><b id="sellerTodayProfit">₹0</b></div>
+      <div class="v2-stat"><span>Credit Due</span><b id="sellerCredit">₹0</b></div>
+      <div class="v2-stat"><span>Low Stock</span><b id="sellerLow">0</b></div>
+    </div>
+  </div>
+  <div class="v2-secret">
+    🔐 <strong>Secret: Pocket Margin</strong>
+    <input id="marginSecret" type="password" placeholder="Secret code">
+    <button class="btn" onclick="unlockMargins()">View Margin</button>
+    <div id="marginPanel" class="v2-margin">
+      <h3>🔒 Pocket Margin — Selling Price vs Purchase Cost</h3>
+      <div class="table-wrap"><table><thead><tr><th>Product</th><th>Purchase</th><th>Sale</th><th>Margin/Unit</th><th>Margin %</th><th>Max Discount Suggestion</th></tr></thead><tbody id="marginTable"></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<section id="bulkProducts" class="page">
+  <h2>📋 Bulk Product / Purchase Entry</h2>
+  <div class="panel">
+    <div class="v2-toolbar">
+      <button class="btn green" onclick="addBulkRow()">➕ Add Row</button>
+      <button class="btn" onclick="addBulkRows(10)">＋ 10 Rows</button>
+      <button class="btn orange" onclick="saveBulkProducts()">💾 Save All Products</button>
+      <button class="btn light" onclick="clearBulkRows()">Clear</button>
+      <button class="btn dark" onclick="showPage('purchase')">← Purchase</button>
+    </div>
+    <div class="v2-note">Excel-এর মতো একের পর এক row-তে Product, Barcode, Purchase, Sale, MRP, Stock, Supplier এবং Payment দেওয়া যাবে।</div>
+    <div class="v2-bulk-wrap" style="margin-top:15px">
+      <table class="v2-bulk v2-table"><thead><tr>
+        <th>#</th><th>Product Name*</th><th>SKU</th><th>Barcode</th><th>Category</th><th>Purchase</th><th>Sale</th><th>MRP</th><th>Qty</th><th>Min</th><th>GST%</th><th>Supplier</th><th>Payment</th><th>Delete</th>
+      </tr></thead><tbody id="bulkBody"></tbody></table>
+    </div>
+  </div>
+</section>
+
+<section id="adjustments" class="page">
+  <h2>🔧 Inventory Adjustment</h2>
+  <div class="panel">
+    <div class="form-grid">
+      <div class="form-group"><label>Product</label><select id="adjProduct"></select></div>
+      <div class="form-group"><label>Adjustment Qty (+ / -)</label><input id="adjQty" type="number" value="0"></div>
+      <div class="form-group"><label>Reason</label><select id="adjReason"><option>Stock Correction</option><option>Damage</option><option>Expired</option><option>Lost</option><option>Found</option><option>Manual Count</option></select></div>
+      <div class="form-group"><label>Note</label><input id="adjNote" placeholder="Optional note"></div>
+    </div>
+    <button class="btn orange" style="margin-top:15px" onclick="saveAdjustment()">Save Adjustment</button>
+  </div>
+  <div class="panel"><h3>Adjustment History</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Product</th><th>Qty</th><th>Reason</th><th>Note</th></tr></thead><tbody id="adjustmentTable"></tbody></table></div></div>
+</section>
+
+<section id="barcodeDesigner" class="page">
+  <h2>🏷️ Advanced Barcode Designer & Bulk Print</h2>
+  <div class="panel">
+    <div class="form-grid">
+      <div class="form-group"><label>Product</label><select id="bdProduct" onchange="renderBarcodeDesigner()"></select></div>
+      <div class="form-group"><label>Barcode Type</label><select id="bdType" onchange="renderBarcodeDesigner()"><option>CODE128</option><option>EAN-13</option><option>QR CODE</option></select></div>
+      <div class="form-group"><label>Label Size</label><select id="bdSize" onchange="renderBarcodeDesigner()"><option value="25x38">25 × 38 mm</option><option value="20x30">20 × 30 mm</option><option value="15x25">15 × 25 mm</option><option value="custom">Custom</option></select></div>
+      <div class="form-group"><label>Print Quantity</label><input id="bdQty" type="number" min="1" value="1" onchange="renderBarcodeDesigner()"></div>
+      <div class="form-group"><label>Custom Width mm</label><input id="bdW" type="number" value="38" onchange="renderBarcodeDesigner()"></div>
+      <div class="form-group"><label>Custom Height mm</label><input id="bdH" type="number" value="25" onchange="renderBarcodeDesigner()"></div>
+    </div>
+    <h3 style="margin:20px 0 10px">Label-এ কী কী থাকবে?</h3>
+    <div class="v2-checks">
+      <label><input type="checkbox" id="bdStore" checked onchange="renderBarcodeDesigner()"> Company / Store Name</label>
+      <label><input type="checkbox" id="bdName" checked onchange="renderBarcodeDesigner()"> Product Name</label>
+      <label><input type="checkbox" id="bdMrp" checked onchange="renderBarcodeDesigner()"> MRP</label>
+      <label><input type="checkbox" id="bdSale" checked onchange="renderBarcodeDesigner()"> Sale Price</label>
+      <label><input type="checkbox" id="bdSku" onchange="renderBarcodeDesigner()"> SKU</label>
+      <label><input type="checkbox" id="bdCat" onchange="renderBarcodeDesigner()"> Category</label>
+      <label><input type="checkbox" id="bdGst" onchange="renderBarcodeDesigner()"> GST %</label>
+      <label><input type="checkbox" id="bdCode" checked onchange="renderBarcodeDesigner()"> Barcode Number</label>
+      <label><input type="checkbox" id="bdHsn" onchange="renderBarcodeDesigner()"> HSN</label>
+    </div>
+    <div id="designerPreview" class="v2-barcode-preview"></div>
+    <div class="actions" style="margin-top:15px">
+      <button class="btn" onclick="printDesignedBarcodes()">🖨️ Print Labels</button>
+      <button class="btn green" onclick="saveBarcodeTemplate()">💾 Save Template</button>
+      <button class="btn light" onclick="loadBarcodeTemplate()">↻ Load Template</button>
+    </div>
+  </div>
+</section>
+
+<section id="reportsAdvanced" class="page">
+  <h2>📈 Advanced Reports</h2>
+  <div class="panel">
+    <div class="form-grid">
+      <div class="form-group"><label>From Date</label><input id="repFrom" type="date"></div>
+      <div class="form-group"><label>To Date</label><input id="repTo" type="date"></div>
+      <div class="form-group"><label>Report Type</label><select id="repType" onchange="renderAdvancedReports()"><option value="sales">Sales</option><option value="profit">Profit & Loss</option><option value="items">Item-wise</option><option value="customers">Customer-wise</option><option value="suppliers">Supplier-wise</option><option value="payments">Payment-wise</option><option value="receivable">Customer Receivable</option><option value="payable">Supplier Payable</option><option value="cashflow">Cash Flow</option></select></div>
+    </div>
+    <div class="actions" style="margin-top:12px"><button class="btn" onclick="setReportToday()">Today</button><button class="btn light" onclick="setReportMonth()">This Month</button><button class="btn green" onclick="renderAdvancedReports()">Generate Report</button><button class="btn orange" onclick="printAdvancedReport()">🖨️ Print</button></div>
+  </div>
+  <div id="advancedReportCards" class="v2-report-cards"></div>
+  <div class="panel"><div class="table-wrap"><table><thead id="advancedHead"></thead><tbody id="advancedBody"></tbody></table></div></div>
+</section>
+
+<section id="ecommerce" class="page">
+  <div class="v2-hero"><h2>🛍️ E-Commerce Center</h2><p>Order accept • pending • cancel • customer details • payment • fulfilment</p></div>
+  <div class="panel">
+    <div class="actions">
+      <button class="btn orange" onclick="addDemoOrder('Pending')">＋ Test Pending Order</button>
+      <button class="btn green" onclick="addDemoOrder('Accepted')">＋ Test Accepted Order</button>
+      <button class="btn red" onclick="addDemoOrder('Cancelled')">＋ Test Cancelled Order</button>
+      <button class="btn" onclick="syncEcommerce()">🔄 Sync Orders</button>
+    </div>
+    <div class="v2-note">Real Shopify/WooCommerce/Amazon/Flipkart-এর live order sync করতে API credentials + server/webhook দরকার। এই single-file version-এ order management, status, customer, payment ও sync-ready data structure রাখা হয়েছে।</div>
+  </div>
+  <div class="panel">
+    <div class="form-grid"><div class="form-group"><label>Filter</label><select id="orderFilter" onchange="renderOrders()"><option>All</option><option>Pending</option><option>Accepted</option><option>Cancelled</option><option>Shipped</option><option>Delivered</option></select></div></div>
+    <div id="orderList"></div>
+  </div>
+</section>
+
+
+<section id="customerPayments" class="page">
+  <div class="v2-hero"><h2>💰 Customer Payment Receive</h2><p>বাকি/ক্রেডিট গ্রাহকের টাকা গ্রহণ, রসিদ ও লেজার</p></div>
+  <div class="panel">
+    <div class="form-grid">
+      <div class="form-group"><label>Customer</label><select id="cpCustomer"></select></div>
+      <div class="form-group"><label>Receive Amount ₹</label><input id="cpAmount" type="number" min="0" step="0.01"></div>
+      <div class="form-group"><label>Payment Method</label><select id="cpMethod"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option></select></div>
+      <div class="form-group"><label>Reference / Note</label><input id="cpNote" placeholder="Receipt no / note"></div>
+    </div>
+    <div class="actions" style="margin-top:15px"><button class="btn green" onclick="receiveCustomerPayment()">💵 Receive Payment</button><button class="btn light" onclick="showPage('customers')">Customer Ledger</button></div>
+  </div>
+  <div class="panel"><h3>Customer Payment History</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Method</th><th>Amount</th><th>Reference</th></tr></thead><tbody id="customerPaymentTable"></tbody></table></div></div>
+</section>
+
+<section id="supplierPayments" class="page">
+  <div class="v2-hero"><h2>💸 Supplier Payment</h2><p>Supplier due পরিশোধ, payment entry ও supplier ledger</p></div>
+  <div class="panel">
+    <div class="form-grid">
+      <div class="form-group"><label>Supplier</label><select id="spSupplier"></select></div>
+      <div class="form-group"><label>Pay Amount ₹</label><input id="spAmount" type="number" min="0" step="0.01"></div>
+      <div class="form-group"><label>Payment Method</label><select id="spMethod"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option></select></div>
+      <div class="form-group"><label>Reference / Note</label><input id="spNote" placeholder="Voucher no / note"></div>
+    </div>
+    <div class="actions" style="margin-top:15px"><button class="btn orange" onclick="paySupplier()">💸 Pay Supplier</button><button class="btn light" onclick="showPage('suppliers')">Supplier Ledger</button></div>
+  </div>
+  <div class="panel"><h3>Supplier Payment History</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Supplier</th><th>Method</th><th>Amount</th><th>Reference</th></tr></thead><tbody id="supplierPaymentTable"></tbody></table></div></div>
+</section>
+
+<section id="cashbook" class="page">
+  <div class="v2-hero"><h2>📒 Cash & Payment Ledger</h2><p>Sales, customer receipts, purchases, supplier payments এবং net cash movement</p></div>
+  <div class="panel"><div class="v2-grid" id="cashbookCards"></div></div>
+  <div class="panel"><div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Party</th><th>Method</th><th>In</th><th>Out</th><th>Reference</th></tr></thead><tbody id="cashbookTable"></tbody></table></div></div>
+</section>
+
+<!-- Add supplier directly from purchase -->
+<div class="modal" id="quickSupplierModal"><div class="modal-box"><div class="modal-head"><h3>Quick Add Supplier</h3><button class="close" onclick="closeModal('quickSupplierModal')">×</button></div>
+<div class="form-grid"><div class="form-group"><label>Name *</label><input id="qsName"></div><div class="form-group"><label>Phone</label><input id="qsPhone"></div><div class="form-group"><label>Address</label><input id="qsAddress"></div></div>
+<div style="margin-top:20px;text-align:right"><button class="btn green" onclick="quickSaveSupplier()">Save Supplier</button></div></div></div>
+
+
 
 </div>
 </main>
@@ -3346,158 +3555,6 @@ refreshAll();
 </script>
 
 
-<!-- ===== NAMITA STORE v2 PAGES ===== -->
-<section id="seller" class="page">
-  <div class="v2-hero">
-    <h2>🧾 Seller Panel</h2>
-    <p>দ্রুত বিক্রি • Discount • Cash / Online / Credit • Customer • Margin</p>
-  </div>
-  <div class="v2-actions">
-    <button class="v2-action" onclick="showPage('pos')">🛒 New Sale / POS</button>
-    <button class="v2-action" onclick="openCustomerModal()">👤 Add Customer</button>
-    <button class="v2-action" onclick="showPage('purchase')">📥 Purchase Entry</button>
-    <button class="v2-action" onclick="showPage('inventory')">📦 Stock Adjustment</button>
-    <button class="v2-action" onclick="showPage('reports')">📊 Reports</button>
-    <button class="v2-action" onclick="showPage('ecommerce')">🛍️ E-Commerce Orders</button>
-  </div>
-  <div class="panel">
-    <h3>Quick Customer & Sale Setup</h3>
-    <div class="form-grid">
-      <div class="form-group"><label>Customer Name</label><input id="sellerCustomerName" placeholder="Customer name"></div>
-      <div class="form-group"><label>Customer Phone</label><input id="sellerCustomerPhone" placeholder="10 digit phone"></div>
-      <div class="form-group"><label>Payment</label><select id="sellerPayment"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Credit</option></select></div>
-      <div class="form-group"><label>Discount ₹</label><input id="sellerDiscount" type="number" min="0" value="0" oninput="syncSellerSale()"></div>
-      <div class="form-group"><label>Discount %</label><input id="sellerDiscountPct" type="number" min="0" max="100" value="0" oninput="syncSellerSalePct()"></div>
-      <div class="form-group"><label>Customer Due / Credit ₹</label><input id="sellerDue" type="number" min="0" value="0"></div>
-    </div>
-    <div class="actions" style="margin-top:15px">
-      <button class="btn green" onclick="saveSellerCustomer()">Save Customer</button>
-      <button class="btn" onclick="applySellerToPOS()">Apply to POS</button>
-      <button class="btn orange" onclick="showPage('pos')">Continue Billing →</button>
-    </div>
-  </div>
-  <div class="panel">
-    <h3>Seller Summary</h3>
-    <div class="v2-grid">
-      <div class="v2-stat"><span>Today Sales</span><b id="sellerTodaySales">₹0</b></div>
-      <div class="v2-stat"><span>Today Profit</span><b id="sellerTodayProfit">₹0</b></div>
-      <div class="v2-stat"><span>Credit Due</span><b id="sellerCredit">₹0</b></div>
-      <div class="v2-stat"><span>Low Stock</span><b id="sellerLow">0</b></div>
-    </div>
-  </div>
-  <div class="v2-secret">
-    🔐 <strong>Secret: Pocket Margin</strong>
-    <input id="marginSecret" type="password" placeholder="Secret code">
-    <button class="btn" onclick="unlockMargins()">View Margin</button>
-    <div id="marginPanel" class="v2-margin">
-      <h3>🔒 Pocket Margin — Selling Price vs Purchase Cost</h3>
-      <div class="table-wrap"><table><thead><tr><th>Product</th><th>Purchase</th><th>Sale</th><th>Margin/Unit</th><th>Margin %</th><th>Max Discount Suggestion</th></tr></thead><tbody id="marginTable"></tbody></table></div>
-    </div>
-  </div>
-</section>
-
-<section id="bulkProducts" class="page">
-  <h2>📋 Bulk Product / Purchase Entry</h2>
-  <div class="panel">
-    <div class="v2-toolbar">
-      <button class="btn green" onclick="addBulkRow()">➕ Add Row</button>
-      <button class="btn" onclick="addBulkRows(10)">＋ 10 Rows</button>
-      <button class="btn orange" onclick="saveBulkProducts()">💾 Save All Products</button>
-      <button class="btn light" onclick="clearBulkRows()">Clear</button>
-      <button class="btn dark" onclick="showPage('purchase')">← Purchase</button>
-    </div>
-    <div class="v2-note">Excel-এর মতো একের পর এক row-তে Product, Barcode, Purchase, Sale, MRP, Stock, Supplier এবং Payment দেওয়া যাবে।</div>
-    <div class="v2-bulk-wrap" style="margin-top:15px">
-      <table class="v2-bulk v2-table"><thead><tr>
-        <th>#</th><th>Product Name*</th><th>SKU</th><th>Barcode</th><th>Category</th><th>Purchase</th><th>Sale</th><th>MRP</th><th>Qty</th><th>Min</th><th>GST%</th><th>Supplier</th><th>Payment</th><th>Delete</th>
-      </tr></thead><tbody id="bulkBody"></tbody></table>
-    </div>
-  </div>
-</section>
-
-<section id="adjustments" class="page">
-  <h2>🔧 Inventory Adjustment</h2>
-  <div class="panel">
-    <div class="form-grid">
-      <div class="form-group"><label>Product</label><select id="adjProduct"></select></div>
-      <div class="form-group"><label>Adjustment Qty (+ / -)</label><input id="adjQty" type="number" value="0"></div>
-      <div class="form-group"><label>Reason</label><select id="adjReason"><option>Stock Correction</option><option>Damage</option><option>Expired</option><option>Lost</option><option>Found</option><option>Manual Count</option></select></div>
-      <div class="form-group"><label>Note</label><input id="adjNote" placeholder="Optional note"></div>
-    </div>
-    <button class="btn orange" style="margin-top:15px" onclick="saveAdjustment()">Save Adjustment</button>
-  </div>
-  <div class="panel"><h3>Adjustment History</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Product</th><th>Qty</th><th>Reason</th><th>Note</th></tr></thead><tbody id="adjustmentTable"></tbody></table></div></div>
-</section>
-
-<section id="barcodeDesigner" class="page">
-  <h2>🏷️ Advanced Barcode Designer & Bulk Print</h2>
-  <div class="panel">
-    <div class="form-grid">
-      <div class="form-group"><label>Product</label><select id="bdProduct" onchange="renderBarcodeDesigner()"></select></div>
-      <div class="form-group"><label>Barcode Type</label><select id="bdType" onchange="renderBarcodeDesigner()"><option>CODE128</option><option>EAN-13</option><option>QR CODE</option></select></div>
-      <div class="form-group"><label>Label Size</label><select id="bdSize" onchange="renderBarcodeDesigner()"><option value="25x38">25 × 38 mm</option><option value="20x30">20 × 30 mm</option><option value="15x25">15 × 25 mm</option><option value="custom">Custom</option></select></div>
-      <div class="form-group"><label>Print Quantity</label><input id="bdQty" type="number" min="1" value="1" onchange="renderBarcodeDesigner()"></div>
-      <div class="form-group"><label>Custom Width mm</label><input id="bdW" type="number" value="38" onchange="renderBarcodeDesigner()"></div>
-      <div class="form-group"><label>Custom Height mm</label><input id="bdH" type="number" value="25" onchange="renderBarcodeDesigner()"></div>
-    </div>
-    <h3 style="margin:20px 0 10px">Label-এ কী কী থাকবে?</h3>
-    <div class="v2-checks">
-      <label><input type="checkbox" id="bdStore" checked onchange="renderBarcodeDesigner()"> Company / Store Name</label>
-      <label><input type="checkbox" id="bdName" checked onchange="renderBarcodeDesigner()"> Product Name</label>
-      <label><input type="checkbox" id="bdMrp" checked onchange="renderBarcodeDesigner()"> MRP</label>
-      <label><input type="checkbox" id="bdSale" checked onchange="renderBarcodeDesigner()"> Sale Price</label>
-      <label><input type="checkbox" id="bdSku" onchange="renderBarcodeDesigner()"> SKU</label>
-      <label><input type="checkbox" id="bdCat" onchange="renderBarcodeDesigner()"> Category</label>
-      <label><input type="checkbox" id="bdGst" onchange="renderBarcodeDesigner()"> GST %</label>
-      <label><input type="checkbox" id="bdCode" checked onchange="renderBarcodeDesigner()"> Barcode Number</label>
-      <label><input type="checkbox" id="bdHsn" onchange="renderBarcodeDesigner()"> HSN</label>
-    </div>
-    <div id="designerPreview" class="v2-barcode-preview"></div>
-    <div class="actions" style="margin-top:15px">
-      <button class="btn" onclick="printDesignedBarcodes()">🖨️ Print Labels</button>
-      <button class="btn green" onclick="saveBarcodeTemplate()">💾 Save Template</button>
-      <button class="btn light" onclick="loadBarcodeTemplate()">↻ Load Template</button>
-    </div>
-  </div>
-</section>
-
-<section id="reportsAdvanced" class="page">
-  <h2>📈 Advanced Reports</h2>
-  <div class="panel">
-    <div class="form-grid">
-      <div class="form-group"><label>From Date</label><input id="repFrom" type="date"></div>
-      <div class="form-group"><label>To Date</label><input id="repTo" type="date"></div>
-      <div class="form-group"><label>Report Type</label><select id="repType" onchange="renderAdvancedReports()"><option value="sales">Sales</option><option value="profit">Profit & Loss</option><option value="items">Item-wise</option><option value="customers">Customer-wise</option><option value="suppliers">Supplier-wise</option><option value="payments">Payment-wise</option><option value="receivable">Customer Receivable</option><option value="payable">Supplier Payable</option><option value="cashflow">Cash Flow</option></select></div>
-    </div>
-    <div class="actions" style="margin-top:12px"><button class="btn" onclick="setReportToday()">Today</button><button class="btn light" onclick="setReportMonth()">This Month</button><button class="btn green" onclick="renderAdvancedReports()">Generate Report</button><button class="btn orange" onclick="printAdvancedReport()">🖨️ Print</button></div>
-  </div>
-  <div id="advancedReportCards" class="v2-report-cards"></div>
-  <div class="panel"><div class="table-wrap"><table><thead id="advancedHead"></thead><tbody id="advancedBody"></tbody></table></div></div>
-</section>
-
-<section id="ecommerce" class="page">
-  <div class="v2-hero"><h2>🛍️ E-Commerce Center</h2><p>Order accept • pending • cancel • customer details • payment • fulfilment</p></div>
-  <div class="panel">
-    <div class="actions">
-      <button class="btn orange" onclick="addDemoOrder('Pending')">＋ Test Pending Order</button>
-      <button class="btn green" onclick="addDemoOrder('Accepted')">＋ Test Accepted Order</button>
-      <button class="btn red" onclick="addDemoOrder('Cancelled')">＋ Test Cancelled Order</button>
-      <button class="btn" onclick="syncEcommerce()">🔄 Sync Orders</button>
-    </div>
-    <div class="v2-note">Real Shopify/WooCommerce/Amazon/Flipkart-এর live order sync করতে API credentials + server/webhook দরকার। এই single-file version-এ order management, status, customer, payment ও sync-ready data structure রাখা হয়েছে।</div>
-  </div>
-  <div class="panel">
-    <div class="form-grid"><div class="form-group"><label>Filter</label><select id="orderFilter" onchange="renderOrders()"><option>All</option><option>Pending</option><option>Accepted</option><option>Cancelled</option><option>Shipped</option><option>Delivered</option></select></div></div>
-    <div id="orderList"></div>
-  </div>
-</section>
-
-<!-- Add supplier directly from purchase -->
-<div class="modal" id="quickSupplierModal"><div class="modal-box"><div class="modal-head"><h3>Quick Add Supplier</h3><button class="close" onclick="closeModal('quickSupplierModal')">×</button></div>
-<div class="form-grid"><div class="form-group"><label>Name *</label><input id="qsName"></div><div class="form-group"><label>Phone</label><input id="qsPhone"></div><div class="form-group"><label>Address</label><input id="qsAddress"></div></div>
-<div style="margin-top:20px;text-align:right"><button class="btn green" onclick="quickSaveSupplier()">Save Supplier</button></div></div></div>
-
-
 <script>
 /* ===== NAMITA STORE v2 EXTENSION ===== */
 let adjustments = JSON.parse(localStorage.getItem("ns_adjustments") || "[]");
@@ -3760,5 +3817,306 @@ window.addEventListener("DOMContentLoaded",()=>{v2InitMenu();v2EnhancePOS();addB
 v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesigner();renderAdvancedReports();renderOrders();
 </script>
 
+
+<script>
+/* ===== NAMITA STORE V3 - PROFESSIONAL OPERATIONS LAYER ===== */
+(function(){
+  const V3={
+    adjKey:"ns_adjustments", payKey:"ns_payments", orderKey:"ns_ecommerce_orders",
+    tplKey:"ns_barcode_template", editId:null
+  };
+  function q3(id){return document.getElementById(id)}
+  function num(v){return Number(v||0)}
+  function esc(v){return escapeHtml(v)}
+  function save3(){
+    saveDB();
+    localStorage.setItem(V3.adjKey,JSON.stringify(adjustments));
+    localStorage.setItem(V3.payKey,JSON.stringify(payments));
+    localStorage.setItem(V3.orderKey,JSON.stringify(ecommerceOrders));
+    localStorage.setItem(V3.tplKey,JSON.stringify(barcodeTemplate));
+  }
+  function date3(d){return new Date(d).toISOString().slice(0,10)}
+  function inRange3(d,a,b){const x=date3(d);return (!a||x>=a)&&(!b||x<=b)}
+  function show3(page,button){
+    showPage(page,button);
+    setTimeout(function(){render3All()},0);
+  }
+
+  /* Sidebar: all professional modules */
+  function initMenu3(){
+    const ul=document.querySelector(".menu"); if(!ul)return;
+    if(ul.dataset.v3)return; ul.dataset.v3="1";
+    const items=[
+      ["seller","🧾 Seller Panel"],["bulkProducts","📋 Bulk Purchase / Excel"],
+      ["adjustments","🔧 Stock Adjustment"],["barcodeDesigner","🏷️ Barcode Studio"],
+      ["reportsAdvanced","📊 Detailed Reports"],["customerPayments","💰 Customer Payment Receive"],
+      ["supplierPayments","💸 Supplier Payment"],["cashbook","📒 Cash & Payment Ledger"],
+      ["ecommerce","🛍️ E-Commerce"]
+    ];
+    const wrap=document.createElement("div");wrap.className="v3-menu";
+    items.forEach(([p,t])=>{const li=document.createElement("li");li.innerHTML='<button onclick="showPage(\''+p+'\',this)">'+t+'</button>';wrap.appendChild(li)});
+    ul.appendChild(wrap);
+  }
+
+  /* Purchase page: product add, bulk, and barcode queue */
+  function enhancePurchase(){
+    const page=q3("purchase"); if(!page||page.dataset.v3)return; page.dataset.v3="1";
+    const h=page.querySelector("h2");
+    if(h){
+      const bar=document.createElement("div");bar.className="v3-toolbar";bar.style.margin="0 0 15px";
+      bar.innerHTML='<button class="btn green" onclick="openProductModal()">➕ Add Product</button><button class="btn" onclick="showPage(\'bulkProducts\')">📋 Excel Bulk Entry</button><button class="btn orange" onclick="showPage(\'barcodeDesigner\')">🏷️ Barcode Studio</button><button class="btn dark" onclick="showPage(\'supplierPayments\')">💸 Supplier Payment</button>';
+      h.parentNode.insertBefore(bar,h.nextSibling);
+    }
+    const panel=page.querySelector(".panel");
+    if(panel && !q3("purchasePrintQueue")){
+      const p=document.createElement("div");p.className="panel";p.innerHTML=
+      '<div class="v3-section-title"><div><h3>🖨️ Purchase-wise Barcode Print Queue</h3><small style="color:#777">Purchase history থেকে যে product-এর যত barcode দরকার, checkbox দিয়ে বাছুন এবং quantity বদলান।</small></div><div class="v3-toolbar"><button class="btn" onclick="selectAllPurchaseBarcodes(true)">Select All</button><button class="btn light" onclick="selectAllPurchaseBarcodes(false)">Clear</button><button class="btn green" onclick="printPurchaseBarcodes()">🖨️ Print Selected Barcodes</button></div></div><div id="purchasePrintQueue" class="v3-print-list"></div>';
+      page.appendChild(p);
+    }
+  }
+
+  function renderPurchaseQueue(){
+    const el=q3("purchasePrintQueue"); if(!el)return;
+    const rows=purchases.slice().reverse();
+    if(!rows.length){el.innerHTML='<p style="padding:15px;color:#777">No purchase entries yet.</p>';return}
+    el.innerHTML='<table class="v3-table"><thead><tr><th>Select</th><th>Date</th><th>Product</th><th>Barcode</th><th>Purchased Qty</th><th>Print Qty</th></tr></thead><tbody>'+
+      rows.map((r,i)=>{
+        const p=products.find(x=>x.id===r.productId)||products.find(x=>x.name===r.product);
+        const bc=p?p.barcode:(r.barcode||"");
+        const key=r.id;
+        return '<tr><td><input class="pb-check" data-key="'+esc(key)+'" type="checkbox"></td><td>'+formatDateTime(r.date)+'</td><td>'+esc(r.product)+'</td><td>'+esc(bc)+'</td><td>'+num(r.qty)+'</td><td><input class="pb-qty" data-key="'+esc(key)+'" type="number" min="1" value="'+Math.max(1,num(r.qty))+'" max="9999"></td></tr>'
+      }).join("")+'</tbody></table>';
+  }
+  window.selectAllPurchaseBarcodes=function(flag){document.querySelectorAll(".pb-check").forEach(x=>x.checked=flag)}
+  window.printPurchaseBarcodes=function(){
+    const checks=[...document.querySelectorAll(".pb-check:checked")]; if(!checks.length){toast("Select at least one purchase row.");return}
+    let labels=[];
+    checks.forEach(c=>{
+      const r=purchases.find(x=>String(x.id)===String(c.dataset.key)); if(!r)return;
+      const p=products.find(x=>x.id===r.productId)||products.find(x=>x.name===r.product); if(!p)return;
+      const input=document.querySelector('.pb-qty[data-key="'+CSS.escape(String(r.id))+'"]');
+      const qty=Math.max(1,Math.min(9999,num(input&&input.value)||r.qty));
+      for(let i=0;i<qty;i++)labels.push(barcodeLabel3(p));
+    });
+    q3("printArea").innerHTML='<div style="display:flex;flex-wrap:wrap;gap:3mm">'+labels.join("")+'</div>';renderRealBarcodes(q3("printArea"));window.print();
+  }
+  function barcodeLabel3(p){
+    return '<div style="width:38mm;height:25mm;border:1px solid #111;padding:2mm;text-align:center;display:flex;flex-direction:column;justify-content:center;font:10px Arial"><strong>'+esc(settings.store||"NAMITA STORE")+'</strong><div>'+esc(p.name)+'</div><svg class="v3svgbarcode" data-code="'+esc(p.barcode)+'" style="width:34mm;height:10mm"></svg><small>'+esc(p.barcode)+'</small><strong>₹'+num(p.sale).toFixed(2)+'</strong></div>';
+  }
+
+  /* Real CODE128-B SVG barcode renderer */
+  const C128=[
+"212222","222122","222221","121223","121322","131222","122213","122312","132212","221213","221312","231212","112232","122132","122231","113222","123122","123221","223211","221132","221231","213212","223112","312131","311222","321122","321221","312212","322112","322211","212123","212321","232121","111323","131123","131321","112313","132113","132311","211313","231113","231311","112133","112331","132131","113123","113321","133121","313121","211331","231131","213113","213311","213131","311123","311321","331121","312113","312311","332111","314111","221411","431111","111224","111422","121124","121421","141122","141221","112214","112412","122114","122411","142112","142211","241211","221114","413111","241112","134111","111242","121142","121241","114212","124112","124211","411212","421112","421211","212141","214121","412121","111143","111341","131141","114113","114311","411113","411311","113141","114131","311141","411131","211412","211214","211232","2331112"];
+  function code128Svg(value){
+    value=String(value||"").replace(/[^\x20-\x7E]/g,"");
+    if(!value)value="000000000001";
+    let codes=[104],checksum=104;
+    for(let i=0;i<value.length;i++){let n=value.charCodeAt(i)-32;codes.push(n);checksum+=n*(i+1)}
+    codes.push(checksum%103,106);
+    let x=5, bars="";
+    codes.forEach((c,idx)=>{let pat=C128[c];let black=true;for(let j=0;j<pat.length;j++){let w=num(pat[j]);if(black)bars+='<rect x="'+x+'" y="2" width="'+w+'" height="48" fill="#000"/>';x+=w;black=!black}});
+    const width=x+5;
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+width+' 52" preserveAspectRatio="none"><rect width="100%" height="100%" fill="#fff"/>'+bars+'</svg>';
+  }
+  window.barcodeLabel3=barcodeLabel3;
+
+  function renderRealBarcodes(root){
+    (root||document).querySelectorAll(".v3svgbarcode").forEach(svg=>{svg.outerHTML=code128Svg(svg.dataset.code)})
+  }
+
+  /* Bulk Excel entry: update existing by barcode/SKU, otherwise create; also purchase ledger */
+  window.saveBulkProducts=function(){
+    const body=q3("bulkBody"); if(!body){toast("Bulk table not found.");return}
+    const rows=[...body.rows]; if(!rows.length){toast("No rows. Add rows first.");return}
+    let count=0,updated=0,purchaseCount=0;
+    rows.forEach(r=>{
+      const name=r.querySelector(".bn")?.value.trim(); if(!name)return;
+      const barcode=r.querySelector(".bbc")?.value.trim()||generateBarcodeNumber();
+      const sku=r.querySelector(".bsku")?.value.trim();
+      let p=products.find(x=>String(x.barcode)===String(barcode)) || (sku?products.find(x=>String(x.sku)===String(sku)):null);
+      const qty=Math.max(0,num(r.querySelector(".bqty")?.value));
+      const purchase=num(r.querySelector(".bpur")?.value), sale=num(r.querySelector(".bsale")?.value), mrp=num(r.querySelector(".bmrp")?.value);
+      if(p){
+        p.name=name;p.sku=sku||p.sku;p.barcode=barcode;p.category=r.querySelector(".bcat")?.value.trim()||p.category||"General";
+        if(purchase>0)p.purchase=purchase;if(sale>0)p.sale=sale;if(mrp>0)p.mrp=mrp;
+        p.minStock=num(r.querySelector(".bmin")?.value);p.gst=num(r.querySelector(".bgst")?.value);p.stock=num(p.stock)+qty;updated++;
+      }else{
+        p={id:id(),name,sku,barcode,category:r.querySelector(".bcat")?.value.trim()||"General",purchase,sale,mrp,stock:qty,minStock:num(r.querySelector(".bmin")?.value)||5,gst:num(r.querySelector(".bgst")?.value),hsn:"",createdAt:new Date().toISOString()};
+        products.push(p);count++;
+      }
+      if(qty>0){
+        const supplier=r.querySelector(".bsup")?.value||"";
+        purchases.push({id:id(),date:new Date().toISOString(),productId:p.id,product:p.name,qty,price:p.purchase,total:qty*p.purchase,supplier,barcode:p.barcode,payment:r.querySelector(".bpay")?.value||"Cash"});
+        purchaseCount++;
+        if(r.querySelector(".bpay")?.value==="Credit" && supplier){const sp=suppliers.find(x=>x.name===supplier);if(sp)sp.due=num(sp.due)+qty*p.purchase}
+      }
+    });
+    save3();refresh3();clearBulkRows();toast("Saved: "+count+" new, "+updated+" updated, "+purchaseCount+" purchase entries.");
+  };
+
+  /* Inventory: row-level adjustment */
+  window.adjustInventoryQuick=function(pid,delta){
+    const p=products.find(x=>x.id===pid); if(!p)return;
+    const n=num(p.stock)+num(delta); if(n<0){toast("Stock cannot be negative.");return}
+    p.stock=n;adjustments.push({id:id(),date:new Date().toISOString(),product:p.name,productId:p.id,qty:num(delta),reason:"Quick Adjustment",note:"Inventory table"});
+    save3();refresh3();toast(p.name+" stock updated.");
+  }
+  window.openAdjustForProduct=function(pid){
+    showPage("adjustments"); setTimeout(()=>{q3("adjProduct").value=pid;q3("adjQty").focus()},50);
+  }
+  function renderInventory3(){
+    const tb=q3("inventoryTable");if(!tb)return;
+    tb.innerHTML=products.map(p=>{
+      let status=p.stock<=0?"Out of Stock":(p.stock<=p.minStock?"Low Stock":"In Stock");
+      let cls=p.stock<=0?"red":(p.stock<=p.minStock?"orange":"green");
+      return '<tr><td>'+esc(p.barcode)+'</td><td><strong>'+esc(p.name)+'</strong></td><td>'+esc(p.category)+'</td><td><strong>'+num(p.stock)+'</strong></td><td>'+num(p.minStock)+'</td><td><span class="badge '+cls+'">'+status+'</span></td><td><div class="v3-inline"><button class="v3-smallbtn v3-minus" onclick="adjustInventoryQuick(\''+esc(p.id)+'\',-1)">−</button><input id="invq_'+esc(p.id)+'" type="number" min="1" value="1"><button class="v3-smallbtn v3-plus" onclick="adjustInventoryQuick(\''+esc(p.id)+'\',num(document.getElementById(\'invq_'+esc(p.id)+'\').value)||1)">+</button><button class="btn light" onclick="openAdjustForProduct(\''+esc(p.id)+'\')">Adjust</button></div></td></tr>';
+    }).join("");
+    const th=tb.closest("table")?.querySelector("thead tr"); if(th&&!th.querySelector(".v3InvAction")){th.insertAdjacentHTML("beforeend",'<th class="v3InvAction">Adjustment</th>')}
+  }
+
+  /* Product edit without removing original add-product workflow */
+  window.editProduct3=function(pid){
+    const p=products.find(x=>x.id===pid);if(!p)return;
+    V3.editId=pid;
+    const fields={productName:p.name,productSku:p.sku||"",productBarcode:p.barcode||"",productCategory:p.category||"",productPurchase:p.purchase||0,productSale:p.sale||0,productMrp:p.mrp||0,productStock:p.stock||0,productMinStock:p.minStock||5,productGst:p.gst||0,productHsn:p.hsn||""};
+    Object.keys(fields).forEach(k=>{if(q3(k))q3(k).value=fields[k]});
+    const h=q3("productModal")?.querySelector(".modal-head h3");if(h)h.textContent="Edit Product";
+    openModal("productModal");
+  }
+  window.openProductModal=function(){
+    V3.editId=null;
+    ["productName","productSku","productCategory","productPurchase","productSale","productMrp","productHsn"].forEach(k=>{if(q3(k))q3(k).value=""});
+    q3("productBarcode").value=generateBarcodeNumber();q3("productStock").value=0;q3("productMinStock").value=5;q3("productGst").value=0;
+    const h=q3("productModal")?.querySelector(".modal-head h3");if(h)h.textContent="Add Product";
+    openModal("productModal");
+  }
+  window.saveProduct=function(){
+    const name=q3("productName").value.trim();if(!name){toast("Product name is required.");return}
+    let p=V3.editId?products.find(x=>x.id===V3.editId):null;
+    const data={name,sku:q3("productSku").value.trim(),barcode:q3("productBarcode").value.trim()||generateBarcodeNumber(),category:q3("productCategory").value.trim()||"General",purchase:num(q3("productPurchase").value),sale:num(q3("productSale").value),mrp:num(q3("productMrp").value),stock:num(q3("productStock").value),minStock:num(q3("productMinStock").value)||5,gst:num(q3("productGst").value),hsn:q3("productHsn").value.trim()};
+    if(p)Object.assign(p,data);else products.push({id:id(),...data,createdAt:new Date().toISOString()});
+    save3();closeModal("productModal");refresh3();toast(p?"Product updated.":"Product saved.");
+  }
+  const oldRenderProducts=window.renderProducts;
+  window.renderProducts=function(filter=""){
+    oldRenderProducts(filter);
+    const tb=q3("productTable");if(!tb)return;
+    [...tb.rows].forEach(row=>{
+      const bc=row.cells[0]?.textContent.trim(),p=products.find(x=>String(x.barcode)===bc);
+      const action=row.cells[row.cells.length-1];if(p&&action)action.innerHTML='<button class="btn" style="padding:6px 9px" onclick="editProduct3(\''+esc(p.id)+'\')">Edit</button> <button class="btn red" style="padding:6px 9px" onclick="deleteProduct(\''+esc(p.id)+'\')">Delete</button>';
+    })
+  }
+
+  /* Customer/supplier payment */
+  function renderPartyPayments(){
+    const cs=q3("cpCustomer"),ss=q3("spSupplier");
+    if(cs)cs.innerHTML='<option value="">Select Customer</option>'+customers.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+' — Due ₹'+num(c.credit).toFixed(2)+'</option>').join("");
+    if(ss)ss.innerHTML='<option value="">Select Supplier</option>'+suppliers.map(s=>'<option value="'+esc(s.id)+'">'+esc(s.name)+' — Due ₹'+num(s.due).toFixed(2)+'</option>').join("");
+    const ct=q3("customerPaymentTable");if(ct)ct.innerHTML=payments.filter(x=>x.type==="customer_receive").slice().reverse().map(x=>'<tr><td>'+formatDateTime(x.date)+'</td><td>'+esc(x.party||x.customer)+'</td><td>'+esc(x.method)+'</td><td>'+v2Money(x.amount)+'</td><td>'+esc(x.reference||"")+'</td></tr>').join("")||'<tr><td colspan="5">No payments.</td></tr>';
+    const st=q3("supplierPaymentTable");if(st)st.innerHTML=payments.filter(x=>x.type==="supplier_pay").slice().reverse().map(x=>'<tr><td>'+formatDateTime(x.date)+'</td><td>'+esc(x.party||x.supplier)+'</td><td>'+esc(x.method)+'</td><td>'+v2Money(x.amount)+'</td><td>'+esc(x.reference||"")+'</td></tr>').join("")||'<tr><td colspan="5">No payments.</td></tr>';
+  }
+  window.receiveCustomerPayment=function(){
+    const c=customers.find(x=>x.id===q3("cpCustomer").value),amt=num(q3("cpAmount").value);
+    if(!c||amt<=0){toast("Select customer and enter amount.");return}
+    if(amt>num(c.credit)+0.01){if(!confirm("Amount is greater than current due. Continue?"))return}
+    c.credit=Math.max(0,num(c.credit)-amt);
+    payments.push({id:id(),date:new Date().toISOString(),type:"customer_receive",method:q3("cpMethod").value,amount:amt,reference:q3("cpNote").value,party:c.name,customer:c.name});
+    save3();q3("cpAmount").value="";q3("cpNote").value="";refresh3();toast("Customer payment received.");
+  }
+  window.paySupplier=function(){
+    const s=suppliers.find(x=>x.id===q3("spSupplier").value),amt=num(q3("spAmount").value);
+    if(!s||amt<=0){toast("Select supplier and enter amount.");return}
+    if(amt>num(s.due)+0.01){if(!confirm("Amount is greater than current due. Continue?"))return}
+    s.due=Math.max(0,num(s.due)-amt);
+    payments.push({id:id(),date:new Date().toISOString(),type:"supplier_pay",method:q3("spMethod").value,amount:amt,reference:q3("spNote").value,party:s.name,supplier:s.name});
+    save3();q3("spAmount").value="";q3("spNote").value="";refresh3();toast("Supplier payment recorded.");
+  }
+
+  /* POS paid/change/credit + robust sale */
+  function enhancePOS3(){
+    const box=q3("pos")?.querySelector(".panel:last-child");if(!box)return;
+    if(!q3("posPaid")){
+      const oldName=q3("posCustomerName"), oldPhone=q3("posCustomerPhone"), oldDue=q3("posDue");
+      const d=document.createElement("div");d.id="v3pospay";d.style.marginTop="10px";
+      d.innerHTML='<div class="form-group"><label>Paid Amount ₹</label><input id="posPaid" type="number" min="0" step="0.01" value="0" oninput="updateChange3()"></div><div class="v3-change"><span>Change / Return</span><strong id="posChange">₹0.00</strong></div>';
+      if(oldDue && oldDue.parentElement){oldDue.parentElement.insertAdjacentElement("afterend",d)}
+      else{const btn=box.querySelector(".btn.green");box.insertBefore(d,btn)}
+    }
+  }
+  window.updateChange3=function(){
+    const total=num(q3("grandTotal")?.textContent.replace(/[₹,]/g,"")),paid=num(q3("posPaid")?.value);
+    const ch=Math.max(0,paid-total);if(q3("posChange"))q3("posChange").textContent=v2Money(ch);
+    const pm=q3("paymentMethod")?.value;
+    if(pm==="Credit"&&q3("posDue")&&(!q3("posDue").dataset.manual||num(q3("posDue").value)===0))q3("posDue").value=Math.max(0,total-paid).toFixed(2);
+  }
+  const oldRenderCart=window.renderCart;
+  window.renderCart=function(){oldRenderCart();enhancePOS3();updateChange3()}
+
+  window.completeSale=function(){
+    if(!cart.length){toast("Cart is empty.");return}
+    for(const item of cart){const p=products.find(x=>x.id===item.productId);if(!p||item.qty>p.stock){toast("Stock unavailable.");return}}
+    const t=calculateTotals(), method=q3("paymentMethod").value, paid=num(q3("posPaid")?.value);
+    let due=method==="Credit"?Math.max(0,t.total-paid):Math.max(0,t.total-paid);
+    if(method!=="Credit" && paid<t.total-0.01){toast("Paid amount is less than bill total.");return}
+    const sale={id:id(),invoice:"NS-"+Date.now(),date:new Date().toISOString(),items:cart.map(item=>{const p=products.find(x=>x.id===item.productId);return {productId:p.id,name:p.name,barcode:p.barcode,qty:item.qty,purchase:num(p.purchase),sale:num(p.sale),total:p.sale*item.qty}}),subtotal:t.subtotal,discount:t.discount,gst:t.gstAmount,total:t.total,payment:method,paid,change:Math.max(0,paid-t.total),customerName:q3("posCustomerName")?.value.trim()||"Walk-in",customerPhone:q3("posCustomerPhone")?.value.trim()||"",customerDue:due};
+    cart.forEach(item=>{const p=products.find(x=>x.id===item.productId);p.stock-=item.qty});
+    let c=customers.find(x=>(sale.customerPhone&&x.phone===sale.customerPhone)||(sale.customerName!=="Walk-in"&&x.name===sale.customerName));
+    if((sale.customerName!=="Walk-in"||sale.customerPhone)&&!c){c={id:id(),name:sale.customerName,phone:sale.customerPhone,address:"",credit:0};customers.push(c)}
+    if(c&&due>0)c.credit=num(c.credit)+due;
+    sales.push(sale);
+    payments.push({id:id(),date:sale.date,type:"sale",method:method,amount:Math.min(paid,t.total),reference:sale.invoice,party:sale.customerName,customer:sale.customerName});
+    save3();cart=[];q3("discount").value=0;q3("gst").value=0;if(q3("posPaid"))q3("posPaid").value=0;if(q3("posDue"))q3("posDue").value=0;
+    refresh3();toast("Sale completed. "+sale.invoice+" | Change "+v2Money(sale.change));try{printInvoice(sale)}catch(e){}
+  }
+
+  /* Detailed reports with actual receipts/payments/cash flow */
+  window.renderAdvancedReports=function(){
+    if(!q3("advancedBody"))return;
+    const a=q3("repFrom").value,b=q3("repTo").value||date3(new Date()),ss=sales.filter(s=>inRange3(s.date,a,b)),pp=purchases.filter(p=>inRange3(p.date,a,b)),pay=payments.filter(p=>inRange3(p.date,a,b));
+    const salesTotal=ss.reduce((x,s)=>x+num(s.total),0),purchaseTotal=pp.reduce((x,p)=>x+num(p.total),0);
+    const profit=ss.reduce((x,s)=>x+s.items.reduce((z,i)=>z+(num(i.sale)-num(i.purchase))*num(i.qty),0)-num(s.discount),0);
+    const received=pay.filter(x=>["sale","customer_receive"].includes(x.type)).reduce((x,p)=>x+num(p.amount),0);
+    const supplierPaid=pay.filter(x=>x.type==="supplier_pay").reduce((x,p)=>x+num(p.amount),0);
+    q3("advancedReportCards").innerHTML='<div class="v2-mini"><span>Sales</span><strong>'+v2Money(salesTotal)+'</strong></div><div class="v2-mini"><span>Purchases</span><strong>'+v2Money(purchaseTotal)+'</strong></div><div class="v2-mini"><span>Gross Profit</span><strong>'+v2Money(profit)+'</strong></div><div class="v2-mini"><span>Invoices</span><strong>'+ss.length+'</strong></div><div class="v2-mini"><span>Customer Received</span><strong>'+v2Money(received)+'</strong></div><div class="v2-mini"><span>Supplier Paid</span><strong>'+v2Money(supplierPaid)+'</strong></div>';
+    let type=q3("repType").value,head=[],rows=[];
+    if(type==="sales"){head=["Invoice","Date","Customer","Payment","Paid","Due","Discount","Total"];rows=ss.map(s=>[s.invoice,formatDateTime(s.date),s.customerName||"Walk-in",s.payment,num(s.paid),num(s.customerDue),num(s.discount),num(s.total)])}
+    else if(type==="profit"){head=["Invoice","Date","Sales","Cost","Discount","Profit"];rows=ss.map(s=>{let cost=s.items.reduce((x,i)=>x+num(i.purchase)*num(i.qty),0);return[s.invoice,formatDate(s.date),s.total,cost,s.discount,s.items.reduce((x,i)=>x+(num(i.sale)-num(i.purchase))*num(i.qty),0)-num(s.discount)]})}
+    else if(type==="items"){head=["Product","Qty","Sales","Cost","Profit"];let m={};ss.forEach(s=>s.items.forEach(i=>{m[i.productId]??={name:i.name,qty:0,sales:0,cost:0};m[i.productId].qty+=num(i.qty);m[i.productId].sales+=num(i.sale)*num(i.qty);m[i.productId].cost+=num(i.purchase)*num(i.qty)}));rows=Object.values(m).map(x=>[x.name,x.qty,x.sales,x.cost,x.sales-x.cost])}
+    else if(type==="customers"){head=["Customer","Phone","Invoices","Sales","Received","Due"];let m={};ss.forEach(s=>{let k=s.customerPhone||s.customerName||"Walk-in";m[k]??={name:s.customerName||"Walk-in",phone:s.customerPhone||"",n:0,t:0,r:0};m[k].n++;m[k].t+=num(s.total);m[k].r+=num(s.paid)});rows=Object.values(m).map(x=>[x.name,x.phone,x.n,x.t,x.r,(customers.find(c=>c.phone===x.phone)||{}).credit||0])}
+    else if(type==="suppliers"){head=["Supplier","Purchase Qty","Purchases","Paid","Current Due"];let m={};pp.forEach(p=>{let k=p.supplier||"Unknown";m[k]??={q:0,t:0};m[k].q+=num(p.qty);m[k].t+=num(p.total)});rows=Object.entries(m).map(([k,x])=>[k,x.q,x.t,pay.filter(y=>y.type==="supplier_pay"&&y.party===k).reduce((z,y)=>z+num(y.amount),0),(suppliers.find(s=>s.name===k)||{}).due||0])}
+    else if(type==="payments"){head=["Date","Type","Party","Method","Amount","Reference"];rows=pay.map(p=>[formatDateTime(p.date),p.type,p.party||"",p.method,p.amount,p.reference||""])}
+    else if(type==="receivable"){head=["Customer","Phone","Due"];rows=customers.filter(c=>num(c.credit)>0).map(c=>[c.name,c.phone,c.credit])}
+    else if(type==="payable"){head=["Supplier","Phone","Due"];rows=suppliers.filter(s=>num(s.due)>0).map(s=>[s.name,s.phone,s.due])}
+    else {head=["Date","Sales Received","Customer Receipts","Supplier Paid","Net Cash"];let m={};pay.forEach(p=>{let d=date3(p.date);m[d]??={sale:0,cr:0,sp:0};if(p.type==="sale")m[d].sale+=num(p.amount);if(p.type==="customer_receive")m[d].cr+=num(p.amount);if(p.type==="supplier_pay")m[d].sp+=num(p.amount)});rows=Object.entries(m).sort().map(([d,x])=>[d,x.sale,x.cr,x.sp,x.sale+x.cr-x.sp])}
+    q3("advancedHead").innerHTML="<tr>"+head.map(x=>"<th>"+esc(x)+"</th>").join("")+"</tr>";
+    q3("advancedBody").innerHTML=rows.map(r=>"<tr>"+r.map((x,i)=>"<td>"+(typeof x==="number"&&i>1?v2Money(x):esc(x))+"</td>").join("")+"</tr>").join("")||'<tr><td colspan="'+head.length+'">No data for selected period</td></tr>';
+  }
+
+  function renderCashbook(){
+    const rows=payments.slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+    let sin=rows.filter(x=>["sale","customer_receive"].includes(x.type)).reduce((a,x)=>a+num(x.amount),0),out=rows.filter(x=>x.type==="supplier_pay").reduce((a,x)=>a+num(x.amount),0);
+    if(q3("cashbookCards"))q3("cashbookCards").innerHTML='<div class="v2-mini"><span>Total In</span><strong>'+v2Money(sin)+'</strong></div><div class="v2-mini"><span>Total Out</span><strong>'+v2Money(out)+'</strong></div><div class="v2-mini"><span>Net</span><strong>'+v2Money(sin-out)+'</strong></div><div class="v2-mini"><span>Transactions</span><strong>'+rows.length+'</strong></div>';
+    if(q3("cashbookTable"))q3("cashbookTable").innerHTML=rows.map(p=>'<tr><td>'+formatDateTime(p.date)+'</td><td>'+esc(p.type)+'</td><td>'+esc(p.party||"")+'</td><td>'+esc(p.method||"")+'</td><td>'+(["sale","customer_receive"].includes(p.type)?v2Money(p.amount):"")+'</td><td>'+ (p.type==="supplier_pay"?v2Money(p.amount):"")+'</td><td>'+esc(p.reference||"")+'</td></tr>').join("")||'<tr><td colspan="7">No entries.</td></tr>';
+  }
+
+  /* Refresh wrapper */
+  function refresh3(){
+    try{renderInventory3()}catch(e){}
+    try{renderPurchaseQueue()}catch(e){}
+    try{renderPartyPayments()}catch(e){}
+    try{renderCashbook()}catch(e){}
+    try{renderAdvancedReports()}catch(e){}
+    try{renderSeller()}catch(e){}
+    try{renderOrders()}catch(e){}
+    try{renderRealBarcodes(document)}catch(e){}
+    try{initMenu3();enhancePurchase();enhancePOS3()}catch(e){}
+  }
+  window.refresh3=refresh3;
+  const oldRefresh=window.refreshAll;
+  window.refreshAll=function(){try{oldRefresh()}catch(e){};refresh3()};
+  document.addEventListener("DOMContentLoaded",function(){initMenu3();enhancePurchase();enhancePOS3();refresh3()});
+  setTimeout(function(){initMenu3();enhancePurchase();enhancePOS3();refresh3()},50);
+})();
+</script>
 </body>
 </html>
