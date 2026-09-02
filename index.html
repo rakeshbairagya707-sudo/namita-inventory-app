@@ -5148,14 +5148,12 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
     let total=0;rs.forEach(r=>total+=N(r.purchase)*Math.max(1,N(r.qty)));
     const paid=cash+upi+card, credit=Math.max(0,total-paid), change=Math.max(0,paid-total);
     let previousDue=N(s.due);const batch=[];
-    rs.forEach(r=>{const qty=Math.max(1,N(r.qty)),pur=N(r.purchase),mrp=N(r.mrp),disc=Math.min(100,Math.max(0,N(r.discount))),sale=mrp>0?mrp*(1-disc/100):N(r.sale);let p=(products||[]).find(x=>(r.barcode&&String(x.barcode)===String(r.barcode))||(r.sku&&String(x.sku)===String(r.sku)));if(!p){p={id:id(),name:r.name,sku:r.sku||'',barcode:r.barcode||genUnique(),category:r.category||'General',purchase:pur,mrp,sale,discount:disc,stock:0,minStock:5,gst:0,hsn:'',createdAt:new Date().toISOString()};products.push(p)}else Object.assign(p,{name:r.name,sku:r.sku||p.sku,barcode:r.barcode||p.barcode,category:r.category||p.category,purchase:pur,mrp,sale,discount:disc});p.stock=N(p.stock)+qty;const amt=qty*pur;purchases.push({id:id(),date:new Date(date+'T12:00:00').toISOString(),productId:p.id,product:p.name,sku:p.sku||r.sku||'',category:p.category||r.category||'General',qty,price:pur,total:amt,supplier:s.name,supplierId:s.id,barcode:p.barcode,payment:r.payment||'Cash',discount:disc,mrp,mrpPrice:mrp,sale, _pendingBatch:true});batch.push({...r,barcode:p.barcode,qty});});
+    rs.forEach(r=>{const qty=Math.max(1,N(r.qty)),pur=N(r.purchase),mrp=N(r.mrp),disc=Math.min(100,Math.max(0,N(r.discount))),sale=mrp>0?mrp*(1-disc/100):N(r.sale);let p=(products||[]).find(x=>(r.barcode&&String(x.barcode)===String(r.barcode))||(r.sku&&String(x.sku)===String(r.sku)));if(!p){p={id:id(),name:r.name,sku:r.sku||'',barcode:r.barcode||genUnique(),category:r.category||'General',purchase:pur,mrp,sale,discount:disc,stock:0,minStock:5,gst:0,hsn:'',createdAt:new Date().toISOString()};products.push(p)}else Object.assign(p,{name:r.name,sku:r.sku||p.sku,barcode:r.barcode||p.barcode,category:r.category||p.category,purchase:pur,mrp,sale,discount:disc});p.stock=N(p.stock)+qty;const amt=qty*pur;purchases.push({id:id(),date:new Date(date+'T12:00:00').toISOString(),productId:p.id,product:p.name,qty,price:pur,total:amt,supplier:s.name,supplierId:s.id,barcode:p.barcode,payment:r.payment||'Cash',discount:disc});batch.push({...r,barcode:p.barcode,qty});});
     s.due=previousDue+credit;
-    const batchId=id(), pd=$('purchasePayDateV44')?.value||date, ref=$('purchasePayNoteV44')?.value||'';
-    purchases.filter(x=>x._pendingBatch).forEach(x=>{x.batchId=batchId;delete x._pendingBatch});
-    batch.forEach(x=>x.batchId=batchId);
-    if(cash>0)payments.push({id:id(),batchId,date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'Cash',amount:cash,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
-    if(upi>0)payments.push({id:id(),batchId,date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'UPI',amount:upi,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
-    if(card>0)payments.push({id:id(),batchId,date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'Card / Online',amount:card,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
+    const pd=$('purchasePayDateV44')?.value||date, ref=$('purchasePayNoteV44')?.value||'';
+    if(cash>0)payments.push({id:id(),date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'Cash',amount:cash,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
+    if(upi>0)payments.push({id:id(),date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'UPI',amount:upi,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
+    if(card>0)payments.push({id:id(),date:new Date(pd+'T12:00:00').toISOString(),type:'purchase_pay',method:'Card / Online',amount:card,reference:ref,party:s.name,supplier:s.name,supplierId:s.id});
     saveDB();localStorage.setItem('ns_payments',JSON.stringify(payments));window.purchaseBarcodeBatchV44=batch;window.purchaseRowsV44=[{name:'',sku:'',barcode:genUnique(),category:'General',purchase:0,mrp:0,discount:0,sale:0,qty:1,date,payment:'Cash'}];
     ['purchaseCashPaidV48','purchaseUpiPaidV48','purchaseCardPaidV48'].forEach(x=>{if($(x))$(x).value='0'});renderGrid();refreshAll();syncSupplierNow();updatePayUI();toast(`Purchase saved. Total ₹${total.toFixed(2)} | Paid ₹${paid.toFixed(2)} | Credit ₹${credit.toFixed(2)}${change>0?' | Change ₹'+change.toFixed(2):''}`);
   }
@@ -5186,121 +5184,81 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
 })();
 </script>
 
-<script>
-/* ===== V4.9 FINAL FIX: LIVE PAYMENT CALC + DASHBOARD FILTER + PURCHASE BATCH CRUD ===== */
+<style id="barcode-ui-fix-v50">
+.b50-controls{margin-top:18px;padding:14px;border:1px solid #e5e7ef;border-radius:12px;background:#fafbff}
+.b50-controls h3{margin:0 0 12px}.b50-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.b50-grid label{display:flex;flex-direction:column;gap:5px;font-weight:600;font-size:13px}.b50-grid select,.b50-grid input{padding:9px;border:1px solid #d8dce8;border-radius:8px}
+.b50-checks{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.b50-checks label{background:#fff;border:1px solid #e1e5ee;border-radius:8px;padding:8px 10px;font-weight:500}.b50-review{margin-top:16px;padding:14px;border:2px solid #dce3f5;border-radius:12px;background:#fff}.b50-review-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.b50-review-head h3{margin:0}.b50-sheet{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;max-height:520px;overflow:auto;padding:8px;background:#f5f6fa;border-radius:10px}.b50-label{box-sizing:border-box;border:1px dashed #555;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;font-family:Arial,sans-serif;padding:2mm;page-break-inside:avoid}.b50-label .b50-code svg{display:block;width:100%;height:auto}.b50-label .b50-code{width:92%;margin:2px 0}.b50-label small{line-height:1.15}.b50-label strong{line-height:1.15}.b50-note{font-size:12px;color:#666;margin-top:8px}
+@media(max-width:900px){.b50-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.b50-grid{grid-template-columns:1fr}}
+@media print{body *{visibility:hidden!important}#printArea,#printArea *{visibility:visible!important}#printArea{position:absolute!important;left:0!important;top:0!important;width:100%!important;background:#fff!important}.b50-sheet{max-height:none!important;overflow:visible!important;background:#fff!important}.b50-review{border:0!important;padding:0!important;margin:0!important}}
+</style>
+<script id="barcode-ui-fix-v50">
 (function(){
-  const $=id=>document.getElementById(id), N=v=>Number(v||0);
-  const esc=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'');
-  const rows=()=>window.purchaseRowsV44||(window.purchaseRowsV44=[]);
-
-  // Live payment calculation: every amount field immediately recalculates total/credit/change.
-  function livePayment(){
-    try{
-      const total=rows().filter(r=>String(r.name||'').trim()).reduce((a,r)=>a+N(r.purchase)*Math.max(1,N(r.qty)),0);
-      const cash=N($('purchaseCashPaidV48')?.value), upi=N($('purchaseUpiPaidV48')?.value), card=N($('purchaseCardPaidV48')?.value);
-      const paid=cash+upi+card, credit=Math.max(0,total-paid), change=Math.max(0,paid-total);
-      const set=(id,v)=>{const el=$(id);if(el)el.textContent='₹'+v.toFixed(2)};
-      set('purchaseGrandTotalV44',total);set('purchaseSummaryTotal46',total);set('purchaseSummaryCash46',cash);set('purchaseSummaryOnline46',upi+card);set('purchaseSummaryDue46',credit);
-      set('purchasePayBillV48',total);set('purchasePayPaidV48',paid);set('purchasePayCreditV48',credit);set('purchasePayChangeV48',change);
-      if($('purchasePaidV44'))$('purchasePaidV44').value=Math.min(total,paid).toFixed(2);
-      if(typeof renderSupplierDue==='function')try{renderSupplierDue()}catch(_){ }
-    }catch(_){ }
-  }
-  function bindPayment(){
-    ['purchaseCashPaidV48','purchaseUpiPaidV48','purchaseCardPaidV48'].forEach(id=>{
-      const el=$(id);if(!el||el.dataset.v49live)return;el.dataset.v49live='1';
-      ['input','change','keyup'].forEach(ev=>el.addEventListener(ev,livePayment));
-      el.addEventListener('focus',()=>el.select?.());
-    });
-    livePayment();
-  }
-
-  // Dashboard cards are clickable and open Inventory with the corresponding filter.
-  function dashboardLinks(){
-    const defs=[['lowStock','low'],['dashboardInStock','in'],['dashboardOutStock','out']];
-    defs.forEach(([id,type])=>{
-      const el=$(id)?.closest('.card');if(!el||el.dataset.v49click)return;el.dataset.v49click='1';el.style.cursor='pointer';el.title='Click to view products';
-      el.addEventListener('click',()=>{
-        window.v49StockFilter=type;
-        showPage('inventory');
-        setTimeout(()=>renderFilteredInventory(),60);
-      });
-    });
-  }
-  function renderFilteredInventory(){
-    const tb=$('inventoryTable');if(!tb)return;
-    const f=window.v49StockFilter||'';
-    const list=(products||[]).filter(p=>f==='low'?N(p.stock)>0&&N(p.stock)<=N(p.minStock):f==='out'?N(p.stock)<=0:f==='in'?N(p.stock)>N(p.minStock):true);
-    const esc2=esc;
-    tb.innerHTML=list.map(p=>{
-      const status=N(p.stock)<=0?'Out of Stock':(N(p.stock)<=N(p.minStock)?'Low Stock':'In Stock');
-      const cls=N(p.stock)<=0?'red':(N(p.stock)<=N(p.minStock)?'orange':'green');
-      return `<tr><td>${esc2(p.barcode||'')}</td><td><strong>${esc2(p.name||'')}</strong></td><td>${esc2(p.category||'')}</td><td><strong>${N(p.stock)}</strong></td><td>${N(p.minStock)}</td><td><span class="badge ${cls}">${status}</span></td><td><div class="v3-inline"><button class="btn light" onclick="editProduct3('${esc2(p.id)}')">Edit</button><button class="btn red" onclick="deleteProduct('${esc2(p.id)}')">Delete</button><button class="btn" onclick="openAdjustForProduct('${esc2(p.id)}')">Adjust</button></div></td></tr>`;
-    }).join('')||'<tr><td colspan="7" style="text-align:center;padding:18px;color:#777">No products found in this stock category.</td></tr>';
-  }
-
-  // Reverse one complete purchase batch: stock, supplier due and payment ledger.
-  function reverseBatch(batchId, ask=true){
-    const list=(purchases||[]).filter(p=>String(p.batchId||p.id)===String(batchId));
-    if(!list.length)return false;
-    const payList=(payments||[]).filter(p=>p.type==='purchase_pay' && String(p.batchId||'')===String(batchId));
-    const supplierId=list[0].supplierId, supplierName=list[0].supplier;
-    let total=list.reduce((a,p)=>a+N(p.total),0), paid=payList.reduce((a,p)=>a+N(p.amount),0);
-    // Legacy records without batchId: only reverse the individual purchase, not unrelated payments.
-    if(!list[0].batchId){ paid=0; }
-    const credit=Math.max(0,total-paid);
-    if(ask && !confirm(`এই পুরো Purchase Entry delete/update করলে ${list.length}টি row-এর stock ও supplier হিসাব reverse হবে। Continue?`))return false;
-    list.forEach(p=>{const prod=(products||[]).find(x=>String(x.id)===String(p.productId));if(prod)prod.stock=Math.max(0,N(prod.stock)-N(p.qty));});
-    const s=(suppliers||[]).find(x=>String(x.id)===String(supplierId)||x.name===supplierName);
-    if(s){ if(list[0].batchId) s.due=Math.max(0,N(s.due)-credit); else if(list[0].payment==='Credit')s.due=Math.max(0,N(s.due)-total); }
-    for(let i=purchases.length-1;i>=0;i--)if(String(purchases[i].batchId||purchases[i].id)===String(batchId))purchases.splice(i,1);
-    if(list[0].batchId)for(let i=payments.length-1;i>=0;i--)if(payments[i].type==='purchase_pay'&&String(payments[i].batchId||'')===String(batchId))payments.splice(i,1);
-    return true;
-  }
-  window.deletePurchaseBatchV49=function(batchId){
-    if(!reverseBatch(batchId,true))return;
-    saveDB();localStorage.setItem('ns_payments',JSON.stringify(payments));refreshAll();toast('পুরো Purchase Entry deleted.');
+  const $=id=>document.getElementById(id);
+  const esc50=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const n50=v=>Number(v)||0;
+  const sizes50={
+    '15x25':['25','15'],'20x30':['30','20'],'25x38':['38','25'],'30x50':['50','30'],'40x60':['60','40'],'50x25':['25','50'],'60x40':['40','60'],'custom':['38','25']
   };
-  let editingBatchId=null;
-  window.editPurchaseBatchV49=function(batchId){
-    const list=(purchases||[]).filter(p=>String(p.batchId||p.id)===String(batchId));if(!list.length)return;
-    const first=list[0];
-    if(!confirm('এই পুরো Purchase Entry Edit করার জন্য Purchase Entry-তে load করা হবে। আগের entry replace করে Save করবেন। Continue?'))return;
-    const payList=(payments||[]).filter(p=>p.type==='purchase_pay'&&String(p.batchId||'')===String(batchId));
-    if(!reverseBatch(batchId,false))return;
-    editingBatchId=batchId;
-    window.purchaseRowsV44=list.map(p=>({name:p.product||'',sku:p.sku||'',barcode:p.barcode||'',category:p.category||'General',purchase:N(p.price),mrp:N(p.mrp)||N(p.mrpPrice)||0,discount:N(p.discount)||0,sale:N(p.sale)||N(p.mrp)||N(p.mrpPrice)||0,qty:N(p.qty)||1,date:(p.date||'').slice(0,10),payment:p.payment||'Cash'}));
-    const top=$('purchaseSupplierTop');if(top)top.value=first.supplierId||'';
-    const dt=$('purchaseDateTop');if(dt)dt.value=(first.date||'').slice(0,10);
-    ['purchaseCashPaidV48','purchaseUpiPaidV48','purchaseCardPaidV48'].forEach(id=>{if($(id))$(id).value='0'});
-    payList.forEach(p=>{if(p.method==='Cash'&&$('purchaseCashPaidV48'))$('purchaseCashPaidV48').value=N(p.amount);else if(p.method==='UPI'&&$('purchaseUpiPaidV48'))$('purchaseUpiPaidV48').value=N(p.amount);else if($('purchaseCardPaidV48'))$('purchaseCardPaidV48').value=N($('purchaseCardPaidV48').value)+N(p.amount)});
-    showPage('purchase');setTimeout(()=>{try{renderGrid()}catch(_){};bindPayment();livePayment();toast('Purchase loaded for editing. Save Purchase to create the updated entry.');},100);
-  };
-  // Wrap save so an edit first removes the original batch (stock/due/payments were already reversed above).
-  const baseSave=window.savePurchaseExcelV44Final;
-  if(baseSave&&!baseSave.__v49wrap){
-    const wrapped=function(){
-      editingBatchId=null;
-      return baseSave();
-    };wrapped.__v49wrap=true;window.savePurchaseExcelV44Final=wrapped;
+  function selectedProduct50(){return (window.products||[]).find(p=>p.id===($('barcodeProduct')?.value||$('bdProduct')?.value)) || (window.products||[])[0];}
+  function injectBasic50(){
+    const page=$('barcode'); if(!page || $('barcodeControlsV50')) return;
+    const anchor=$('barcodePreview')?.closest('.panel') || page.querySelector('.panel'); if(!anchor)return;
+    const box=document.createElement('div');box.id='barcodeControlsV50';box.className='b50-controls';
+    box.innerHTML=`<h3>🏷️ Barcode Template & Print Settings</h3>
+      <div class="b50-grid">
+        <label>Template Size<select id="b50Size"><option value="15x25">15 × 25 mm</option><option value="20x30">20 × 30 mm</option><option value="25x38" selected>25 × 38 mm</option><option value="30x50">30 × 50 mm</option><option value="40x60">40 × 60 mm</option><option value="50x25">50 × 25 mm</option><option value="custom">Custom</option></select></label>
+        <label>Custom Width (mm)<input id="b50W" type="number" min="10" value="38"></label>
+        <label>Custom Height (mm)<input id="b50H" type="number" min="10" value="25"></label>
+        <label>Print Quantity<input id="b50Qty" type="number" min="1" max="999" value="1"></label>
+      </div>
+      <h3 style="margin-top:14px">লেবেলে কী কী থাকবে?</h3>
+      <div class="b50-checks">
+        <label><input type="checkbox" id="b50Store" checked> Store Name</label>
+        <label><input type="checkbox" id="b50Name" checked> Product Name</label>
+        <label><input type="checkbox" id="b50Mrp" checked> MRP</label>
+        <label><input type="checkbox" id="b50Sale" checked> Sale Price</label>
+        <label><input type="checkbox" id="b50Sku"> SKU</label>
+        <label><input type="checkbox" id="b50Cat"> Category</label>
+        <label><input type="checkbox" id="b50Gst"> GST %</label>
+        <label><input type="checkbox" id="b50Code" checked> Barcode Number</label>
+        <label><input type="checkbox" id="b50Hsn"> HSN</label>
+      </div>
+      <div class="b50-review"><div class="b50-review-head"><h3>👁️ Barcode Print Review</h3><span id="b50ReviewInfo" class="b50-note"></span></div><div id="b50ReviewSheet" class="b50-sheet"></div><div class="b50-note">উপরের অপশন বদলালে এই Preview সঙ্গে সঙ্গে পরিবর্তন হবে।</div></div>
+      <div class="actions" style="margin-top:12px"><button class="btn green" type="button" id="b50PrintBtn">🖨️ Print Preview / Labels</button><button class="btn light" type="button" id="b50SaveBtn">💾 Save Template</button><button class="btn" type="button" id="b50LoadBtn">↻ Load Template</button></div>`;
+    anchor.appendChild(box);
+    ['b50Size','b50W','b50H','b50Qty','b50Store','b50Name','b50Mrp','b50Sale','b50Sku','b50Cat','b50Gst','b50Code','b50Hsn'].forEach(id=>$(id)?.addEventListener('input',renderBasic50));
+    ['b50Size','b50Store','b50Name','b50Mrp','b50Sale','b50Sku','b50Cat','b50Gst','b50Code','b50Hsn'].forEach(id=>$(id)?.addEventListener('change',renderBasic50));
+    $('b50PrintBtn').onclick=printBasic50;$('b50SaveBtn').onclick=saveBasic50;$('b50LoadBtn').onclick=loadBasic50;
+    renderBasic50();
   }
-
-  // Add full-batch buttons to Purchase History. Existing legacy rows remain individually editable/deletable.
-  function purchaseHistoryButtons(){
-    const tb=$('purchaseTable');if(!tb)return;
-    const list=(purchases||[]).slice().reverse();
-    [...tb.rows].forEach((row,i)=>{
-      const p=list[i];if(!p)return;
-      let cell=row.querySelector('.v49BatchActions');if(!cell){cell=row.insertCell(-1);cell.className='v49BatchActions'}
-      const bid=p.batchId||p.id;
-      cell.innerHTML=`<button class="btn light" onclick="editPurchaseBatchV49('${esc(bid)}')">Edit Entry</button> <button class="btn red" onclick="deletePurchaseBatchV49('${esc(bid)}')">Delete Entry</button>`;
-    });
-    const h=tb.closest('table')?.querySelector('thead tr');if(h&&!h.querySelector('.v49BatchHead'))h.insertAdjacentHTML('beforeend','<th class="v49BatchHead">Full Entry</th>');
+  function dims50(){const v=$('b50Size')?.value||'25x38';if(v==='custom')return [n50($('b50W')?.value)||38,n50($('b50H')?.value)||25];const a=sizes50[v]||['38','25'];return [n50(a[0]),n50(a[1])];}
+  function label50(p, w,h){
+    const parts=[];
+    if($('b50Store')?.checked)parts.push('<strong>'+esc50((window.settings||{}).store||'NAMITA STORE')+'</strong>');
+    if($('b50Name')?.checked)parts.push('<div>'+esc50(p.name||'')+'</div>');
+    if($('b50Cat')?.checked)parts.push('<small>'+esc50(p.category||'')+'</small>');
+    if($('b50Code')?.checked)parts.push('<small>'+esc50(p.barcode||'')+'</small>');
+    if($('b50Mrp')?.checked)parts.push('<div>MRP ₹'+n50(p.mrp||p.sale).toFixed(2)+'</div>');
+    if($('b50Sale')?.checked)parts.push('<div>Sale ₹'+n50(p.sale).toFixed(2)+'</div>');
+    if($('b50Sku')?.checked)parts.push('<small>SKU: '+esc50(p.sku||'')+'</small>');
+    if($('b50Gst')?.checked)parts.push('<small>GST: '+n50(p.gst).toFixed(2)+'%</small>');
+    if($('b50Hsn')?.checked)parts.push('<small>HSN: '+esc50(p.hsn||'')+'</small>');
+    const bar=$('b50Code')?.checked ? '<div class="b50-code">'+code128Svg50(p.barcode||'000000000001')+'</div>' : '';
+    return '<div class="b50-label" style="width:'+w+'mm;height:'+h+'mm">'+parts.join('')+bar+'</div>';
   }
-  function boot(){bindPayment();dashboardLinks();purchaseHistoryButtons();}
-  const oldRefresh=window.refreshAll;
-  window.refreshAll=function(){try{oldRefresh?.()}catch(_){};setTimeout(()=>{bindPayment();dashboardLinks();purchaseHistoryButtons();if(window.v49StockFilter)renderFilteredInventory();},60)};
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,1200));setTimeout(boot,1600);
+  function code128Svg50(value){
+    if(typeof window.code128Svg==='function')return window.code128Svg(value);
+    const C=['212222','222122','222221','121223','121322','131222','122213','122312','132212','221213','221312','231212','112232','122132','122231','113222','123122','123221','223211','221132','221231','213212','223112','312131','311222','321122','321221','312212','322112','322211','212123','212321','232121','111323','131123','131321','112313','132113','132311','211313','231113','231311','112133','112331','132131','113123','113321','133121','313121','211331','231131','213113','213311','213131','311123','311321','331121','312113','312311','332111','314111','221411','431111','111224','111422','121124','121421','141122','141221','112214','112412','122114','122411','142112','142211','241211','221114','413111','241112','134111','111242','121142','121241','114212','124112','124211','411212','421112','421211','212141','214121','412121','111143','111341','131141','114113','114311','411113','411311','113141','114131','311141','411131','211412','211214','211232','2331112'];
+    value=String(value||'').replace(/[^\x20-\x7E]/g,'')||'000000000001';let codes=[104],sum=104;for(let i=0;i<value.length;i++){let z=value.charCodeAt(i)-32;codes.push(z);sum+=z*(i+1)}codes.push(sum%103,106);let x=2,b='';codes.forEach(c=>{let pat=C[c],black=true;for(let j=0;j<pat.length;j++){let w=Number(pat[j]);if(black)b+='<rect x="'+x+'" y="1" width="'+w+'" height="42"/>';x+=w;black=!black}});return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+(x+2)+' 44" preserveAspectRatio="none"><rect width="100%" height="100%" fill="#fff"/>'+b+'</svg>';
+  }
+  function renderBasic50(){const p=selectedProduct50(),sheet=$('b50ReviewSheet');if(!sheet)return;if(!p){sheet.innerHTML='<p style="padding:20px;color:#777">আগে একটি Product select করুন।</p>';return}const [w,h]=dims50(),qty=Math.min(999,Math.max(1,n50($('b50Qty')?.value)||1));let html='';for(let i=0;i<qty;i++)html+=label50(p,w,h);sheet.innerHTML=html;$('b50ReviewInfo').textContent=p.name+' • '+w+'×'+h+' mm • '+qty+' label';}
+  function printBasic50(){const p=selectedProduct50();if(!p){toast('Select a product first.');return}renderBasic50();$('printArea').innerHTML=$('b50ReviewSheet').outerHTML;window.print();}
+  function saveBasic50(){const t={size:$('b50Size').value,w:$('b50W').value,h:$('b50H').value,qty:$('b50Qty').value,fields:['Store','Name','Mrp','Sale','Sku','Cat','Gst','Code','Hsn'].filter(x=>$('b50'+x)?.checked)};localStorage.setItem('ns_barcode_template_v50',JSON.stringify(t));toast('Barcode template saved.');}
+  function loadBasic50(){try{const t=JSON.parse(localStorage.getItem('ns_barcode_template_v50')||'null');if(!t){toast('No saved barcode template.');return} $('b50Size').value=t.size||'25x38';$('b50W').value=t.w||38;$('b50H').value=t.h||25;$('b50Qty').value=t.qty||1;['Store','Name','Mrp','Sale','Sku','Cat','Gst','Code','Hsn'].forEach(x=>{if($('b50'+x))$('b50'+x).checked=(t.fields||[]).includes(x)});renderBasic50();toast('Barcode template loaded.')}catch(e){toast('Could not load template.')}}
+  function wireDesigner50(){const d=$('barcodeDesigner');if(!d||$('bdReviewV50'))return;const preview=$('designerPreview');if(!preview)return;const wrap=document.createElement('div');wrap.id='bdReviewV50';wrap.className='b50-review';wrap.innerHTML='<div class="b50-review-head"><h3>👁️ Barcode Print Review</h3><span class="b50-note">Designer-এর বর্তমান template-এর live preview</span></div><div id="bdReviewSheetV50" class="b50-sheet"></div>';preview.parentNode.insertBefore(wrap,preview);const old=window.renderBarcodeDesigner;window.renderBarcodeDesigner=function(){if(typeof old==='function')old();syncDesignerReview50()};syncDesignerReview50();}
+  function syncDesignerReview50(){const sheet=$('bdReviewSheetV50'),src=$('designerPreview');if(!sheet||!src)return;sheet.innerHTML=src.innerHTML||'<p>No preview.</p>';}
+  const oldRefresh=window.refreshAll;window.refreshAll=function(){if(typeof oldRefresh==='function')oldRefresh();setTimeout(()=>{injectBasic50();wireDesigner50();const bp=$('barcodeProduct');if(bp&&!bp.dataset.b50)bp.addEventListener('change',renderBasic50),bp.dataset.b50='1';},30)};
+  document.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{injectBasic50();wireDesigner50();const bp=$('barcodeProduct');if(bp&&!bp.dataset.b50)bp.addEventListener('change',renderBasic50),bp.dataset.b50='1';},50)});
 })();
 </script>
 </body>
