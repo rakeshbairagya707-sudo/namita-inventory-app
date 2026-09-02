@@ -3161,6 +3161,8 @@ function exportData(){
 
         products,
 
+        categories: (settings.categories||[]),
+
         customers,
 
         suppliers,
@@ -4533,17 +4535,16 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
   function selectedSupplier(){return $('purchaseSupplier')?.value||$('purchaseSupplierTop')?.value||''}
 
   function rowHtml44(r,i){
-    const sups=(window.suppliers||[]).map(s=>`<option value="${esc(s.name)}">${esc(s.name)}</option>`).join('');
     return `<tr data-i="${i}"><td>${i+1}</td>
       <td><input class="px-name" value="${esc(r.name||'')}" placeholder="Product" required></td>
       <td><input class="px-sku" value="${esc(r.sku||'')}" placeholder="SKU"></td>
       <td><input class="px-barcode" value="${esc(r.barcode||'')}" placeholder="Scan barcode"></td>
-      <td><input class="px-cat" value="${esc(r.category||'General')}" placeholder="Category"></td>
+      <td><input class="px-cat" value="${esc(r.category||'General')}" placeholder="Category" list="categoryMasterDatalist"></td>
       <td><input class="px-pur" type="number" min="0" step="0.01" value="${N(r.purchase)}" required></td>
       <td><input class="px-mrp" type="number" min="0" step="0.01" value="${N(r.mrp)}" required></td>
-      <td><input class="px-sale" type="number" min="0" step="0.01" value="${N(r.sale)}" required></td>
+      <td><input class="px-disc" type="number" min="0" max="100" step="0.01" value="${N(r.discount)}" placeholder="%"></td>
+      <td><input class="px-sale" type="number" min="0" step="0.01" value="${N(r.sale)}" readonly required></td>
       <td><input class="px-qty" type="number" min="1" value="${Math.max(1,N(r.qty)||1)}" required></td>
-      <td><select class="px-sup"><option value="">Select</option>${sups}</select></td>
       <td><input class="px-date" type="date" value="${r.date||today()}" required></td>
       <td><select class="px-pay"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Credit</option></select></td>
       <td><button class="btn red" type="button" onclick="removePurchaseExcelRowV44(${i})">×</button></td></tr>`;
@@ -4554,7 +4555,7 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
     rows().forEach((r,i)=>{const tr=body.rows[i];if(!tr)return;tr.querySelector('.px-sup').value=r.supplier||selectedSupplier();tr.querySelector('.px-pay').value=r.payment||'Cash';});
     wire44();updatePurchaseFooterV44();
   }
-  window.addPurchaseExcelRowV44=function(data={}){rows().push({name:'',sku:'',barcode:'',category:'General',purchase:0,mrp:0,sale:0,qty:1,supplier:selectedSupplier(),date:$('purchaseDate')?.value||today(),payment:'Cash',...data});render44();setTimeout(()=>{const b=$('purchaseExcelBodyV43');b?.rows?.[b.rows.length-1]?.querySelector('.px-name')?.focus()},20)};
+  window.addPurchaseExcelRowV44=function(data={}){rows().push({name:'',sku:'',barcode:'',category:'General',purchase:0,mrp:0,discount:0,sale:0,qty:1,supplier:selectedSupplier(),date:$('purchaseDate')?.value||today(),payment:'Cash',...data});render44();setTimeout(()=>{const b=$('purchaseExcelBodyV43');b?.rows?.[b.rows.length-1]?.querySelector('.px-name')?.focus()},20)};
   window.removePurchaseExcelRowV44=function(i){rows().splice(i,1);render44()};
 
   function wire44(){
@@ -4566,8 +4567,8 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
       const ri=[...body.rows].indexOf(tr);if(ri===body.rows.length-1)window.addPurchaseExcelRowV44();else body.rows[ri+1].querySelector('input,select')?.focus();
     });
     body.addEventListener('input',e=>{
-      const tr=e.target.closest('tr');if(!tr)return;const i=Number(tr.dataset.i), map={'px-name':'name','px-sku':'sku','px-barcode':'barcode','px-cat':'category','px-pur':'purchase','px-mrp':'mrp','px-sale':'sale','px-qty':'qty','px-date':'date'};
-      for(const c in map)if(e.target.classList.contains(c))rows()[i][map[c]]=e.target.value;updatePurchaseFooterV44();
+      const tr=e.target.closest('tr');if(!tr)return;const i=Number(tr.dataset.i), map={'px-name':'name','px-sku':'sku','px-barcode':'barcode','px-cat':'category','px-pur':'purchase','px-mrp':'mrp','px-disc':'discount','px-sale':'sale','px-qty':'qty','px-date':'date'};
+      for(const c in map)if(e.target.classList.contains(c))rows()[i][map[c]]=e.target.value;if(e.target.classList.contains('px-mrp')||e.target.classList.contains('px-disc')){const m=N(tr.querySelector('.px-mrp')?.value),d=Math.min(100,Math.max(0,N(tr.querySelector('.px-disc')?.value)));const sale=tr.querySelector('.px-sale');if(sale)sale.value=m>0?(m*(1-d/100)).toFixed(2):'';rows()[i].sale=N(sale?.value)}updatePurchaseFooterV44();
     });
     body.addEventListener('change',e=>{const tr=e.target.closest('tr');if(!tr)return;const i=Number(tr.dataset.i);if(e.target.classList.contains('px-sup'))rows()[i].supplier=e.target.value;if(e.target.classList.contains('px-pay'))rows()[i].payment=e.target.value;if(e.target.classList.contains('px-date'))rows()[i].date=e.target.value;});
   }
@@ -4639,5 +4640,186 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
 .v44-label{width:38mm;height:25mm;border:1px solid #111;padding:2mm;text-align:center;display:flex;flex-direction:column;justify-content:center;font:10px Arial;page-break-inside:avoid}.v44-label svg{width:34mm;height:9mm;margin:1mm auto}.v44-label small{font-size:8px}
 @media(max-width:800px){.v44-purchase-head,.v44-paygrid{grid-template-columns:1fr}.v44-total{flex-direction:column;align-items:flex-start;gap:5px}}
 </style>
+
+<style>
+/* V4.5 UX fixes */
+.v45-actions{display:flex;gap:6px;flex-wrap:wrap}.v45-actions .btn{padding:5px 8px;font-size:12px}
+.v45-master-list{display:grid;gap:7px;margin-top:12px}.v45-master-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 11px;border:1px solid #e5e7ef;border-radius:8px;background:#fff}.v45-master-row span{font-weight:600}.v45-category-help{font-size:12px;color:#777;margin-top:5px}
+#purchase .v44-purchase-head{margin-top:0}.v45-hide-old-supplier{display:none!important}
+.v45-inline-actions{display:flex;gap:5px;flex-wrap:wrap}
+</style>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const N=v=>Number(v||0);
+  const E=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'');
+  const save=()=>{try{saveDB()}catch(e){try{save3()}catch(_){}}};
+  const refresh=()=>{try{refreshAll()}catch(e){} try{renderPartyPayments?.()}catch(e){} try{renderCashbook?.()}catch(e){} try{renderAdjustments?.()}catch(e){}};
+  const today45=()=>new Date().toISOString().slice(0,10);
+
+  /* ---------- Category Master ---------- */
+  function ensureCategories(){
+    settings=settings||{};
+    if(!Array.isArray(settings.categories)) settings.categories=['General'];
+    settings.categories=[...new Set(settings.categories.map(x=>String(x||'').trim()).filter(Boolean))];
+    if(!settings.categories.includes('General')) settings.categories.unshift('General');
+  }
+  function renderCategoryMaster(){
+    ensureCategories();
+    const box=$('categoryMasterList'); if(!box)return;
+    box.innerHTML=settings.categories.map((c,i)=>`<div class="v45-master-row"><span>${E(c)}</span><div class="v45-actions"><button class="btn light" type="button" onclick="editCategory45(${i})">Edit</button>${c!=='General'?`<button class="btn red" type="button" onclick="deleteCategory45(${i})">Delete</button>`:''}</div></div>`).join('');
+    refreshCategoryInputs();
+  }
+  function refreshCategoryInputs(){
+    ensureCategories();
+    const opts=settings.categories.map(c=>`<option value="${E(c)}">${E(c)}</option>`).join('');
+    const inp=$('productCategory');
+    if(inp){inp.setAttribute('list','categoryMasterDatalist');let dl=$('categoryMasterDatalist');if(!dl){dl=document.createElement('datalist');dl.id='categoryMasterDatalist';document.body.appendChild(dl)}dl.innerHTML=opts;}
+    document.querySelectorAll('.bcat,.px-cat').forEach(x=>x.setAttribute('list','categoryMasterDatalist'));
+  }
+  window.addCategory45=function(){
+    ensureCategories();const v=prompt('নতুন Category-এর নাম লিখুন:','');if(v===null)return;const name=v.trim();if(!name)return toast('Category name required.');
+    if(settings.categories.some(c=>c.toLowerCase()===name.toLowerCase()))return toast('Category already exists.');
+    settings.categories.push(name);save();renderCategoryMaster();toast('Category added.');
+  };
+  window.editCategory45=function(i){
+    ensureCategories();const old=settings.categories[i];if(!old)return;const v=prompt('Category-এর নতুন নাম লিখুন:',old);if(v===null)return;const name=v.trim();if(!name)return;
+    if(name!==old && settings.categories.some((c,j)=>j!==i&&c.toLowerCase()===name.toLowerCase()))return toast('Category already exists.');
+    settings.categories[i]=name;products.forEach(p=>{if(p.category===old)p.category=name});save();renderCategoryMaster();refresh();toast('Category updated.');
+  };
+  window.deleteCategory45=function(i){
+    ensureCategories();const old=settings.categories[i];if(!old||old==='General')return;if(!confirm('Delete category "'+old+'"? Products will be moved to General.'))return;
+    products.forEach(p=>{if(p.category===old)p.category='General'});settings.categories.splice(i,1);save();renderCategoryMaster();refresh();toast('Category deleted.');
+  };
+  function ensureCategoryMasterUI(){
+    const panel=$('settings');if(!panel||$('categoryMasterPanel'))return;
+    const bank=$('bankAccountsPanel');
+    const div=document.createElement('div');div.className='panel';div.id='categoryMasterPanel';
+    div.innerHTML='<h3>🗂️ Category Master</h3><p class="v45-category-help">এখান থেকে নতুন Category তৈরি, Edit ও Delete করতে পারবেন। Product Entry-তে এগুলো সরাসরি ব্যবহার করা যাবে।</p><div class="actions" style="margin-top:10px"><button class="btn green" type="button" onclick="addCategory45()">＋ New Category</button></div><div id="categoryMasterList" class="v45-master-list"></div>';
+    (bank||panel.querySelector('.panel'))?.insertAdjacentElement('afterend',div);
+    renderCategoryMaster();
+  }
+
+  /* ---------- Product pricing + Enter navigation ---------- */
+  function calcProductPrice45(){
+    const mrp=N($('productMrp')?.value), d=Math.min(100,Math.max(0,N($('productDiscount')?.value)));
+    const sale=$('productSale');if(sale)sale.value=mrp>0?(mrp*(1-d/100)).toFixed(2):'';
+  }
+  function bindProductModal45(){
+    ['productMrp','productDiscount'].forEach(id=>{const el=$(id);if(el&&!el.dataset.v45price){el.addEventListener('input',calcProductPrice45);el.dataset.v45price='1';}});
+    const modal=$('productModal');if(!modal||modal.dataset.v45enter)return;modal.dataset.v45enter='1';
+    modal.addEventListener('keydown',e=>{
+      if(e.key!=='Enter')return;const t=e.target;if(!t.matches('input,select,textarea'))return;e.preventDefault();
+      const els=[...modal.querySelectorAll('input:not([type="hidden"]):not([disabled]),select,textarea')].filter(x=>x.offsetParent!==null);
+      const i=els.indexOf(t);if(i<0)return;
+      if(i<els.length-1){els[i+1].focus();els[i+1].select?.();}else{$('productModal').querySelector('button.btn.green')?.click();}
+    });
+  }
+  function bindBulk45(){
+    const body=$('bulkBody');if(!body||body.dataset.v45enter)return;body.dataset.v45enter='1';
+    body.addEventListener('keydown',e=>{
+      if(e.key!=='Enter')return;const t=e.target;if(!t.matches('input,select,textarea'))return;e.preventDefault();
+      const tr=t.closest('tr');if(!tr)return;const els=[...tr.querySelectorAll('input,select,textarea')];const i=els.indexOf(t);
+      if(i<els.length-1){els[i+1].focus();els[i+1].select?.();return}
+      const rows=[...body.rows],ri=rows.indexOf(tr);if(ri===rows.length-1){addBulkRow();setTimeout(()=>body.rows[body.rows.length-1]?.querySelector('input,select')?.focus(),0)}else rows[ri+1]?.querySelector('input,select')?.focus();
+    });
+  }
+  const oldEditProduct45=window.editProduct3;
+  window.editProduct3=function(pid){
+    if(oldEditProduct45)oldEditProduct45(pid);const p=products.find(x=>x.id===pid);if(!p)return;
+    setTimeout(()=>{const mrp=N(p.mrp),sale=N(p.sale);const d=mrp>0?Math.max(0,Math.min(100,100-(sale/mrp*100))):0;if($('productDiscount'))$('productDiscount').value=d.toFixed(2);calcProductPrice45();bindProductModal45();},0);
+  };
+  const oldOpenProduct45=window.openProductModal;
+  window.openProductModal=function(){oldOpenProduct45?.();setTimeout(()=>{if($('productDiscount'))$('productDiscount').value='0';calcProductPrice45();bindProductModal45();refreshCategoryInputs()},0)};
+  const oldSaveProduct45=window.saveProduct;
+  window.saveProduct=function(){
+    calcProductPrice45();return oldSaveProduct45?.();
+  };
+
+  /* ---------- Purchase: one global supplier at top ---------- */
+  const oldRenderPurchaseDropdowns45=window.renderPurchaseDropdowns;
+  window.renderPurchaseDropdowns=function(){
+    oldRenderPurchaseDropdowns45?.();
+    const top=$('purchaseSupplierTop'); if(top){const old=top.value;top.innerHTML='<option value="">Select Supplier</option>'+suppliers.map(s=>`<option value="${E(s.id)}">${E(s.name)}</option>`).join('');top.value=old||$('purchaseSupplier')?.value||'';}
+    setupPurchaseSupplier45();
+  };
+
+  function setupPurchaseSupplier45(){
+    const old=$('purchaseSupplier');
+    if(old){const wrap=old.closest('.form-group');if(wrap)wrap.classList.add('v45-hide-old-supplier');}
+    document.querySelectorAll('#purchaseExcelBodyV43 tr').forEach(tr=>tr.querySelector('.px-sup')?.closest('td')?.classList.add('v45-hide-old-supplier'));
+    const head=$('purchaseSupplierTop');
+    if(head){
+      head.onchange=()=>{const val=head.value;if(old){old.value=val;old.dispatchEvent(new Event('change',{bubbles:true}))} if(window.purchaseRowsV44)window.purchaseRowsV44.forEach(r=>r.supplier=val);};
+    }
+  }
+  function supplierTopName45(){const s=$('purchaseSupplierTop');return s?.options[s.selectedIndex]?.textContent?.trim()||''}
+
+  /* Override purchase grid row without per-row supplier; top supplier is used for all rows. */
+  const purchaseRowState45=()=>Array.isArray(window.purchaseRowsV44)?window.purchaseRowsV44:[];
+  function rowHtml45(r,i){
+    return `<tr data-i="${i}"><td>${i+1}</td><td><input class="px-name" value="${E(r.name||'')}" placeholder="Product" required></td><td><input class="px-sku" value="${E(r.sku||'')}" placeholder="SKU"></td><td><input class="px-barcode" value="${E(r.barcode||'')}" placeholder="Scan barcode"></td><td><input class="px-cat" value="${E(r.category||'General')}" placeholder="Category" list="categoryMasterDatalist"></td><td><input class="px-pur" type="number" min="0" step="0.01" value="${N(r.purchase)}" required></td><td><input class="px-mrp" type="number" min="0" step="0.01" value="${N(r.mrp)}" required></td><td><input class="px-disc" type="number" min="0" max="100" step="0.01" value="${N(r.discount)}" placeholder="%"></td><td><input class="px-sale" type="number" min="0" step="0.01" value="${N(r.sale)}" readonly required></td><td><input class="px-qty" type="number" min="1" value="${Math.max(1,N(r.qty)||1)}" required></td><td><input class="px-date" type="date" value="${r.date||today45()}" required></td><td><select class="px-pay"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Credit</option></select></td><td><button class="btn red" type="button" onclick="removePurchaseExcelRowV44(${i})">×</button></td></tr>`;
+  }
+  function calcPurchaseRow45(tr,i){const m=N(tr.querySelector('.px-mrp')?.value),d=Math.min(100,Math.max(0,N(tr.querySelector('.px-disc')?.value)));const sale=tr.querySelector('.px-sale');if(sale)sale.value=m>0?(m*(1-d/100)).toFixed(2):'';const rs=purchaseRowState45();if(rs[i]){rs[i].mrp=m;rs[i].discount=d;rs[i].sale=N(sale?.value)}}
+  function renderPurchase45(){
+    const body=$('purchaseExcelBodyV43');if(!body)return;const rs=purchaseRowState45();body.innerHTML=rs.map(rowHtml45).join('');
+    rs.forEach((r,i)=>{const tr=body.rows[i];if(!tr)return;tr.querySelector('.px-pay').value=r.payment||'Cash';calcPurchaseRow45(tr,i);});
+    setupPurchaseSupplier45();refreshCategoryInputs();
+    try{updatePurchaseFooterV44()}catch(e){}
+  }
+  window.renderPurchaseRows=renderPurchase45;
+  window.render44=renderPurchase45;
+  const oldAddPurchase44=window.addPurchaseExcelRowV44;
+  window.addPurchaseExcelRowV44=function(data={}){const rs=purchaseRowState45();rs.push({name:'',sku:'',barcode:'',category:'General',purchase:0,mrp:0,discount:0,sale:0,qty:1,supplier:$('purchaseSupplierTop')?.value||'',date:$('purchaseDateTop')?.value||$('purchaseDate')?.value||today45(),payment:'Cash',...data});renderPurchase45();setTimeout(()=>$('purchaseExcelBodyV43')?.rows?.[rs.length-1]?.querySelector('.px-name')?.focus(),20)};
+  window.addPurchaseExcelRowV43=window.addPurchaseExcelRowV44;
+  function wirePurchase45(){
+    const body=$('purchaseExcelBodyV43');if(!body||body.dataset.v45wire)return;body.dataset.v45wire='1';
+    body.addEventListener('keydown',e=>{
+      if(e.key!=='Enter')return;const t=e.target;if(!t.matches('input,select'))return;e.preventDefault();const tr=t.closest('tr'),cells=[...tr.querySelectorAll('input,select')],i=cells.indexOf(t);if(i<cells.length-1){cells[i+1].focus();cells[i+1].select?.();return}const rows=[...body.rows],ri=rows.indexOf(tr);if(ri===rows.length-1)window.addPurchaseExcelRowV44();else rows[ri+1]?.querySelector('input,select')?.focus();
+    });
+    body.addEventListener('input',e=>{const tr=e.target.closest('tr');if(!tr)return;const i=N(tr.dataset.i),rs=purchaseRowState45();if(!rs[i])return;const map={'px-name':'name','px-sku':'sku','px-barcode':'barcode','px-cat':'category','px-pur':'purchase','px-qty':'qty','px-date':'date'};for(const c in map)if(e.target.classList.contains(c))rs[i][map[c]]=e.target.value;if(e.target.classList.contains('px-mrp')||e.target.classList.contains('px-disc'))calcPurchaseRow45(tr,i);if(e.target.classList.contains('px-sale'))rs[i].sale=N(e.target.value);try{updatePurchaseFooterV44()}catch(_){} });
+    body.addEventListener('change',e=>{const tr=e.target.closest('tr');if(!tr)return;const i=N(tr.dataset.i),rs=purchaseRowState45();if(e.target.classList.contains('px-pay'))rs[i].payment=e.target.value;if(e.target.classList.contains('px-date'))rs[i].date=e.target.value;});
+  }
+  function normalizePurchaseHeaders45(){const table=$('purchaseExcelBodyV43')?.closest('table');if(!table)return;const th=table.querySelector('thead tr');if(th)th.innerHTML='<th>#</th><th>Product Name *</th><th>SKU</th><th>Barcode</th><th>Category</th><th>Purchase Price *</th><th>MRP *</th><th>Discount %</th><th>Selling Price *</th><th>Qty *</th><th>Date *</th><th>Payment</th><th>Delete</th>';}
+
+  /* ---------- Inventory + history actions ---------- */
+  const oldRenderInv45=window.renderInventory3;
+  window.renderInventory3=function(){oldRenderInv45?.();const tb=$('inventoryTable');if(!tb)return;[...tb.rows].forEach(row=>{const bc=row.cells[0]?.textContent.trim(),p=products.find(x=>String(x.barcode)===bc);if(p){const a=row.cells[row.cells.length-1]||row.insertCell(-1);a.innerHTML=`<div class="v45-inline-actions"><button class="btn light" onclick="editProduct3('${E(p.id)}')">Edit</button><button class="btn red" onclick="deleteProduct('${E(p.id)}')">Delete</button><button class="btn" onclick="openAdjustForProduct('${E(p.id)}')">Adjust</button></div>`;}})};
+  const oldRenderInvBase45=window.renderInventory;
+  window.renderInventory=function(){oldRenderInvBase45?.();const tb=$('inventoryTable');if(!tb)return;const head=tb.closest('table')?.querySelector('thead tr');if(head&&!head.querySelector('.v45InvAct'))head.insertAdjacentHTML('beforeend','<th class="v45InvAct">Actions</th>');[...tb.rows].forEach(row=>{const bc=row.cells[0]?.textContent.trim(),p=products.find(x=>String(x.barcode)===bc);if(p){const a=row.cells[row.cells.length-1];a.innerHTML=`<div class="v45-inline-actions"><button class="btn light" onclick="editProduct3('${E(p.id)}')">Edit</button><button class="btn red" onclick="deleteProduct('${E(p.id)}')">Delete</button></div>`;}})};
+
+  window.editCustomer45=function(id){const c=customers.find(x=>x.id===id);if(!c)return;const name=prompt('Customer Name:',c.name);if(name===null)return;const phone=prompt('Phone:',c.phone||'');if(phone===null)return;const address=prompt('Address:',c.address||'');if(address===null)return;c.name=name.trim()||c.name;c.phone=phone.trim();c.address=address.trim();save();refresh();toast('Customer updated.');};
+  window.editSupplier45=function(id){const s=suppliers.find(x=>x.id===id);if(!s)return;const name=prompt('Supplier Name:',s.name);if(name===null)return;const phone=prompt('Phone:',s.phone||'');if(phone===null)return;const address=prompt('Address:',s.address||'');if(address===null)return;s.name=name.trim()||s.name;s.phone=phone.trim();s.address=address.trim();save();refresh();toast('Supplier updated.');};
+  const oldRenderCust45=window.renderCustomers;window.renderCustomers=function(){oldRenderCust45?.();const tb=$('customerTable');if(!tb)return;[...tb.rows].forEach(row=>{const name=row.cells[0]?.textContent.trim(),c=customers.find(x=>x.name===name&&String(x.phone||'')===String(row.cells[1]?.textContent.trim()==='-'?'':row.cells[1]?.textContent.trim()));if(c){const a=row.cells[row.cells.length-1];a.innerHTML=`<div class="v45-inline-actions"><button class="btn light" onclick="editCustomer45('${E(c.id)}')">Edit</button><button class="btn red" onclick="deleteCustomer('${E(c.id)}')">Delete</button></div>`;}})};
+  const oldRenderSupp45=window.renderSuppliers;window.renderSuppliers=function(){oldRenderSupp45?.();const tb=$('supplierTable');if(!tb)return;[...tb.rows].forEach(row=>{const name=row.cells[0]?.textContent.trim(),s=suppliers.find(x=>x.name===name&&String(x.phone||'')===String(row.cells[1]?.textContent.trim()==='-'?'':row.cells[1]?.textContent.trim()));if(s){const a=row.cells[row.cells.length-1];a.innerHTML=`<div class="v45-inline-actions"><button class="btn light" onclick="editSupplier45('${E(s.id)}')">Edit</button><button class="btn red" onclick="deleteSupplier('${E(s.id)}')">Delete</button></div>`;}})};
+
+  window.deletePurchase45=function(id){const i=purchases.findIndex(x=>x.id===id);if(i<0)return;const p=purchases[i];if(!confirm('Delete this purchase history entry? Stock will be reduced by '+N(p.qty)+'.'))return;const prod=products.find(x=>x.id===p.productId);if(prod)prod.stock=Math.max(0,N(prod.stock)-N(p.qty));purchases.splice(i,1);save();refresh();toast('Purchase deleted.');};
+  window.editPurchase45=function(id){const p=purchases.find(x=>x.id===id);if(!p)return;const qty=prompt('Quantity:',p.qty);if(qty===null)return;const price=prompt('Purchase Price:',p.price);if(price===null)return;const supplier=prompt('Supplier:',p.supplier||'');if(supplier===null)return;const prod=products.find(x=>x.id===p.productId);if(prod)prod.stock=Math.max(0,N(prod.stock)-N(p.qty)+Math.max(0,N(qty)));p.qty=Math.max(0,N(qty));p.price=Math.max(0,N(price));p.total=p.qty*p.price;p.supplier=supplier.trim();save();refresh();toast('Purchase updated.');};
+  const oldRenderPurch45=window.renderPurchases;window.renderPurchases=function(){oldRenderPurch45?.();const tb=$('purchaseTable');if(!tb)return;const list=purchases.slice().reverse();[...tb.rows].forEach((row,ri)=>{const p=list[ri];if(!p)return;let a=row.insertCell(-1);a.innerHTML=`<div class="v45-inline-actions"><button class="btn light" onclick="editPurchase45('${E(p.id)}')">Edit</button><button class="btn red" onclick="deletePurchase45('${E(p.id)}')">Delete</button></div>`;});const h=tb.closest('table')?.querySelector('thead tr');if(h&&!h.querySelector('.v45HistAct'))h.insertAdjacentHTML('beforeend','<th class="v45HistAct">Actions</th>');};
+
+  window.editAdjustment45=function(id){const a=adjustments.find(x=>x.id===id);if(!a)return;const q=prompt('Adjustment Quantity (+/-):',a.qty);if(q===null)return;const reason=prompt('Reason:',a.reason||'');if(reason===null)return;const note=prompt('Note:',a.note||'');if(note===null)return;const prod=products.find(x=>x.id===a.productId);if(prod)prod.stock=Math.max(0,N(prod.stock)-N(a.qty)+N(q));a.qty=N(q);a.reason=reason;a.note=note;save();refresh();toast('Adjustment updated.');};
+  window.deleteAdjustment45=function(id){const i=adjustments.findIndex(x=>x.id===id);if(i<0)return;const a=adjustments[i];if(!confirm('Delete this adjustment? Stock will be reversed.'))return;const prod=products.find(x=>x.id===a.productId);if(prod)prod.stock=Math.max(0,N(prod.stock)-N(a.qty));adjustments.splice(i,1);save();refresh();toast('Adjustment deleted.');};
+  const oldRenderAdj45=window.renderAdjustments;window.renderAdjustments=function(){oldRenderAdj45?.();const tb=$('adjustmentTable');if(!tb)return;const list=adjustments.slice().reverse();[...tb.rows].forEach((row,ri)=>{const a=list[ri];if(!a)return;const cell=row.insertCell(-1);cell.innerHTML=`<div class="v45-inline-actions"><button class="btn light" onclick="editAdjustment45('${E(a.id)}')">Edit</button><button class="btn red" onclick="deleteAdjustment45('${E(a.id)}')">Delete</button></div>`;});const h=tb.closest('table')?.querySelector('thead tr');if(h&&!h.querySelector('.v45AdjAct'))h.insertAdjacentHTML('beforeend','<th class="v45AdjAct">Actions</th>');};
+
+  function editPayment45(id){const x=payments.find(p=>p.id===id);if(!x)return;const amt=prompt('Amount:',x.amount);if(amt===null)return;const ref=prompt('Reference:',x.reference||'');if(ref===null)return;const old=N(x.amount),neu=Math.max(0,N(amt));if(x.type==='customer_receive'){const c=customers.find(c=>c.name===x.party);if(c)c.credit=N(c.credit)+old-neu}else if(x.type==='supplier_pay'||x.type==='purchase_pay'){const s=suppliers.find(s=>s.name===x.party);if(s)s.due=N(s.due)-old+neu}x.amount=neu;x.reference=ref;save();refresh();toast('Payment updated.');}
+  function deletePayment45(id){const i=payments.findIndex(p=>p.id===id);if(i<0)return;const x=payments[i];if(!confirm('Delete this payment entry?'))return;const amt=N(x.amount);if(x.type==='customer_receive'){const c=customers.find(c=>c.name===x.party);if(c)c.credit=N(c.credit)+amt}else if(x.type==='supplier_pay'){const s=suppliers.find(s=>s.name===x.party);if(s)s.due=N(s.due)+amt}payments.splice(i,1);save();refresh();toast('Payment deleted.');}
+  window.editPayment45=editPayment45;window.deletePayment45=deletePayment45;
+  const oldRenderParty45=window.renderPartyPayments;window.renderPartyPayments=function(){oldRenderParty45?.();['customerPaymentTable','supplierPaymentTable'].forEach(id=>{const tb=$(id);if(!tb)return;const list=payments.filter(x=>id==='customerPaymentTable'?x.type==='customer_receive':x.type==='supplier_pay').slice().reverse();[...tb.rows].forEach((row,i)=>{const x=list[i];if(x){const c=row.insertCell(-1);c.innerHTML=`<div class="v45-inline-actions"><button class="btn light" onclick="editPayment45('${E(x.id)}')">Edit</button><button class="btn red" onclick="deletePayment45('${E(x.id)}')">Delete</button></div>`;}});const h=tb.closest('table')?.querySelector('thead tr');if(h&&!h.querySelector('.v45PayAct'))h.insertAdjacentHTML('beforeend','<th class="v45PayAct">Actions</th>');});};
+  const oldRenderCash45=window.renderCashbook;window.renderCashbook=function(){oldRenderCash45?.();const tb=$('cashbookTable');if(!tb)return;const list=payments.slice().sort((a,b)=>new Date(b.date)-new Date(a.date));[...tb.rows].forEach((row,i)=>{const x=list[i];if(x){const c=row.insertCell(-1);c.innerHTML=`<div class="v45-inline-actions"><button class="btn light" onclick="editPayment45('${E(x.id)}')">Edit</button><button class="btn red" onclick="deletePayment45('${E(x.id)}')">Delete</button></div>`;}});const h=tb.closest('table')?.querySelector('thead tr');if(h&&!h.querySelector('.v45CashAct'))h.insertAdjacentHTML('beforeend','<th class="v45CashAct">Actions</th>');};
+
+  /* Purchase payment footer: top supplier name + single supplier source */
+  function patchPurchaseSave45(){
+    const btn=$('savePurchaseExcelV43Btn');if(btn)btn.onclick=window.savePurchaseExcelV44Final;
+    setupPurchaseSupplier45();
+  }
+  function boot45(){
+    ensureCategories();ensureCategoryMasterUI();bindProductModal45();bindBulk45();refreshCategoryInputs();normalizePurchaseHeaders45();wirePurchase45();setupPurchaseSupplier45();patchPurchaseSave45();
+    setTimeout(()=>{if(Array.isArray(window.purchaseRowsV44)&&window.purchaseRowsV44.length)renderPurchase45();},80);
+  }
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(boot45,250));
+  setTimeout(boot45,500);
+})();
+</script>
+
 </body>
 </html>
