@@ -682,6 +682,7 @@ oninput="searchPOS()">
 <div class="panel">
 
 <h3>Current Cart</h3>
+<div class="form-group" style="margin:10px 0"><label>Sale Date *</label><input id="saleDate" type="date" required></div>
 
 <div id="cart" class="cart"></div>
 
@@ -832,10 +833,29 @@ oninput="renderProducts(this.value)">
 </div>
 
 <div class="form-group">
-<label>Supplier</label>
+<label>Supplier *</label>
 <select id="purchaseSupplier"></select>
 </div>
 
+<div class="form-group">
+<label>Purchase Date *</label>
+<input id="purchaseDate" type="date" required>
+</div>
+
+</div>
+
+<div id="purchaseQuickGrid" class="panel" style="margin-top:16px">
+  <h3>Purchase Product Entry — Excel Style</h3>
+  <div class="v3-inventory-search">
+    <input id="purchaseProductSearch" type="search" placeholder="🔎 Scan barcode / search product name / SKU / category">
+    <button class="btn" type="button" onclick="searchPurchaseProductV43()">Search</button>
+    <button class="btn green" type="button" onclick="openNewPurchaseProductV43()">➕ Add New Product</button>
+    <button class="btn light" type="button" onclick="addPurchaseExcelRowV43()">＋ New Row</button>
+  </div>
+  <div id="purchaseSearchResultsV43" class="product-results"></div>
+  <div class="v2-bulk-wrap" style="margin-top:12px">
+    <table class="v2-bulk v2-table"><thead><tr><th>#</th><th>Product Name *</th><th>SKU</th><th>Barcode</th><th>Category</th><th>Purchase Price *</th><th>MRP *</th><th>Selling Price *</th><th>Qty *</th><th>Supplier</th><th>Date *</th><th>Payment</th><th>Delete</th></tr></thead><tbody id="purchaseExcelBodyV43"></tbody></table>
+  </div>
 </div>
 
 <button class="btn green" style="margin-top:15px;" onclick="addPurchase()">
@@ -1149,6 +1169,18 @@ Save Settings
 </div>
 
 
+<div class="panel" id="bankAccountsPanel">
+<h3>🏦 Bank Accounts</h3>
+<div class="form-grid">
+  <div class="form-group"><label>Account Name *</label><input id="bankAccountName" placeholder="e.g. SBI Current Account"></div>
+  <div class="form-group"><label>Bank Name</label><input id="bankBankName"></div>
+  <div class="form-group"><label>Account Number</label><input id="bankAccountNumber"></div>
+  <div class="form-group"><label>IFSC</label><input id="bankIfsc"></div>
+</div>
+<div class="actions" style="margin-top:12px"><button class="btn green" onclick="addBankAccountV43()">＋ Add Bank Account</button></div>
+<div id="bankAccountListV43" style="margin-top:14px"></div>
+</div>
+
 <div class="panel">
 
 <h3>Database</h3>
@@ -1263,7 +1295,7 @@ Data is stored locally in this browser.
     <div class="form-grid">
       <div class="form-group"><label>Product</label><select id="bdProduct" onchange="renderBarcodeDesigner()"></select></div>
       <div class="form-group"><label>Barcode Type</label><select id="bdType" onchange="renderBarcodeDesigner()"><option>CODE128</option><option>EAN-13</option><option>QR CODE</option></select></div>
-      <div class="form-group"><label>Label Size</label><select id="bdSize" onchange="renderBarcodeDesigner()"><option value="25x38">25 × 38 mm</option><option value="20x30">20 × 30 mm</option><option value="15x25">15 × 25 mm</option><option value="custom">Custom</option></select></div>
+      <div class="form-group"><label>Label Size</label><select id="bdSize" onchange="renderBarcodeDesigner()"><option value="25x50">25 × 50 mm</option><option value="15x25">15 × 25 mm</option><option value="25x38">25 × 38 mm</option><option value="20x30">20 × 30 mm</option><option value="30x50">30 × 50 mm</option><option value="40x60">40 × 60 mm</option><option value="50x25">50 × 25 mm</option><option value="custom">Custom</option></select></div>
       <div class="form-group"><label>Print Quantity</label><input id="bdQty" type="number" min="1" value="1" onchange="renderBarcodeDesigner()"></div>
       <div class="form-group"><label>Custom Width mm</label><input id="bdW" type="number" value="38" onchange="renderBarcodeDesigner()"></div>
       <div class="form-group"><label>Custom Height mm</label><input id="bdH" type="number" value="25" onchange="renderBarcodeDesigner()"></div>
@@ -1326,6 +1358,7 @@ Data is stored locally in this browser.
   <div class="panel">
     <div class="form-grid">
       <div class="form-group"><label>Customer</label><select id="cpCustomer"></select></div>
+      <div class="form-group"><label>Payment Date *</label><input id="cpDate" type="date" required></div>
       <div class="form-group"><label>Receive Amount ₹</label><input id="cpAmount" type="number" min="0" step="0.01"></div>
       <div class="form-group"><label>Payment Method</label><select id="cpMethod"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option></select></div>
       <div class="form-group"><label>Reference / Note</label><input id="cpNote" placeholder="Receipt no / note"></div>
@@ -1340,6 +1373,7 @@ Data is stored locally in this browser.
   <div class="panel">
     <div class="form-grid">
       <div class="form-group"><label>Supplier</label><select id="spSupplier"></select></div>
+      <div class="form-group"><label>Payment Date *</label><input id="spDate" type="date" required></div>
       <div class="form-group"><label>Pay Amount ₹</label><input id="spAmount" type="number" min="0" step="0.01"></div>
       <div class="form-group"><label>Payment Method</label><select id="spMethod"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option></select></div>
       <div class="form-group"><label>Reference / Note</label><input id="spNote" placeholder="Voucher no / note"></div>
@@ -4262,6 +4296,154 @@ v2InitMenu();v2EnhancePOS();renderSeller();renderAdjustments();renderBarcodeDesi
   }
   document.addEventListener('DOMContentLoaded',boot);
   setTimeout(boot,100);
+})();
+</script>
+<script>
+/* ===== V4.3 FINAL OPERATIONS PATCH ===== */
+(function(){
+  const $=id=>document.getElementById(id), N=v=>Number(v||0), today=()=>new Date().toISOString().slice(0,10);
+  const esc=v=>escapeHtml(v);
+  function setToday(id){const x=$(id);if(x&&!x.value)x.value=today()}
+  function save(){try{saveDB()}catch(e){} try{localStorage.setItem('ns_adjustments',JSON.stringify(adjustments));localStorage.setItem('ns_payments',JSON.stringify(payments));}catch(e){}}
+
+  // Remove accidental duplicate Back labels/buttons and install exactly one Back per non-dashboard page.
+  function cleanBacks(){
+    document.querySelectorAll('.page').forEach(pg=>{
+      const backs=[...pg.querySelectorAll('.v41-back, .v43-back')];
+      backs.forEach((b,i)=>{if(i>0)b.remove()});
+      const textButtons=[...pg.querySelectorAll('button')].filter(b=>/^\s*(←|↩)?\s*Back\s*$/i.test(b.textContent));
+      textButtons.forEach((b,i)=>{if(i>0)b.remove(); else b.textContent='← Back';});
+      if(pg.id==='dashboard')return;
+      let b=pg.querySelector('.v41-back,.v43-back');
+      if(!b){b=document.createElement('button');b.className='btn light v43-back';b.type='button';b.textContent='← Back';b.onclick=window.goBackV41||(()=>showPage('seller'));const h=pg.querySelector(':scope > h2, :scope > .v2-hero h2');if(h)h.parentElement.insertBefore(b,h);else pg.insertBefore(b,pg.firstChild)}
+    });
+  }
+
+  // Purchase Excel grid, tied to currently selected supplier.
+  let purchaseRows=[];
+  function selectedSupplier(){return $('purchaseSupplier')?.value||''}
+  function rowHtml(r,i){
+    const suppliersHtml=(window.suppliers||[]).map(s=>`<option value="${esc(s.name)}" ${s.name===r.supplier?'selected':''}>${esc(s.name)}</option>`).join('');
+    return `<tr data-i="${i}"><td>${i+1}</td>
+      <td><input class="px-name" value="${esc(r.name||'')}" placeholder="Product"></td>
+      <td><input class="px-sku" value="${esc(r.sku||'')}"></td>
+      <td><input class="px-barcode" value="${esc(r.barcode||'')}" placeholder="Scan / barcode"></td>
+      <td><input class="px-cat" value="${esc(r.category||'General')}"></td>
+      <td><input class="px-pur" type="number" min="0" value="${N(r.purchase)}"></td>
+      <td><input class="px-mrp" type="number" min="0" value="${N(r.mrp)}"></td>
+      <td><input class="px-sale" type="number" min="0" value="${N(r.sale)}"></td>
+      <td><input class="px-qty" type="number" min="1" value="${Math.max(1,N(r.qty)||1)}"></td>
+      <td><select class="px-sup"><option value="">Select</option>${suppliersHtml}</select></td>
+      <td><input class="px-date" type="date" value="${r.date||today()}" required></td>
+      <td><select class="px-pay"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Credit</option></select></td>
+      <td><button class="btn red" type="button" onclick="removePurchaseExcelRowV43(${i})">×</button></td></tr>`;
+  }
+  function renderPurchaseRows(){
+    const body=$('purchaseExcelBodyV43');if(!body)return;
+    body.innerHTML=purchaseRows.map(rowHtml).join('');
+    purchaseRows.forEach((r,i)=>{const tr=body.rows[i];if(!tr)return; const sup=tr.querySelector('.px-sup'),pay=tr.querySelector('.px-pay');if(sup)sup.value=r.supplier||selectedSupplier();if(pay)pay.value=r.payment||'Cash'});
+    wirePurchaseExcel();
+  }
+  window.addPurchaseExcelRowV43=function(data={}){purchaseRows.push({supplier:selectedSupplier(),date:$('purchaseDate')?.value||today(),qty:1,...data});renderPurchaseRows();setTimeout(()=>{const body=$('purchaseExcelBodyV43');body?.rows?.[body.rows.length-1]?.querySelector('input')?.focus()},20)};
+  window.removePurchaseExcelRowV43=function(i){purchaseRows.splice(i,1);renderPurchaseRows()};
+  function wirePurchaseExcel(){
+    const body=$('purchaseExcelBodyV43');if(!body)return;
+    body.onkeydown=function(ev){if(ev.key!=='Enter')return;const t=ev.target;if(!t.matches('input,select'))return;ev.preventDefault();
+      const tr=t.closest('tr'), cells=[...tr.querySelectorAll('input,select')],i=cells.indexOf(t);
+      if(i<cells.length-1){cells[i+1].focus();cells[i+1].select?.();return}
+      const ri=[...body.rows].indexOf(tr); if(ri===body.rows.length-1)window.addPurchaseExcelRowV43(); else body.rows[ri+1].querySelector('input,select')?.focus();
+    };
+    body.oninput=function(ev){const tr=ev.target.closest('tr');if(!tr)return;const i=Number(tr.dataset.i);const map=[['px-name','name'],['px-sku','sku'],['px-barcode','barcode'],['px-cat','category'],['px-pur','purchase'],['px-mrp','mrp'],['px-sale','sale'],['px-qty','qty'],['px-date','date']];for(const [c,k] of map)if(ev.target.classList.contains(c))purchaseRows[i][k]=ev.target.value;};
+    body.onchange=function(ev){const tr=ev.target.closest('tr');if(!tr)return;const i=Number(tr.dataset.i);if(ev.target.classList.contains('px-sup'))purchaseRows[i].supplier=ev.target.value;if(ev.target.classList.contains('px-pay'))purchaseRows[i].payment=ev.target.value;if(ev.target.classList.contains('px-date'))purchaseRows[i].date=ev.target.value};
+  }
+  window.searchPurchaseProductV43=function(){
+    const q=String($('purchaseProductSearch')?.value||'').trim().toLowerCase(),box=$('purchaseSearchResultsV43');if(!box)return;
+    if(!q){box.innerHTML='';return}
+    const list=products.filter(p=>[p.barcode,p.name,p.sku,p.category].some(v=>String(v||'').toLowerCase().includes(q))).slice(0,12);
+    box.innerHTML=list.map(p=>`<button type="button" class="v2-action" style="margin:4px" onclick="addExistingProductToPurchaseV43('${esc(p.id)}')">${esc(p.name)} — ${esc(p.barcode||'')} — Stock ${N(p.stock)}</button>`).join('')||'<p style="padding:8px">No product found.</p>';
+  };
+  window.addExistingProductToPurchaseV43=function(pid){const p=products.find(x=>x.id===pid);if(!p)return;purchaseRows.push({name:p.name,sku:p.sku,barcode:p.barcode,category:p.category,purchase:p.purchase,mrp:p.mrp,sale:p.sale,qty:1,supplier:selectedSupplier(),date:$('purchaseDate')?.value||today(),payment:'Cash'});renderPurchaseRows();$('purchaseSearchResultsV43').innerHTML='';$('purchaseProductSearch').value='';setTimeout(()=>{$('purchaseExcelBodyV43')?.rows?.[purchaseRows.length-1]?.querySelector('.px-qty')?.focus()},20)};
+  window.openNewPurchaseProductV43=function(){if(!selectedSupplier()){toast('Please select Supplier first.');$('purchaseSupplier')?.focus();return} v43FromPurchase=true;window.openProductModal()};
+  let v43FromPurchase=false;
+  const oldOpen=window.openProductModal;
+  window.openProductModal=function(){oldOpen();setTimeout(()=>{const ids=['productName','productSku','productBarcode','productCategory','productPurchase','productSale','productMrp','productStock','productMinStock','productGst','productHsn'];ids.forEach((id,i)=>{const el=$(id);if(!el)return;el.onkeydown=function(ev){if(ev.key!=='Enter')return;ev.preventDefault();if(i<ids.length-1)$(ids[i+1])?.focus();else window.saveProduct()}});$('productName')?.focus()},50)};
+  const oldSaveProduct=window.saveProduct;
+  window.saveProduct=function(){
+    if(!v43FromPurchase)return oldSaveProduct();
+    const name=$('productName')?.value.trim();if(!name){toast('Product name is required.');$('productName')?.focus();return}
+    const p={id:id(),name,sku:$('productSku')?.value.trim()||'',barcode:$('productBarcode')?.value.trim()||generateBarcodeNumber(),category:$('productCategory')?.value.trim()||'General',purchase:N($('productPurchase')?.value),sale:N($('productSale')?.value),mrp:N($('productMrp')?.value),stock:0,minStock:N($('productMinStock')?.value)||5,gst:N($('productGst')?.value),hsn:$('productHsn')?.value.trim()||'',createdAt:new Date().toISOString()};
+    products.push(p);save();closeModal('productModal');
+    purchaseRows.push({name:p.name,sku:p.sku,barcode:p.barcode,category:p.category,purchase:p.purchase,mrp:p.mrp,sale:p.sale,qty:Math.max(1,N($('productStock')?.value)||1),supplier:selectedSupplier(),date:$('purchaseDate')?.value||today(),payment:'Cash'});
+    v43FromPurchase=false;renderPurchaseRows();setTimeout(()=>{$('purchaseExcelBodyV43')?.rows?.[purchaseRows.length-1]?.querySelector('.px-qty')?.focus()},50);toast('New product added to Purchase Entry.');
+  };
+  // Barcode/name search: Enter performs search, exact barcode immediately adds the product.
+  const psrch=$('purchaseProductSearch');if(psrch)psrch.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();const q=String(this.value||'').trim().toLowerCase();const p=products.find(x=>String(x.barcode||'').toLowerCase()===q);if(p)window.addExistingProductToPurchaseV43(p.id);else window.searchPurchaseProductV43();}});
+
+  // Save inline purchase grid to products + purchase ledger. This is an explicit second save, preserving old Save Purchase.
+  window.savePurchaseExcelV43=function(){
+    if(!purchaseRows.length){toast('Add at least one product row.');return}
+    const date=$('purchaseDate')?.value;if(!date){toast('Purchase Date is required.');$('purchaseDate')?.focus();return}
+    const supplier=selectedSupplier(); if(!supplier){toast('Supplier is required.');$('purchaseSupplier')?.focus();return}
+    let count=0;
+    purchaseRows.forEach(r=>{
+      if(!r.name)return; const qty=Math.max(1,N(r.qty)||1), pur=N(r.purchase), sale=N(r.sale), mrp=N(r.mrp);
+      let p=products.find(x=>(r.barcode&&x.barcode===r.barcode)||(r.sku&&x.sku===r.sku));
+      if(!p){p={id:id(),name:r.name,sku:r.sku||'',barcode:r.barcode||generateBarcodeNumber(),category:r.category||'General',purchase:pur,sale: sale,mrp:mrp,stock:0,minStock:5,gst:0,hsn:'',createdAt:new Date().toISOString()};products.push(p)}
+      else{p.name=r.name;p.sku=r.sku||p.sku;p.barcode=r.barcode||p.barcode;p.category=r.category||p.category;p.purchase=pur;p.sale=sale;p.mrp=mrp}
+      p.stock=N(p.stock)+qty;
+      purchases.push({id:id(),date:new Date(date+'T12:00:00').toISOString(),productId:p.id,product:p.name,qty,price:pur,total:qty*pur,supplier});
+      if(r.payment==='Credit'){const s=suppliers.find(x=>x.name===supplier);if(s)s.due=N(s.due)+qty*pur}
+      count++;
+    });
+    save();purchaseRows=[];renderPurchaseRows();refreshAll();toast(count+' purchase rows saved.');
+  };
+
+  // Add an obvious save button for the Excel purchase grid.
+  function ensurePurchaseUI(){
+    const panel=$('purchaseQuickGrid');if(!panel)return;
+    if(!$('savePurchaseExcelV43Btn')){const b=document.createElement('button');b.id='savePurchaseExcelV43Btn';b.className='btn green';b.style.marginTop='12px';b.textContent='💾 Save All Purchase Rows';b.onclick=window.savePurchaseExcelV43;panel.querySelector('.v2-bulk-wrap').insertAdjacentElement('afterend',b)}
+    setToday('purchaseDate'); if(!purchaseRows.length)addPurchaseExcelRowV43();
+  }
+
+  // Adjustment history: hard override so it always renders after adjustment save.
+  const oldSaveAdj=window.saveAdjustment;
+  window.saveAdjustment=function(){const d=$('adjustmentDateV43')?.value;if(!d){toast('Adjustment Date is required.');return}oldSaveAdj();setTimeout(()=>{window.renderAdjustments?.();},30)};
+  function ensureAdjustmentDate(){const p=$('adjustments');if(!p||$('adjustmentDateV43'))return;const box=p.querySelector('.form-grid');if(box){const d=document.createElement('div');d.className='form-group';d.innerHTML='<label>Adjustment Date *</label><input id="adjustmentDateV43" type="date" required>';box.appendChild(d);setToday('adjustmentDateV43')}}
+
+  // Payments with mandatory dates and exact history refresh.
+  const oldReceive=window.receiveCustomerPayment;
+  window.receiveCustomerPayment=function(){if(!$('cpDate')?.value){toast('Payment Date is required.');$('cpDate')?.focus();return}oldReceive();setTimeout(()=>renderPartyPaymentsV43(),50)};
+  const oldPay=window.paySupplier;
+  window.paySupplier=function(){if(!$('spDate')?.value){toast('Payment Date is required.');$('spDate')?.focus();return}oldPay();setTimeout(()=>renderPartyPaymentsV43(),50)};
+  function renderPartyPaymentsV43(){try{renderPartyPayments()}catch(e){}}
+
+  // Mandatory sale date; preserve it in sale record by wrapping completeSale.
+  const oldComplete=window.completeSale;
+  window.completeSale=function(){if(!$('saleDate')?.value){toast('Sale Date is required.');$('saleDate')?.focus();return}oldComplete();if(sales.length){const s=sales[sales.length-1];const d=$('saleDate').value;s.date=new Date(d+'T12:00:00').toISOString();save();}}
+
+  // Dashboard business KPIs: today / 7 days / 1 month / 3 months + stock value.
+  function rangeSales(days){const now=new Date(),from=new Date(now.getTime()-days*86400000);return sales.filter(s=>new Date(s.date)>=from)}
+  window.renderDashboardV43=function(){
+    const dash=$('dashboard');if(!dash)return;
+    let box=$('dashboardV43');if(!box){box=document.createElement('div');box.id='dashboardV43';box.style.marginTop='18px';dash.appendChild(box)}
+    const todaySales=sales.filter(s=>new Date(s.date).toISOString().slice(0,10)===today()).reduce((a,s)=>a+N(s.total),0);
+    const s7=rangeSales(7).reduce((a,s)=>a+N(s.total),0),s30=rangeSales(30).reduce((a,s)=>a+N(s.total),0),s90=rangeSales(90).reduce((a,s)=>a+N(s.total),0);
+    const cost=products.reduce((a,p)=>a+N(p.stock)*N(p.purchase),0),sale=products.reduce((a,p)=>a+N(p.stock)*N(p.sale),0);
+    box.innerHTML=`<div class="v2-report-cards"><div class="v2-mini"><span>Today Sales</span><strong>${v2Money(todaySales)}</strong></div><div class="v2-mini"><span>7 Days Sales</span><strong>${v2Money(s7)}</strong></div><div class="v2-mini"><span>1 Month Sales</span><strong>${v2Money(s30)}</strong></div><div class="v2-mini"><span>3 Months Sales</span><strong>${v2Money(s90)}</strong></div><div class="v2-mini"><span>Total Purchase Value</span><strong>${v2Money(cost)}</strong></div><div class="v2-mini"><span>Total Selling Value</span><strong>${v2Money(sale)}</strong></div></div>`;
+  }
+
+  // Bank accounts stored in settings and visible in settings.
+  function bankList(){settings.bankAccounts=settings.bankAccounts||[];return settings.bankAccounts}
+  window.addBankAccountV43=function(){const name=$('bankAccountName')?.value.trim();if(!name){toast('Account name is required.');return}bankList().push({id:id(),name,bank:$('bankBankName').value.trim(),number:$('bankAccountNumber').value.trim(),ifsc:$('bankIfsc').value.trim()});save();renderBankAccountsV43();['bankAccountName','bankBankName','bankAccountNumber','bankIfsc'].forEach(k=>{if($(k))$(k).value=''})};
+  window.removeBankAccountV43=function(i){bankList().splice(i,1);save();renderBankAccountsV43()};
+  function renderBankAccountsV43(){const box=$('bankAccountListV43');if(!box)return;box.innerHTML=bankList().map((b,i)=>`<div class="panel" style="margin-top:8px;padding:10px"><strong>${esc(b.name)}</strong> — ${esc(b.bank||'')} ${b.number?'• A/C '+esc(b.number):''} ${b.ifsc?'• IFSC '+esc(b.ifsc):''} <button class="btn red" style="float:right" onclick="removeBankAccountV43(${i})">Delete</button></div>`).join('')||'<p style="color:#777">No bank account added.</p>'}
+
+  // Initialise mandatory dates, clean duplicated Back buttons, and add the purchase grid.
+  function boot(){
+    setToday('purchaseDate');setToday('cpDate');setToday('spDate');setToday('saleDate');ensureAdjustmentDate();ensurePurchaseUI();renderBankAccountsV43();cleanBacks();window.renderDashboardV43();
+  }
+  const oldRefresh=window.refreshAll;window.refreshAll=function(){try{oldRefresh()}catch(e){}boot();};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,100));setTimeout(boot,200);
 })();
 </script>
 </body>
