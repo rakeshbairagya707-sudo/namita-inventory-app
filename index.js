@@ -56,7 +56,7 @@ function view() {
   if (page === "dashboard") {
     const totalProd = products.length;
     const totalStock = products.reduce((a, b) => a + Number(b.stock || 0), 0);
-    const lowStock = products.filter(p => p.stock <= 5).length;
+    const totalDue = customers.reduce((a, b) => a + Number(b.due_amount || 0), 0);
 
     return `
       <h2 class="text-2xl font-bold mb-4">Dashboard Overview</h2>
@@ -70,8 +70,8 @@ function view() {
           <h3 class="text-2xl font-bold">${totalStock}</h3>
         </div>
         <div class="bg-white p-4 rounded shadow">
-          <p class="text-gray-500 text-sm">Low Stock Alert (<= 5)</p>
-          <h3 class="text-2xl font-bold text-red-600">${lowStock}</h3>
+          <p class="text-gray-500 text-sm">Total Customer Due (মোট বাকি)</p>
+          <h3 class="text-2xl font-bold text-red-600">${money(totalDue)}</h3>
         </div>
       </div>
     `;
@@ -131,12 +131,16 @@ function view() {
             <h3 class="font-bold text-lg mb-3">Cart</h3>
             <div class="mb-3">
               <label class="block text-xs font-bold text-gray-600 mb-1">কাস্টমার সিলেক্ট করুন:</label>
-              <select onchange="selectedCustomer=this.value" class="w-full border p-2 rounded text-sm">
+              <select id="pos_customer" onchange="selectedCustomer=this.value" class="w-full border p-2 rounded text-sm">
                 <option value="">সাধারণ কাস্টমার (Cash)</option>
-                ${customers.map(c => `<option value="${esc(c.name)}">${esc(c.name)} (${esc(c.phone || 'No Phone')})</option>`).join('')}
+                ${customers.map(c => `<option value="${c.id}">${esc(c.name)} (বাকি: ${money(c.due_amount)})</option>`).join('')}
               </select>
             </div>
-            <div class="space-y-2 max-h-48 overflow-y-auto border-t pt-2">
+            <div class="mb-3">
+              <label class="block text-xs font-bold text-gray-600 mb-1">জমা দেওয়া টাকার পরিমাণ (₹):</label>
+              <input id="paid_amount" type="number" placeholder="সব দিলে ফাঁকা রাখুন" class="w-full border p-2 rounded text-sm" />
+            </div>
+            <div class="space-y-2 max-h-36 overflow-y-auto border-t pt-2">
               ${cart.length === 0 ? '<p class="text-gray-400 text-sm">Cart is empty</p>' : ''}
               ${cart.map(item => `
                 <div class="flex justify-between items-center text-sm border-b pb-1">
@@ -175,14 +179,20 @@ function view() {
             <tr class="bg-slate-100 border-b">
               <th class="p-3">Name</th>
               <th class="p-3">Phone</th>
+              <th class="p-3">Current Due (বাকি)</th>
+              <th class="p-3">Action</th>
             </tr>
           </thead>
           <tbody>
-            ${customers.length === 0 ? '<tr><td colspan="2" class="p-3 text-gray-400">No customers found</td></tr>' : ''}
+            ${customers.length === 0 ? '<tr><td colspan="4" class="p-3 text-gray-400">No customers found</td></tr>' : ''}
             ${customers.map(c => `
               <tr class="border-b">
                 <td class="p-3 font-semibold">${esc(c.name)}</td>
                 <td class="p-3">${esc(c.phone || '-')}</td>
+                <td class="p-3 font-bold ${c.due_amount > 0 ? 'text-red-600' : 'text-green-600'}">${money(c.due_amount)}</td>
+                <td class="p-3">
+                  <button onclick="clearDue('${c.id}', ${c.due_amount})" class="bg-emerald-600 text-white text-xs px-2 py-1 rounded hover:bg-emerald-700">বাকি জমা নিন</button>
+                </td>
               </tr>
             `).join('')}
           </tbody>
@@ -241,10 +251,26 @@ async function addCustomer(e) {
   const name = $("#c_name").value;
   const phone = $("#c_phone").value;
 
-  const { data, error } = await db.from("customers").insert([{ name, phone }]).select();
+  const { data, error } = await db.from("customers").insert([{ name, phone, due_amount: 0 }]).select();
   if (error) alert("Error adding customer");
   else {
     customers.unshift(data[0]);
+    render();
+  }
+}
+
+async function clearDue(custId, currentDue) {
+  const amount = prompt("কত টাকা জমা পেলেন লিখুন:", currentDue);
+  if (!amount || isNaN(amount)) return;
+  
+  const paid = parseFloat(amount);
+  const newDue = Math.max(0, currentDue - paid);
+
+  const { error } = await db.from("customers").update({ due_amount: newDue }).eq("id", custId);
+  if (error) alert("বাকি আপডেট করা সম্ভব হয়নি");
+  else {
+    const cust = customers.find(c => c.id === custId);
+    if (cust) cust.due_amount = newDue;
     render();
   }
 }
@@ -279,10 +305,26 @@ async function completeSale() {
   if (cart.length === 0) return alert("Cart empty!");
 
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const custName = selectedCustomer || "Walk-in Customer";
+  const custId = $("#pos_customer").value;
+  const paidInput = $("#paid_amount").value;
+  
+  let paidAmount = paidInput !== "" ? parseFloat(paidInput) : total;
+  let customerObj = customers.find(c => c.id === custId);
+  let custName = customerObj ? customerObj.name : "Walk-in Customer";
+  let due = total - paidAmount;
+
+  if (due > 0 && !customerObj) {
+    return alert("বাকি রাখতে হলে অবশ্যই কোনো কাস্টমার সিলেক্ট করতে হবে!");
+  }
 
   const { data: sale, error: saleErr } = await db.from("sales").insert([{ total_amount: total, customer_name: custName }]).select();
   if (saleErr) return alert("Sale error!");
+
+  if (customerObj && due > 0) {
+    const newDue = Number(customerObj.due_amount || 0) + due;
+    await db.from("customers").update({ due_amount: newDue }).eq("id", customerObj.id);
+    customerObj.due_amount = newDue;
+  }
 
   for (const item of cart) {
     const prod = products.find(p => p.id === item.id);
@@ -293,7 +335,7 @@ async function completeSale() {
     }
   }
 
-  printInvoice({ customer_name: custName }, [...cart]);
+  printInvoice({ customer_name: custName, paid: paidAmount, due: due }, [...cart]);
 
   cart = [];
   selectedCustomer = "";
@@ -344,9 +386,17 @@ function printInvoice(saleData, itemsData) {
         </tbody>
       </table>
       <hr style="border-top: 1px dashed #000; margin: 8px 0;" />
-      <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 13px;">
+      <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 11px;">
         <span>সর্বমোট:</span>
         <span>₹${totalAmount}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 11px;">
+        <span>জমা:</span>
+        <span>₹${saleData.paid}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 11px; color: red;">
+        <span>বাকি:</span>
+        <span>₹${saleData.due}</span>
       </div>
       <hr style="border-top: 1px dashed #000; margin: 8px 0;" />
       <p style="text-align: center; font-size: 10px; margin-top: 10px;">ধন্যবাদ! আবার আসবেন।</p>
