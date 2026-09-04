@@ -380,3 +380,74 @@ document.addEventListener("submit", async e => {
 // App Initialization
 layout();
 load();
+
+
+// ==========================================
+// INVOICE PRINT & MEMO GENERATOR
+// ==========================================
+
+function printInvoice(saleData, itemsData) {
+  const printArea = document.getElementById("print-section");
+  
+  if (!printArea) return;
+
+  let itemsRows = "";
+  let totalAmount = 0;
+
+  itemsData.forEach((item, index) => {
+    const itemTotal = item.quantity * item.price;
+    totalAmount += itemTotal;
+    itemsRows += `
+      <tr>
+        <td style="padding: 4px; border-bottom: 1px dashed #ccc;">${index + 1}</td>
+        <td style="padding: 4px; border-bottom: 1px dashed #ccc;">${item.name}</td>
+        <td style="padding: 4px; border-bottom: 1px dashed #ccc; text-align: center;">${item.quantity}</td>
+        <td style="padding: 4px; border-bottom: 1px dashed #ccc; text-align: right;">₹${item.price}</td>
+        <td style="padding: 4px; border-bottom: 1px dashed #ccc; text-align: right;">₹${itemTotal}</td>
+      </tr>
+    `;
+  });
+
+  printArea.innerHTML = `
+    <div style="font-family: monospace; width: 80mm; padding: 10px; background: #fff; margin: auto;">
+      <h2 style="text-align: center; margin: 0; font-size: 18px;">NAMITA STORE</h2>
+      <p style="text-align: center; margin: 2px 0; font-size: 12px;">মোবাইল/ক্যাশ মেমো</p>
+      <hr style="border-top: 1px dashed #000; margin: 8px 0;" />
+      
+      <p style="font-size: 11px; margin: 2px 0;">তারিখ: ${new Date().toLocaleString('bn-IN')}</p>
+      <p style="font-size: 11px; margin: 2px 0;">কাস্টমার: ${saleData.customer_name || 'সাধারণ কাস্টমার'}</p>
+      
+      <hr style="border-top: 1px dashed #000; margin: 8px 0;" />
+
+      <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 1px solid #000;">
+            <th style="text-align: left;">#</th>
+            <th style="text-align: left;">আইটেম</th>
+            <th style="text-align: center;">পরিমাণ</th>
+            <th style="text-align: right;">দর</th>
+            <th style="text-align: right;">মোট</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemsRows}
+        </tbody>
+      </table>
+
+      <hr style="border-top: 1px dashed #000; margin: 8px 0;" />
+      
+      <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 13px;">
+        <span>সর্বমোট:</span>
+        <span>₹${totalAmount}</span>
+      </div>
+
+      <hr style="border-top: 1px dashed #000; margin: 8px 0;" />
+      <p style="text-align: center; font-size: 10px; margin-top: 10px;">ধন্যবাদ! আবার আসবেন।</p>
+    </div>
+  `;
+
+  // প্রিন্ট কন্টেইনার সাময়িকভাবে ভিজিবল করে প্রিন্ট চালানো
+  printArea.classList.remove("hidden");
+  window.print();
+  printArea.classList.add("hidden");
+}
