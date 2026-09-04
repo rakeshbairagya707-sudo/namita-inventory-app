@@ -1,6 +1,6 @@
 "use strict";
 
-const SUPABASE_URL = "https://ekcgmtusasqziirkohd.supabase.co";
+const SUPABASE_URL = "https://ekcgmmtusasqziirkohd.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_A2fNVKm3AGDq25-UroB-4Q_V3mcLrUO";
 
 // Supabase client initialization
