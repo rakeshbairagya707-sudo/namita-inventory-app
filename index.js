@@ -1,7 +1,7 @@
 "use strict";
 
-const SUPABASE_URL = "https://ekcg...supabase.co";
-const SUPABASE_ANON_KEY = "এখানে_Publishable_key_পেস্ট_করুন";
+const SUPABASE_URL = "https://ekcgmtusasqziirkohd.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_A2fNVKm3AGDq25-UroB-4Q_V3mcLrUO
 
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = s => document.querySelector(s);
