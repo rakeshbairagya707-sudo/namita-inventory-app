@@ -7,18 +7,18 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
   <style>
-    *{box-sizing:border-box}body{margin:0;background:#f1f5f9;font-family:Arial,'Noto Sans Bengali',sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:#f1f5f9;font-family:Arial,"Noto Sans Bengali",sans-serif}
     .sidebar{background:linear-gradient(180deg,#0f766e,#134e4a)}
     .nav-btn:hover{background:#ffffff22}.nav-btn.active{background:white;color:#115e59}
-    .card{background:white;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 4px 15px #0f766e12}
+    .card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 4px 15px #0f766e12}
     input,select,textarea{outline:none}input:focus,select:focus,textarea:focus{border-color:#0f766e;box-shadow:0 0 0 3px #0f766e22}
-    .modal-bg{background:#0f172a99}.label{display:inline-flex;flex-direction:column;align-items:center;border:1px dashed #777;padding:5px;margin:4px;text-align:center}
+    .barcode{display:inline-flex;flex-direction:column;align-items:center;border:1px dashed #777;padding:5px;margin:4px;text-align:center}
     @media(max-width:850px){.sidebar{position:fixed;z-index:50;transform:translateX(-100%);transition:.2s}.sidebar.open{transform:translateX(0)}}
-    @media print{body *{visibility:hidden}.print-area,.print-area *{visibility:visible}.print-area{position:absolute;left:0;top:0;width:100%}}
+    @media print{body *{visibility:hidden}.print-area,.print-area *{visibility:visible}.print-area{position:absolute;top:0;left:0;width:100%}}
   </style>
 </head>
 <body>
   <div id="app"></div>
-  <script src="./index.js?v=10"></script>
+  <script src="./index.js?v=20"></script>
 </body>
 </html>
