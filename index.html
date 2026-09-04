@@ -12,30 +12,18 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    /* প্রিন্ট করার সময়ের বিশেষ স্টাইল */
     @media print {
-      body * {
-        visibility: hidden;
-      }
-      #print-section, #print-section * {
-        visibility: visible;
-      }
-      #print-section {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-      }
+      body * { visibility: hidden; }
+      #print-section, #print-section * { visibility: visible; }
+      #print-section { position: absolute; left: 0; top: 0; width: 100%; }
     }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800">
   <div id="app"></div>
-
-  <!-- প্রিন্ট ইনভয়েসের জন্য অদৃশ্য কন্টেইনার -->
   <div id="print-section" class="hidden"></div>
 
-  <!-- Main JavaScript File -->
-  <script src="index.js"></script>
+  <!-- Script File -->
+  <script src="/index.js"></script>
 </body>
 </html>
