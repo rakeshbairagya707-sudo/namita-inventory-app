@@ -1,369 +1,358 @@
-(() => {
-  "use strict";
+"use strict";
 
-  const $ = s => document.querySelector(s);
-  const KEY = "namita_store_data";
-  const id = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
-  const money = n => "₹" + Number(n || 0).toLocaleString("en-IN");
-  const esc = x => String(x ?? "").replace(/[&<>"']/g, c =>
-    ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" }[c]));
+const SUPABASE_URL = "https://ekcg...supabase.co";
+const SUPABASE_ANON_KEY = "এখানে_Publishable_key_পেস্ট_করুন";
 
-  let data = JSON.parse(localStorage.getItem(KEY) || "null") || {
-    store:"NAMITA STORE", phone:"", address:"",
-    products:[], customers:[], suppliers:[], sales:[], purchases:[], orders:[]
-  };
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = s => document.querySelector(s);
+const money = n => "₹" + Number(n || 0).toLocaleString("en-IN");
+const esc = x => String(x ?? "").replace(/[&<>"']/g, c =>
+  ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" }[c]));
 
-  ["products","customers","suppliers","sales","purchases","orders"].forEach(k => {
-    if (!Array.isArray(data[k])) data[k] = [];
-  });
+let page = "dashboard";
+let products = [];
+let customers = [];
+let suppliers = [];
+let cart = [];
 
-  const save = () => localStorage.setItem(KEY, JSON.stringify(data));
-  let current = "dashboard";
-  let cart = [];
+async function load() {
+  const p = await db.from("products").select("*").order("created_at");
+  const c = await db.from("customers").select("*").order("created_at");
+  const s = await db.from("suppliers").select("*").order("created_at");
 
-  const menu = {
-    dashboard:"📊 Dashboard",
-    products:"📦 Products",
-    sales:"🧾 Sales",
-    purchase:"📥 Purchase",
-    customers:"👥 Customers",
-    suppliers:"🏭 Suppliers",
-    orders:"🛒 Orders",
-    settings:"⚙️ Settings"
-  };
-
-  function layout() {
-    $("#app").innerHTML = `
-      <div class="flex min-h-screen">
-        <aside id="side" class="sidebar w-64 p-4 text-white">
-          <h1 class="text-xl font-bold text-center">${esc(data.store)}</h1>
-          <p class="text-center border-b border-white/30 pb-4 mb-4">
-            Inventory System
-          </p>
-          <nav class="space-y-1">
-            ${Object.entries(menu).map(([key,value]) => `
-              <button data-page="${key}" class="nav-btn w-full text-left p-3 rounded-lg">
-                ${value}
-              </button>`).join("")}
-          </nav>
-        </aside>
-
-        <main class="flex-1">
-          <header class="bg-white border-b p-4 flex items-center gap-2">
-            <button data-action="menu" class="bg-teal-700 text-white p-2 rounded">☰</button>
-            <h2 id="title" class="font-bold text-xl"></h2>
-          </header>
-          <section id="content" class="p-5"></section>
-        </main>
-      </div>
-
-      <div id="modal" class="hidden fixed inset-0 bg-black/60 z-50
-        items-center justify-center p-4">
-        <div class="bg-white rounded-xl p-5 w-full max-w-lg">
-          <div class="flex justify-between mb-4">
-            <h2 id="modalTitle" class="font-bold text-xl"></h2>
-            <button data-action="close" class="text-2xl">×</button>
-          </div>
-          <div id="modalBody"></div>
-        </div>
-      </div>`;
+  if (p.error || c.error || s.error) {
+    alert("Supabase সংযোগ বা Database policy সমস্যা হয়েছে।");
+    console.error(p.error || c.error || s.error);
+    return;
   }
 
-  function openModal(title, html) {
-    $("#modalTitle").textContent = title;
-    $("#modalBody").innerHTML = html;
-    $("#modal").className =
-      "fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4";
-  }
-
-  function closeModal() {
-    $("#modal").className = "hidden";
-  }
-
-  function field(label, name, value="", type="text") {
-    return `
-      <label class="block mb-3">${label}
-        <input name="${name}" type="${type}" value="${esc(value)}">
-      </label>`;
-  }
-
-  function dashboard() {
-    const sales = data.sales.reduce((a,x) => a + Number(x.total || 0), 0);
-    return `
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="card"><small>Total Products</small>
-          <b class="text-2xl block">${data.products.length}</b></div>
-        <div class="card"><small>Total Sales</small>
-          <b class="text-2xl block">${money(sales)}</b></div>
-        <div class="card"><small>Customers</small>
-          <b class="text-2xl block">${data.customers.length}</b></div>
-        <div class="card"><small>Suppliers</small>
-          <b class="text-2xl block">${data.suppliers.length}</b></div>
-      </div>
-      <div class="card">
-        <button data-page="products" class="bg-teal-700 text-white p-3 rounded mr-2">
-          Add Product
-        </button>
-        <button data-page="sales" class="bg-blue-600 text-white p-3 rounded">
-          New Sale
-        </button>
-      </div>`;
-  }
-
-  function products() {
-    return `
-      <div class="card">
-        <div class="flex items-center mb-4">
-          <h2 class="font-bold text-xl mr-auto">Products</h2>
-          <button data-action="product-form"
-            class="bg-teal-700 text-white p-3 rounded">＋ Add Product</button>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <tr class="bg-slate-100">
-              <th class="p-3 text-left">Name</th>
-              <th class="p-3 text-left">SKU</th>
-              <th class="p-3 text-left">Price</th>
-              <th class="p-3 text-left">Stock</th>
-              <th class="p-3 text-left">Action</th>
-            </tr>
-            ${data.products.map(p => `
-              <tr class="border-b">
-                <td class="p-3">${esc(p.name)}</td>
-                <td class="p-3">${esc(p.sku)}</td>
-                <td class="p-3">${money(p.price)}</td>
-                <td class="p-3">${p.stock}</td>
-                <td class="p-3">
-                  <button data-action="edit-product" data-id="${p.id}"
-                    class="text-blue-600 mr-2">Edit</button>
-                  <button data-action="delete-product" data-id="${p.id}"
-                    class="text-red-600">Delete</button>
-                </td>
-              </tr>`).join("")}
-          </table>
-        </div>
-      </div>`;
-  }
-
-  function productForm(old={}) {
-    openModal(old.id ? "Edit Product" : "Add Product", `
-      <form id="product-form">
-        ${field("Product Name","name",old.name)}
-        ${field("SKU","sku",old.sku)}
-        ${field("Price","price",old.price,"number")}
-        ${field("Stock","stock",old.stock,"number")}
-        <button class="bg-green-600 text-white p-3 rounded">Save Product</button>
-      </form>`);
-  }
-
-  function people(type) {
-    const key = type === "Customer" ? "customers" : "suppliers";
-    return `
-      <div class="card">
-        <div class="flex items-center mb-4">
-          <h2 class="font-bold text-xl mr-auto">${type}s</h2>
-          <button data-action="person-form" data-type="${type}"
-            class="bg-teal-700 text-white p-3 rounded">＋ Add ${type}</button>
-        </div>
-        ${data[key].map(x => `
-          <div class="border-b p-3 flex">
-            <span class="mr-auto">${esc(x.name)} — ${esc(x.phone)}</span>
-            <button data-action="delete-person" data-type="${key}"
-              data-id="${x.id}" class="text-red-600">Delete</button>
-          </div>`).join("")}
-      </div>`;
-  }
-
-  function personForm(type) {
-    openModal(`Add ${type}`, `
-      <form id="person-form">
-        ${field("Name","name")}
-        ${field("Phone","phone")}
-        ${field("Address","address")}
-        <input type="hidden" name="type" value="${type}">
-        <button class="bg-green-600 text-white p-3 rounded">Save</button>
-      </form>`);
-  }
-
-  function sales() {
-    return `
-      <div class="grid md:grid-cols-2 gap-5">
-        <div class="card">
-          <h2 class="font-bold text-xl mb-3">Products</h2>
-          ${data.products.map(p => `
-            <button data-action="add-cart" data-id="${p.id}"
-              class="border p-3 rounded-lg m-1 text-left">
-              ${esc(p.name)}<br>${money(p.price)} | Stock: ${p.stock}
-            </button>`).join("")}
-        </div>
-        <div class="card">
-          <h2 class="font-bold text-xl mb-3">Cart</h2>
-          <div id="cart"></div>
-          <button data-action="complete-sale"
-            class="bg-green-600 text-white p-3 rounded mt-3">
-            Complete Sale
-          </button>
-        </div>
-      </div>`;
-  }
-
-  function renderCart() {
-    if (!$("#cart")) return;
-    const total = cart.reduce((a,p) => a + p.price * p.qty, 0);
-    $("#cart").innerHTML = cart.length
-      ? cart.map(p => `
-        <div class="border-b p-2 flex">
-          <span class="mr-auto">${esc(p.name)} × ${p.qty}</span>
-          <b>${money(p.price * p.qty)}</b>
-        </div>`).join("") + `<hr><b>Total: ${money(total)}</b>`
-      : "<p>Cart খালি।</p>";
-  }
-
-  function purchase() {
-    return `<div class="card">
-      <h2 class="font-bold text-xl mb-3">Purchase</h2>
-      <p>Products-এর stock পরিবর্তন করতে Products menu ব্যবহার করুন।</p>
-    </div>`;
-  }
-
-  function orders() {
-    return `<div class="card">
-      <h2 class="font-bold text-xl mb-3">Orders</h2>
-      <p>এখনও কোনো order নেই।</p>
-    </div>`;
-  }
-
-  function settings() {
-    return `<div class="card">
-      <h2 class="font-bold text-xl mb-4">Settings</h2>
-      <form id="settings-form">
-        ${field("Store Name","store",data.store)}
-        ${field("Phone","phone",data.phone)}
-        ${field("Address","address",data.address)}
-        <button class="bg-teal-700 text-white p-3 rounded">Save Settings</button>
-      </form>
-    </div>`;
-  }
-
-  function render() {
-    $("#title").textContent = menu[current];
-    document.querySelectorAll(".nav-btn").forEach(b =>
-      b.classList.toggle("active", b.dataset.page === current));
-
-    const pages = {
-      dashboard, products, sales, purchase,
-      customers: () => people("Customer"),
-      suppliers: () => people("Supplier"),
-      orders, settings
-    };
-
-    $("#content").innerHTML = pages[current]();
-    if (current === "sales") renderCart();
-  }
-
-  document.addEventListener("click", e => {
-    const pageButton = e.target.closest("[data-page]");
-    if (pageButton) {
-      current = pageButton.dataset.page;
-      render();
-      return;
-    }
-
-    const button = e.target.closest("[data-action]");
-    if (!button) return;
-
-    const action = button.dataset.action;
-    const itemId = button.dataset.id;
-
-    if (action === "menu") $("#side").classList.toggle("hidden");
-    if (action === "close") closeModal();
-    if (action === "product-form") productForm();
-
-    if (action === "edit-product") {
-      productForm(data.products.find(p => p.id === itemId));
-    }
-
-    if (action === "delete-product") {
-      data.products = data.products.filter(p => p.id !== itemId);
-      save();
-      render();
-    }
-
-    if (action === "person-form") personForm(button.dataset.type);
-
-    if (action === "delete-person") {
-      data[button.dataset.type] =
-        data[button.dataset.type].filter(x => x.id !== itemId);
-      save();
-      render();
-    }
-
-    if (action === "add-cart") {
-      const p = data.products.find(x => x.id === itemId);
-      if (!p || p.stock < 1) return alert("Stock নেই।");
-      const old = cart.find(x => x.id === itemId);
-      if (old) old.qty++;
-      else cart.push({ id:p.id, name:p.name, price:Number(p.price), qty:1 });
-      renderCart();
-    }
-
-    if (action === "complete-sale") {
-      if (!cart.length) return alert("Cart খালি।");
-      const total = cart.reduce((a,p) => a + p.price * p.qty, 0);
-      cart.forEach(x => {
-        const p = data.products.find(y => y.id === x.id);
-        p.stock -= x.qty;
-      });
-      data.sales.push({ id:id(), date:new Date().toISOString(), total });
-      save();
-      cart = [];
-      render();
-      alert("Sale সংরক্ষণ হয়েছে।");
-    }
-  });
-
-  document.addEventListener("submit", e => {
-    e.preventDefault();
-    const form = new FormData(e.target);
-
-    if (e.target.id === "product-form") {
-      const item = {
-        id:id(),
-        name:form.get("name"),
-        sku:form.get("sku"),
-        price:Number(form.get("price") || 0),
-        stock:Number(form.get("stock") || 0)
-      };
-      data.products.push(item);
-      save();
-      closeModal();
-      render();
-    }
-
-    if (e.target.id === "person-form") {
-      const key = form.get("type") === "Customer" ? "customers" : "suppliers";
-      data[key].push({
-        id:id(),
-        name:form.get("name"),
-        phone:form.get("phone"),
-        address:form.get("address")
-      });
-      save();
-      closeModal();
-      render();
-    }
-
-    if (e.target.id === "settings-form") {
-      data.store = form.get("store") || "NAMITA STORE";
-      data.phone = form.get("phone");
-      data.address = form.get("address");
-      save();
-      layout();
-      render();
-    }
-  });
-
-  layout();
+  products = p.data || [];
+  customers = c.data || [];
+  suppliers = s.data || [];
   render();
-})();
+}
+
+function layout() {
+  $("#app").innerHTML = `
+    <div class="flex min-h-screen">
+      <aside class="w-64 bg-teal-800 text-white p-4">
+        <h1 class="text-xl font-bold text-center mb-5">NAMITA STORE</h1>
+        ${[
+          ["dashboard","📊 Dashboard"],
+          ["products","📦 Products"],
+          ["sales","🧾 POS Sales"],
+          ["customers","👥 Customers"],
+          ["suppliers","🏭 Suppliers"]
+        ].map(x => `
+          <button data-page="${x[0]}"
+            class="w-full text-left p-3 rounded hover:bg-teal-700 mb-1">
+            ${x[1]}
+          </button>`).join("")}
+      </aside>
+
+      <main class="flex-1">
+        <header class="bg-white p-4 border-b">
+          <h2 id="title" class="font-bold text-xl"></h2>
+        </header>
+        <section id="content" class="p-5"></section>
+      </main>
+    </div>
+
+    <div id="modal" class="hidden fixed inset-0 bg-black/60
+      items-center justify-center p-4">
+      <div class="bg-white rounded-xl p-5 w-full max-w-lg">
+        <div class="flex justify-between">
+          <h2 id="modalTitle" class="font-bold text-xl"></h2>
+          <button data-action="close" class="text-2xl">×</button>
+        </div>
+        <div id="modalBody" class="mt-4"></div>
+      </div>
+    </div>`;
+}
+
+function modal(title, html) {
+  $("#modalTitle").textContent = title;
+  $("#modalBody").innerHTML = html;
+  $("#modal").className =
+    "fixed inset-0 bg-black/60 flex items-center justify-center p-4";
+}
+
+function closeModal() {
+  $("#modal").className = "hidden";
+}
+
+function dashboard() {
+  return `
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white rounded-xl p-5">
+        <small>মোট পণ্য</small>
+        <b class="text-2xl block">${products.length}</b>
+      </div>
+      <div class="bg-white rounded-xl p-5">
+        <small>Customer</small>
+        <b class="text-2xl block">${customers.length}</b>
+      </div>
+      <div class="bg-white rounded-xl p-5">
+        <small>Supplier</small>
+        <b class="text-2xl block">${suppliers.length}</b>
+      </div>
+      <div class="bg-white rounded-xl p-5">
+        <small>Low Stock</small>
+        <b class="text-2xl block">
+          ${products.filter(p => p.stock <= p.minimum_stock).length}
+        </b>
+      </div>
+    </div>`;
+}
+
+function productsPage() {
+  return `
+    <div class="bg-white rounded-xl p-5">
+      <div class="flex mb-4">
+        <h2 class="font-bold text-xl mr-auto">Products</h2>
+        <button data-action="add-product"
+          class="bg-teal-700 text-white px-4 py-2 rounded">
+          ＋ Add Product
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <tr class="bg-slate-100">
+            <th class="p-3 text-left">Name</th>
+            <th class="p-3 text-left">SKU</th>
+            <th class="p-3 text-left">Sale Price</th>
+            <th class="p-3 text-left">Stock</th>
+            <th class="p-3 text-left">Action</th>
+          </tr>
+          ${products.map(p => `
+            <tr class="border-b">
+              <td class="p-3">${esc(p.name)}</td>
+              <td class="p-3">${esc(p.sku)}</td>
+              <td class="p-3">${money(p.sale_price)}</td>
+              <td class="p-3">${p.stock}</td>
+              <td class="p-3">
+                <button data-action="delete-product" data-id="${p.id}"
+                  class="text-red-600">Delete</button>
+              </td>
+            </tr>`).join("")}
+        </table>
+      </div>
+    </div>`;
+}
+
+function salesPage() {
+  return `
+    <div class="grid md:grid-cols-2 gap-5">
+      <div class="bg-white rounded-xl p-5">
+        <h2 class="font-bold text-xl mb-3">Products</h2>
+        ${products.map(p => `
+          <button data-action="add-cart" data-id="${p.id}"
+            class="border rounded p-3 m-1 text-left">
+            ${esc(p.name)}<br>
+            ${money(p.sale_price)} | Stock: ${p.stock}
+          </button>`).join("")}
+      </div>
+
+      <div class="bg-white rounded-xl p-5">
+        <h2 class="font-bold text-xl mb-3">Cart</h2>
+        <div id="cart"></div>
+        <button data-action="complete-sale"
+          class="bg-green-600 text-white p-3 rounded mt-3">
+          Complete Sale
+        </button>
+      </div>
+    </div>`;
+}
+
+function renderCart() {
+  if (!$("#cart")) return;
+
+  const total = cart.reduce((a, x) => a + x.price * x.qty, 0);
+
+  $("#cart").innerHTML = cart.length
+    ? cart.map(x => `
+      <div class="border-b p-2 flex">
+        <span class="mr-auto">${esc(x.name)} × ${x.qty}</span>
+        <b>${money(x.price * x.qty)}</b>
+      </div>`).join("") + `<hr><b>Total: ${money(total)}</b>`
+    : "Cart খালি।";
+}
+
+function people(type) {
+  const list = type === "Customer" ? customers : suppliers;
+
+  return `
+    <div class="bg-white rounded-xl p-5">
+      <div class="flex mb-4">
+        <h2 class="font-bold text-xl mr-auto">${type}s</h2>
+        <button data-action="add-person" data-type="${type}"
+          class="bg-teal-700 text-white px-4 py-2 rounded">
+          ＋ Add
+        </button>
+      </div>
+      ${list.map(x => `
+        <div class="border-b p-3">
+          ${esc(x.name)} — ${esc(x.phone || "")}
+        </div>`).join("")}
+    </div>`;
+}
+
+function render() {
+  const titles = {
+    dashboard: "Dashboard",
+    products: "Products",
+    sales: "POS Sales",
+    customers: "Customers",
+    suppliers: "Suppliers"
+  };
+
+  $("#title").textContent = titles[page];
+
+  const views = {
+    dashboard,
+    products: productsPage,
+    sales: salesPage,
+    customers: () => people("Customer"),
+    suppliers: () => people("Supplier")
+  };
+
+  $("#content").innerHTML = views[page]();
+  if (page === "sales") renderCart();
+}
+
+document.addEventListener("click", async e => {
+  const pageBtn = e.target.closest("[data-page]");
+  if (pageBtn) {
+    page = pageBtn.dataset.page;
+    render();
+    return;
+  }
+
+  const btn = e.target.closest("[data-action]");
+  if (!btn) return;
+
+  if (btn.dataset.action === "close") closeModal();
+
+  if (btn.dataset.action === "add-product") {
+    modal("Add Product", `
+      <form id="productForm">
+        <input name="name" placeholder="Product Name" required>
+        <input name="sku" placeholder="SKU" required>
+        <input name="price" type="number" placeholder="Sale Price" required>
+        <input name="stock" type="number" placeholder="Stock" required>
+        <input name="minimum" type="number" value="5"
+          placeholder="Minimum Stock">
+        <button class="bg-green-600 text-white p-3 rounded mt-3">
+          Save Product
+        </button>
+      </form>`);
+  }
+
+  if (btn.dataset.action === "delete-product") {
+    if (!confirm("Product মুছবেন?")) return;
+    await db.from("products").delete().eq("id", btn.dataset.id);
+    await load();
+  }
+
+  if (btn.dataset.action === "add-cart") {
+    const p = products.find(x => x.id === btn.dataset.id);
+    if (!p || p.stock < 1) return alert("Stock নেই।");
+
+    const old = cart.find(x => x.id === p.id);
+    if (old) old.qty++;
+    else cart.push({
+      id: p.id,
+      name: p.name,
+      price: Number(p.sale_price),
+      qty: 1
+    });
+
+    renderCart();
+  }
+
+  if (btn.dataset.action === "complete-sale") {
+    if (!cart.length) return alert("Cart খালি।");
+
+    const total = cart.reduce((a, x) => a + x.price * x.qty, 0);
+
+    const sale = await db.from("sales").insert({
+      invoice_no: "INV-" + Date.now(),
+      total,
+      subtotal: total,
+      paid: total,
+      due: 0,
+      payment_method: "Cash"
+    }).select().single();
+
+    if (sale.error) return alert("Sale সংরক্ষণ হয়নি।");
+
+    for (const x of cart) {
+      const p = products.find(y => y.id === x.id);
+      await db.from("products")
+        .update({ stock: Number(p.stock) - x.qty })
+        .eq("id", x.id);
+
+      await db.from("sale_items").insert({
+        sale_id: sale.data.id,
+        product_id: x.id,
+        quantity: x.qty,
+        price: x.price,
+        total: x.qty * x.price
+      });
+    }
+
+    cart = [];
+    await load();
+    alert("Sale সংরক্ষণ হয়েছে।");
+  }
+
+  if (btn.dataset.action === "add-person") {
+    modal("Add " + btn.dataset.type, `
+      <form id="personForm">
+        <input name="name" placeholder="Name" required>
+        <input name="phone" placeholder="Phone">
+        <input name="address" placeholder="Address">
+        <input type="hidden" name="type" value="${btn.dataset.type}">
+        <button class="bg-green-600 text-white p-3 rounded mt-3">
+          Save
+        </button>
+      </form>`);
+  }
+});
+
+document.addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+
+  if (e.target.id === "productForm") {
+    await db.from("products").insert({
+      name: f.get("name"),
+      sku: f.get("sku"),
+      sale_price: Number(f.get("price")),
+      mrp: Number(f.get("price")),
+      stock: Number(f.get("stock")),
+      minimum_stock: Number(f.get("minimum") || 5)
+    });
+    closeModal();
+    await load();
+  }
+
+  if (e.target.id === "personForm") {
+    const table = f.get("type") === "Customer"
+      ? "customers"
+      : "suppliers";
+
+    await db.from(table).insert({
+      name: f.get("name"),
+      phone: f.get("phone"),
+      address: f.get("address")
+    });
+
+    closeModal();
+    await load();
+  }
+});
+
+layout();
+load();
