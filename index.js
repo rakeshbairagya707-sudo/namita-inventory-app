@@ -3,7 +3,10 @@
 const SUPABASE_URL = "https://ekcgmtusasqziirkohd.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_A2fNVKm3AGDq25-UroB-4Q_V3mcLrUO";
 
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Supabase client initialization
+const { createClient } = window.supabase || supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const $ = s => document.querySelector(s);
 const money = n => "₹" + Number(n || 0).toLocaleString("en-IN");
 const esc = x => String(x ?? "").replace(/[&<>"']/g, c =>
@@ -16,13 +19,13 @@ let suppliers = [];
 let cart = [];
 
 async function load() {
-  const p = await db.from("products").select("*").order("created_at");
-  const c = await db.from("customers").select("*").order("created_at");
-  const s = await db.from("suppliers").select("*").order("created_at");
+  const p = await db.from("products").select("*").order("created_at", { ascending: false });
+  const c = await db.from("customers").select("*").order("created_at", { ascending: false });
+  const s = await db.from("suppliers").select("*").order("created_at", { ascending: false });
 
   if (p.error || c.error || s.error) {
-    alert("Supabase সংযোগ বা Database policy সমস্যা হয়েছে।");
     console.error(p.error || c.error || s.error);
+    alert("Supabase সংযোগ বা Database policy সমস্যা হয়েছে।");
     return;
   }
 
@@ -34,36 +37,37 @@ async function load() {
 
 function layout() {
   $("#app").innerHTML = `
-    <div class="flex min-h-screen">
-      <aside class="w-64 bg-teal-800 text-white p-4">
+    <div class="flex flex-col md:flex-row min-h-screen">
+      <aside class="w-full md:w-64 bg-teal-800 text-white p-4">
         <h1 class="text-xl font-bold text-center mb-5">NAMITA STORE</h1>
-        ${[
-          ["dashboard","📊 Dashboard"],
-          ["products","📦 Products"],
-          ["sales","🧾 POS Sales"],
-          ["customers","👥 Customers"],
-          ["suppliers","🏭 Suppliers"]
-        ].map(x => `
-          <button data-page="${x[0]}"
-            class="w-full text-left p-3 rounded hover:bg-teal-700 mb-1">
-            ${x[1]}
-          </button>`).join("")}
+        <div class="flex flex-col gap-1">
+          ${[
+            ["dashboard","📊 Dashboard"],
+            ["products","📦 Products"],
+            ["sales","🧾 POS Sales"],
+            ["customers","👥 Customers"],
+            ["suppliers","🏭 Suppliers"]
+          ].map(x => `
+            <button data-page="${x[0]}"
+              class="w-full text-left p-3 rounded hover:bg-teal-700 transition">
+              ${x[1]}
+            </button>`).join("")}
+        </div>
       </aside>
 
-      <main class="flex-1">
-        <header class="bg-white p-4 border-b">
-          <h2 id="title" class="font-bold text-xl"></h2>
+      <main class="flex-1 bg-slate-100">
+        <header class="bg-white p-4 border-b shadow-sm">
+          <h2 id="title" class="font-bold text-xl text-slate-800"></h2>
         </header>
         <section id="content" class="p-5"></section>
       </main>
     </div>
 
-    <div id="modal" class="hidden fixed inset-0 bg-black/60
-      items-center justify-center p-4">
-      <div class="bg-white rounded-xl p-5 w-full max-w-lg">
-        <div class="flex justify-between">
+    <div id="modal" class="hidden fixed inset-0 bg-black/60 items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-xl p-5 w-full max-w-lg shadow-2xl">
+        <div class="flex justify-between items-center border-b pb-3">
           <h2 id="modalTitle" class="font-bold text-xl"></h2>
-          <button data-action="close" class="text-2xl">×</button>
+          <button data-action="close" class="text-2xl font-bold text-slate-500 hover:text-black">×</button>
         </div>
         <div id="modalBody" class="mt-4"></div>
       </div>
@@ -73,8 +77,7 @@ function layout() {
 function modal(title, html) {
   $("#modalTitle").textContent = title;
   $("#modalBody").innerHTML = html;
-  $("#modal").className =
-    "fixed inset-0 bg-black/60 flex items-center justify-center p-4";
+  $("#modal").className = "fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50";
 }
 
 function closeModal() {
@@ -84,22 +87,22 @@ function closeModal() {
 function dashboard() {
   return `
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="bg-white rounded-xl p-5">
-        <small>মোট পণ্য</small>
-        <b class="text-2xl block">${products.length}</b>
+      <div class="bg-white rounded-xl p-5 shadow-sm border">
+        <small class="text-slate-500 font-semibold">মোট পণ্য</small>
+        <b class="text-2xl block text-slate-800 mt-1">${products.length}</b>
       </div>
-      <div class="bg-white rounded-xl p-5">
-        <small>Customer</small>
-        <b class="text-2xl block">${customers.length}</b>
+      <div class="bg-white rounded-xl p-5 shadow-sm border">
+        <small class="text-slate-500 font-semibold">Customer</small>
+        <b class="text-2xl block text-slate-800 mt-1">${customers.length}</b>
       </div>
-      <div class="bg-white rounded-xl p-5">
-        <small>Supplier</small>
-        <b class="text-2xl block">${suppliers.length}</b>
+      <div class="bg-white rounded-xl p-5 shadow-sm border">
+        <small class="text-slate-500 font-semibold">Supplier</small>
+        <b class="text-2xl block text-slate-800 mt-1">${suppliers.length}</b>
       </div>
-      <div class="bg-white rounded-xl p-5">
-        <small>Low Stock</small>
-        <b class="text-2xl block">
-          ${products.filter(p => p.stock <= p.minimum_stock).length}
+      <div class="bg-white rounded-xl p-5 shadow-sm border">
+        <small class="text-slate-500 font-semibold">Low Stock</small>
+        <b class="text-2xl block text-red-600 mt-1">
+          ${products.filter(p => Number(p.stock) <= Number(p.minimum_stock || 0)).length}
         </b>
       </div>
     </div>`;
@@ -107,35 +110,39 @@ function dashboard() {
 
 function productsPage() {
   return `
-    <div class="bg-white rounded-xl p-5">
-      <div class="flex mb-4">
-        <h2 class="font-bold text-xl mr-auto">Products</h2>
+    <div class="bg-white rounded-xl p-5 shadow-sm border">
+      <div class="flex items-center mb-4">
+        <h2 class="font-bold text-xl mr-auto">Products List</h2>
         <button data-action="add-product"
-          class="bg-teal-700 text-white px-4 py-2 rounded">
+          class="bg-teal-700 text-white px-4 py-2 rounded hover:bg-teal-800 transition">
           ＋ Add Product
         </button>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full">
-          <tr class="bg-slate-100">
-            <th class="p-3 text-left">Name</th>
-            <th class="p-3 text-left">SKU</th>
-            <th class="p-3 text-left">Sale Price</th>
-            <th class="p-3 text-left">Stock</th>
-            <th class="p-3 text-left">Action</th>
-          </tr>
-          ${products.map(p => `
-            <tr class="border-b">
-              <td class="p-3">${esc(p.name)}</td>
-              <td class="p-3">${esc(p.sku)}</td>
-              <td class="p-3">${money(p.sale_price)}</td>
-              <td class="p-3">${p.stock}</td>
-              <td class="p-3">
-                <button data-action="delete-product" data-id="${p.id}"
-                  class="text-red-600">Delete</button>
-              </td>
-            </tr>`).join("")}
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-100 border-b">
+              <th class="p-3">Name</th>
+              <th class="p-3">SKU</th>
+              <th class="p-3">Sale Price</th>
+              <th class="p-3">Stock</th>
+              <th class="p-3">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${products.length ? products.map(p => `
+              <tr class="border-b hover:bg-slate-50">
+                <td class="p-3 font-medium">${esc(p.name)}</td>
+                <td class="p-3 text-slate-600">${esc(p.sku)}</td>
+                <td class="p-3 font-semibold">${money(p.sale_price)}</td>
+                <td class="p-3">${p.stock}</td>
+                <td class="p-3">
+                  <button data-action="delete-product" data-id="${p.id}"
+                    class="text-red-600 hover:underline">Delete</button>
+                </td>
+              </tr>`).join("") : `<tr><td colspan="5" class="p-4 text-center text-slate-500">কোনো পণ্য পাওয়া যায়নি।</td></tr>`}
+          </tbody>
         </table>
       </div>
     </div>`;
@@ -144,21 +151,23 @@ function productsPage() {
 function salesPage() {
   return `
     <div class="grid md:grid-cols-2 gap-5">
-      <div class="bg-white rounded-xl p-5">
+      <div class="bg-white rounded-xl p-5 shadow-sm border">
         <h2 class="font-bold text-xl mb-3">Products</h2>
-        ${products.map(p => `
-          <button data-action="add-cart" data-id="${p.id}"
-            class="border rounded p-3 m-1 text-left">
-            ${esc(p.name)}<br>
-            ${money(p.sale_price)} | Stock: ${p.stock}
-          </button>`).join("")}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          ${products.map(p => `
+            <button data-action="add-cart" data-id="${p.id}"
+              class="border rounded-lg p-3 text-left hover:border-teal-600 hover:bg-teal-50 transition">
+              <div class="font-semibold">${esc(p.name)}</div>
+              <div class="text-sm text-slate-600">${money(p.sale_price)} | Stock: ${p.stock}</div>
+            </button>`).join("")}
+        </div>
       </div>
 
-      <div class="bg-white rounded-xl p-5">
+      <div class="bg-white rounded-xl p-5 shadow-sm border">
         <h2 class="font-bold text-xl mb-3">Cart</h2>
-        <div id="cart"></div>
+        <div id="cart" class="min-h-[150px]"></div>
         <button data-action="complete-sale"
-          class="bg-green-600 text-white p-3 rounded mt-3">
+          class="w-full bg-green-600 text-white p-3 rounded-lg font-bold mt-4 hover:bg-green-700 transition">
           Complete Sale
         </button>
       </div>
@@ -172,29 +181,32 @@ function renderCart() {
 
   $("#cart").innerHTML = cart.length
     ? cart.map(x => `
-      <div class="border-b p-2 flex">
-        <span class="mr-auto">${esc(x.name)} × ${x.qty}</span>
-        <b>${money(x.price * x.qty)}</b>
-      </div>`).join("") + `<hr><b>Total: ${money(total)}</b>`
-    : "Cart খালি।";
+      <div class="border-b py-2 flex justify-between items-center">
+        <span>${esc(x.name)} × ${x.qty}</span>
+        <b class="text-slate-800">${money(x.price * x.qty)}</b>
+      </div>`).join("") + `<div class="mt-3 text-right text-lg"><b>Total: ${money(total)}</b></div>`
+    : `<p class="text-slate-400 py-4 text-center">Cart খালি।</p>`;
 }
 
 function people(type) {
   const list = type === "Customer" ? customers : suppliers;
 
   return `
-    <div class="bg-white rounded-xl p-5">
-      <div class="flex mb-4">
+    <div class="bg-white rounded-xl p-5 shadow-sm border">
+      <div class="flex items-center mb-4">
         <h2 class="font-bold text-xl mr-auto">${type}s</h2>
         <button data-action="add-person" data-type="${type}"
-          class="bg-teal-700 text-white px-4 py-2 rounded">
-          ＋ Add
+          class="bg-teal-700 text-white px-4 py-2 rounded hover:bg-teal-800 transition">
+          ＋ Add ${type}
         </button>
       </div>
-      ${list.map(x => `
-        <div class="border-b p-3">
-          ${esc(x.name)} — ${esc(x.phone || "")}
-        </div>`).join("")}
+      <div class="divide-y">
+        ${list.length ? list.map(x => `
+          <div class="py-3 flex justify-between">
+            <span class="font-medium">${esc(x.name)}</span>
+            <span class="text-slate-500">${esc(x.phone || "No Phone")}</span>
+          </div>`).join("") : `<p class="text-slate-400 text-center py-4">কোনো তথ্য নেই।</p>`}
+      </div>
     </div>`;
 }
 
@@ -236,30 +248,29 @@ document.addEventListener("click", async e => {
 
   if (btn.dataset.action === "add-product") {
     modal("Add Product", `
-      <form id="productForm">
-        <input name="name" placeholder="Product Name" required>
-        <input name="sku" placeholder="SKU" required>
-        <input name="price" type="number" placeholder="Sale Price" required>
-        <input name="stock" type="number" placeholder="Stock" required>
-        <input name="minimum" type="number" value="5"
-          placeholder="Minimum Stock">
-        <button class="bg-green-600 text-white p-3 rounded mt-3">
+      <form id="productForm" class="flex flex-col gap-3">
+        <input name="name" placeholder="Product Name" class="border p-2 rounded w-full" required>
+        <input name="sku" placeholder="SKU" class="border p-2 rounded w-full" required>
+        <input name="price" type="number" step="any" placeholder="Sale Price" class="border p-2 rounded w-full" required>
+        <input name="stock" type="number" placeholder="Stock" class="border p-2 rounded w-full" required>
+        <input name="minimum" type="number" value="5" placeholder="Minimum Stock" class="border p-2 rounded w-full">
+        <button class="bg-green-600 text-white p-3 rounded font-bold hover:bg-green-700 transition mt-2">
           Save Product
         </button>
       </form>`);
   }
 
   if (btn.dataset.action === "delete-product") {
-    if (!confirm("Product মুছবেন?")) return;
+    if (!confirm("আপনি কি নিশ্চিত এই Product-টি মুছে ফেলতে চান?")) return;
     await db.from("products").delete().eq("id", btn.dataset.id);
     await load();
   }
 
   if (btn.dataset.action === "add-cart") {
-    const p = products.find(x => x.id === btn.dataset.id);
-    if (!p || p.stock < 1) return alert("Stock নেই।");
+    const p = products.find(x => String(x.id) === String(btn.dataset.id));
+    if (!p || Number(p.stock) < 1) return alert("Stock নেই।");
 
-    const old = cart.find(x => x.id === p.id);
+    const old = cart.find(x => String(x.id) === String(p.id));
     if (old) old.qty++;
     else cart.push({
       id: p.id,
@@ -285,13 +296,18 @@ document.addEventListener("click", async e => {
       payment_method: "Cash"
     }).select().single();
 
-    if (sale.error) return alert("Sale সংরক্ষণ হয়নি।");
+    if (sale.error) {
+      console.error(sale.error);
+      return alert("Sale সংরক্ষণ হয়নি। Supabase RLS Policy চেক করুন।");
+    }
 
     for (const x of cart) {
-      const p = products.find(y => y.id === x.id);
-      await db.from("products")
-        .update({ stock: Number(p.stock) - x.qty })
-        .eq("id", x.id);
+      const p = products.find(y => String(y.id) === String(x.id));
+      if (p) {
+        await db.from("products")
+          .update({ stock: Number(p.stock) - x.qty })
+          .eq("id", x.id);
+      }
 
       await db.from("sale_items").insert({
         sale_id: sale.data.id,
@@ -304,17 +320,17 @@ document.addEventListener("click", async e => {
 
     cart = [];
     await load();
-    alert("Sale সংরক্ষণ হয়েছে।");
+    alert("Sale সফলভাবে সংরক্ষণ হয়েছে!");
   }
 
   if (btn.dataset.action === "add-person") {
     modal("Add " + btn.dataset.type, `
-      <form id="personForm">
-        <input name="name" placeholder="Name" required>
-        <input name="phone" placeholder="Phone">
-        <input name="address" placeholder="Address">
+      <form id="personForm" class="flex flex-col gap-3">
+        <input name="name" placeholder="Name" class="border p-2 rounded w-full" required>
+        <input name="phone" placeholder="Phone" class="border p-2 rounded w-full">
+        <input name="address" placeholder="Address" class="border p-2 rounded w-full">
         <input type="hidden" name="type" value="${btn.dataset.type}">
-        <button class="bg-green-600 text-white p-3 rounded mt-3">
+        <button class="bg-green-600 text-white p-3 rounded font-bold hover:bg-green-700 transition mt-2">
           Save
         </button>
       </form>`);
@@ -326,7 +342,7 @@ document.addEventListener("submit", async e => {
   const f = new FormData(e.target);
 
   if (e.target.id === "productForm") {
-    await db.from("products").insert({
+    const { error } = await db.from("products").insert({
       name: f.get("name"),
       sku: f.get("sku"),
       sale_price: Number(f.get("price")),
@@ -334,25 +350,33 @@ document.addEventListener("submit", async e => {
       stock: Number(f.get("stock")),
       minimum_stock: Number(f.get("minimum") || 5)
     });
-    closeModal();
-    await load();
+
+    if (error) {
+      alert("পণ্য যোগ করা সম্ভব হয়নি: " + error.message);
+    } else {
+      closeModal();
+      await load();
+    }
   }
 
   if (e.target.id === "personForm") {
-    const table = f.get("type") === "Customer"
-      ? "customers"
-      : "suppliers";
+    const table = f.get("type") === "Customer" ? "customers" : "suppliers";
 
-    await db.from(table).insert({
+    const { error } = await db.from(table).insert({
       name: f.get("name"),
       phone: f.get("phone"),
       address: f.get("address")
     });
 
-    closeModal();
-    await load();
+    if (error) {
+      alert("তথ্য সেভ করা সম্ভব হয়নি: " + error.message);
+    } else {
+      closeModal();
+      await load();
+    }
   }
 });
 
+// App Initialization
 layout();
 load();
