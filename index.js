@@ -3,7 +3,6 @@
 const SUPABASE_URL = "https://ekcgmmtusasqziirkohd.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_A2fNVKm3AGDq25-UroB-4Q_V3mcLrUO";
 
-// Supabase Client Initialization
 const { createClient } = window.supabase || supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -16,16 +15,12 @@ let products = [];
 let customers = [];
 let suppliers = [];
 let cart = [];
+let selectedCustomer = "";
 
 async function load() {
   const p = await db.from("products").select("*").order("created_at", { ascending: false });
   const c = await db.from("customers").select("*").order("created_at", { ascending: false });
   const s = await db.from("suppliers").select("*").order("created_at", { ascending: false });
-
-  if (p.error || c.error || s.error) {
-    alert("Supabase সংযোগ বা Database policy সমস্যা হয়েছে।");
-    return;
-  }
 
   products = p.data || [];
   customers = c.data || [];
@@ -41,15 +36,15 @@ function nav(p) {
 function render() {
   const root = $("#app");
   root.innerHTML = `
-    <div class="min-h-screen flex flex-col md:flex-row">
+    <div class="min-h-screen flex flex-col md:flex-row bg-slate-100 text-slate-800">
       <aside class="w-full md:w-64 bg-slate-900 text-white p-4 space-y-4">
-        <h1 class="text-xl font-bold tracking-wide border-b border-slate-700 pb-3">NAMITA STORE</h1>
+        <h1 class="text-xl font-bold border-b border-slate-700 pb-3">NAMITA STORE</h1>
         <nav class="space-y-2">
           <button onclick="nav('dashboard')" class="w-full text-left px-3 py-2 rounded hover:bg-slate-800 ${page==='dashboard'?'bg-slate-800 font-bold':''}">📊 Dashboard</button>
           <button onclick="nav('products')" class="w-full text-left px-3 py-2 rounded hover:bg-slate-800 ${page==='products'?'bg-slate-800 font-bold':''}">📦 Products</button>
           <button onclick="nav('pos')" class="w-full text-left px-3 py-2 rounded hover:bg-slate-800 ${page==='pos'?'bg-slate-800 font-bold':''}">🧾 POS Sales</button>
-          <button onclick="nav('customers')" class="w-full text-left px-3 py-2 rounded hover:bg-slate-800 ${page==='customers'?'bg-slate-800 font-bold':''}">👥 Customers</button>
-          <button onclick="nav('suppliers')" class="w-full text-left px-3 py-2 rounded hover:bg-slate-800 ${page==='suppliers'?'bg-slate-800 font-bold':''}">🚚 Suppliers</button>
+          <button onclick="nav('customers')" class="w-full text-left px-3 py-2 rounded hover:bg-slate-800 ${page==='customers'?'bg-slate-800 font-bold':''}">👥 Customers (খাতা)</button>
+          <button onclick="nav('suppliers')" class="w-full text-left px-3 py-2 rounded hover:bg-slate-800 ${page==='suppliers'?'bg-slate-800 font-bold':''}">🚚 Suppliers (সাপ্লায়ার)</button>
         </nav>
       </aside>
       <main class="flex-1 p-4 md:p-8">${view()}</main>
@@ -84,9 +79,7 @@ function view() {
 
   if (page === "products") {
     return `
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold">Product Management</h2>
-      </div>
+      <h2 class="text-2xl font-bold mb-4">Product Management</h2>
       <form onsubmit="addProduct(event)" class="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-3">
         <input id="p_name" placeholder="Product Name" required class="border p-2 rounded w-full" />
         <input id="p_price" type="number" step="0.01" placeholder="Sale Price (₹)" required class="border p-2 rounded w-full" />
@@ -136,10 +129,17 @@ function view() {
         <div class="bg-white p-4 rounded shadow flex flex-col justify-between">
           <div>
             <h3 class="font-bold text-lg mb-3">Cart</h3>
-            <div class="space-y-2 max-h-60 overflow-y-auto">
-              ${cart.length === 0 ? '<p class="text-gray-400">Cart is empty</p>' : ''}
+            <div class="mb-3">
+              <label class="block text-xs font-bold text-gray-600 mb-1">কাস্টমার সিলেক্ট করুন:</label>
+              <select onchange="selectedCustomer=this.value" class="w-full border p-2 rounded text-sm">
+                <option value="">সাধারণ কাস্টমার (Cash)</option>
+                ${customers.map(c => `<option value="${esc(c.name)}">${esc(c.name)} (${esc(c.phone || 'No Phone')})</option>`).join('')}
+              </select>
+            </div>
+            <div class="space-y-2 max-h-48 overflow-y-auto border-t pt-2">
+              ${cart.length === 0 ? '<p class="text-gray-400 text-sm">Cart is empty</p>' : ''}
               ${cart.map(item => `
-                <div class="flex justify-between items-center text-sm border-b pb-2">
+                <div class="flex justify-between items-center text-sm border-b pb-1">
                   <div>
                     <p class="font-bold">${esc(item.name)}</p>
                     <p class="text-xs text-gray-500">${money(item.price)} x ${item.quantity}</p>
@@ -161,8 +161,64 @@ function view() {
     `;
   }
 
-  if (page === "customers" || page === "suppliers") {
-    return `<div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold capitalize">${page} Management</h2><p class="text-gray-500 mt-2">Module ready for extension.</p></div>`;
+  if (page === "customers") {
+    return `
+      <h2 class="text-2xl font-bold mb-4">Customer Management (খাতা)</h2>
+      <form onsubmit="addCustomer(event)" class="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+        <input id="c_name" placeholder="Customer Name" required class="border p-2 rounded w-full" />
+        <input id="c_phone" placeholder="Phone Number" class="border p-2 rounded w-full" />
+        <button class="bg-indigo-600 text-white rounded p-2 hover:bg-indigo-700 font-bold">+ Add Customer</button>
+      </form>
+      <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-100 border-b">
+              <th class="p-3">Name</th>
+              <th class="p-3">Phone</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${customers.length === 0 ? '<tr><td colspan="2" class="p-3 text-gray-400">No customers found</td></tr>' : ''}
+            ${customers.map(c => `
+              <tr class="border-b">
+                <td class="p-3 font-semibold">${esc(c.name)}</td>
+                <td class="p-3">${esc(c.phone || '-')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  if (page === "suppliers") {
+    return `
+      <h2 class="text-2xl font-bold mb-4">Supplier Management</h2>
+      <form onsubmit="addSupplier(event)" class="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+        <input id="s_name" placeholder="Supplier / Company Name" required class="border p-2 rounded w-full" />
+        <input id="s_phone" placeholder="Phone Number" class="border p-2 rounded w-full" />
+        <button class="bg-indigo-600 text-white rounded p-2 hover:bg-indigo-700 font-bold">+ Add Supplier</button>
+      </form>
+      <div class="bg-white rounded shadow overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-100 border-b">
+              <th class="p-3">Company Name</th>
+              <th class="p-3">Phone</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${suppliers.length === 0 ? '<tr><td colspan="2" class="p-3 text-gray-400">No suppliers found</td></tr>' : ''}
+            ${suppliers.map(s => `
+              <tr class="border-b">
+                <td class="p-3 font-semibold">${esc(s.name)}</td>
+                <td class="p-3">${esc(s.phone || '-')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
   }
 }
 
@@ -173,23 +229,42 @@ async function addProduct(e) {
   const stock = parseInt($("#p_stock").value);
 
   const { data, error } = await db.from("products").insert([{ name, price, stock }]).select();
-  if (error) {
-    alert("Error adding product");
-  } else {
+  if (error) alert("Error adding product");
+  else {
     products.unshift(data[0]);
-    $("#p_name").value = "";
-    $("#p_price").value = "";
-    $("#p_stock").value = "";
+    render();
+  }
+}
+
+async function addCustomer(e) {
+  e.preventDefault();
+  const name = $("#c_name").value;
+  const phone = $("#c_phone").value;
+
+  const { data, error } = await db.from("customers").insert([{ name, phone }]).select();
+  if (error) alert("Error adding customer");
+  else {
+    customers.unshift(data[0]);
+    render();
+  }
+}
+
+async function addSupplier(e) {
+  e.preventDefault();
+  const name = $("#s_name").value;
+  const phone = $("#s_phone").value;
+
+  const { data, error } = await db.from("suppliers").insert([{ name, phone }]).select();
+  if (error) alert("Error adding supplier");
+  else {
+    suppliers.unshift(data[0]);
     render();
   }
 }
 
 function addToCart(id) {
   const p = products.find(x => x.id === id);
-  if (!p || p.stock <= 0) {
-    alert("Out of stock!");
-    return;
-  }
+  if (!p || p.stock <= 0) return alert("Out of stock!");
   const existing = cart.find(x => x.id === id);
   if (existing) {
     if (existing.quantity < p.stock) existing.quantity++;
@@ -204,12 +279,11 @@ async function completeSale() {
   if (cart.length === 0) return alert("Cart empty!");
 
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const custName = selectedCustomer || "Walk-in Customer";
 
-  // Save Sale in DB
-  const { data: sale, error: saleErr } = await db.from("sales").insert([{ total_amount: total }]).select();
+  const { data: sale, error: saleErr } = await db.from("sales").insert([{ total_amount: total, customer_name: custName }]).select();
   if (saleErr) return alert("Sale error!");
 
-  // Stock deduction
   for (const item of cart) {
     const prod = products.find(p => p.id === item.id);
     if (prod) {
@@ -219,10 +293,10 @@ async function completeSale() {
     }
   }
 
-  // Print Invoice Popup
-  printInvoice({ customer_name: "Walk-in Customer" }, [...cart]);
+  printInvoice({ customer_name: custName }, [...cart]);
 
   cart = [];
+  selectedCustomer = "";
   render();
 }
 
