@@ -1264,3 +1264,1425 @@
       }
 
     };
+  /* =======================================================
+     TOP BAR
+     ======================================================= */
+
+  function renderTopbar() {
+    return `
+      <header class="bg-white border-b sticky top-0 z-40">
+        <div class="px-4 md:px-6 py-3 flex items-center justify-between gap-3">
+
+          <div class="flex items-center gap-3">
+
+            <button
+              onclick="window.nsToggleSidebar()"
+              class="md:hidden bg-slate-100 px-3 py-2 rounded-lg"
+            >
+              ☰
+            </button>
+
+            <div>
+              <div class="font-bold">
+                ${esc(
+                  businessSettings.business_name ||
+                  "NAMITA STORE"
+                )}
+              </div>
+
+              <div class="text-xs text-slate-500 mt-0.5">
+                ${new Date().toLocaleDateString("bn-IN")}
+              </div>
+            </div>
+
+          </div>
+
+          <button
+            onclick="window.nsGo('pos')"
+            class="
+              bg-gradient-to-r
+              from-indigo-600
+              via-violet-600
+              to-fuchsia-600
+              hover:opacity-90
+              text-white
+              px-4 py-2.5
+              rounded-xl
+              font-semibold
+              shadow
+            "
+          >
+            + নতুন বিল
+          </button>
+
+        </div>
+      </header>
+    `;
+  }
+
+  /* =======================================================
+     DASHBOARD
+     ======================================================= */
+
+  function getTodaySales() {
+    return sales
+      .filter(
+        (s) =>
+          String(s.created_at || "").slice(0, 10) === today()
+      )
+      .reduce(
+        (sum, s) =>
+          sum + num(s.total_amount),
+        0
+      );
+  }
+
+  function getTodayPurchase() {
+    return purchases
+      .filter(
+        (p) =>
+          String(p.created_at || "").slice(0, 10) === today()
+      )
+      .reduce(
+        (sum, p) =>
+          sum + num(p.total_amount),
+        0
+      );
+  }
+
+  function getCustomerDue() {
+    return customers.reduce(
+      (sum, c) =>
+        sum + num(c.due_amount),
+      0
+    );
+  }
+
+  function getSupplierDue() {
+    return suppliers.reduce(
+      (sum, s) =>
+        sum + num(s.due_amount),
+      0
+    );
+  }
+
+  function getStockQty() {
+    return products.reduce(
+      (sum, p) =>
+        sum + stockQty(p),
+      0
+    );
+  }
+
+  function getStockValue() {
+    return products.reduce(
+      (sum, p) =>
+        sum +
+        stockQty(p) *
+          purchasePrice(p),
+      0
+    );
+  }
+
+  function getLowStock() {
+    return products.filter(
+      (p) =>
+        stockQty(p) <=
+        num(
+          p.minimum_stock ??
+          5
+        )
+    );
+  }
+
+  function dashboardPage() {
+    const low = getLowStock();
+
+    return `
+      ${sectionHeader(
+        "Dashboard",
+        "NAMITA STORE — Accounting + Billing + Inventory + E-Commerce"
+      )}
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+        ${card(
+          "আজকের Sales",
+          money(getTodaySales()),
+          "💰",
+          `<span class="text-xs text-emerald-600">Live</span>`
+        )}
+
+        ${card(
+          "আজকের Purchase",
+          money(getTodayPurchase()),
+          "🛒"
+        )}
+
+        ${card(
+          "Customer Due",
+          money(getCustomerDue()),
+          "👥"
+        )}
+
+        ${card(
+          "Supplier Due",
+          money(getSupplierDue()),
+          "🚚"
+        )}
+
+        ${card(
+          "মোট Products",
+          products.length,
+          "📦"
+        )}
+
+        ${card(
+          "মোট Stock",
+          getStockQty(),
+          "📊"
+        )}
+
+        ${card(
+          "Stock Value",
+          money(getStockValue()),
+          "💎"
+        )}
+
+        ${card(
+          "Online Orders",
+          onlineOrders.length,
+          "🛍️"
+        )}
+
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-5 mt-6">
+
+        <div class="
+          lg:col-span-2
+          bg-gradient-to-br
+          from-indigo-600
+          via-violet-600
+          to-fuchsia-600
+          text-white
+          rounded-3xl
+          p-6
+          shadow-xl
+        ">
+
+          <div class="text-sm opacity-90">
+            Seller Panel
+          </div>
+
+          <div class="text-3xl font-black mt-2">
+            সবকিছু এক জায়গায়
+          </div>
+
+          <div class="mt-3 opacity-90">
+            POS • Inventory • Accounting • E-Commerce • Reports • Barcode
+          </div>
+
+          <div class="flex flex-wrap gap-2 mt-5">
+
+            <button
+              onclick="window.nsGo('pos')"
+              class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl"
+            >
+              🔥 New Sale
+            </button>
+
+            <button
+              onclick="window.nsGo('purchase')"
+              class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl"
+            >
+              🛒 Purchase
+            </button>
+
+            <button
+              onclick="window.nsGo('ecommerceProducts')"
+              class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl"
+            >
+              🛍️ Store
+            </button>
+
+            <button
+              onclick="window.nsGo('products')"
+              class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl"
+            >
+              📦 Products
+            </button>
+
+            <button
+              onclick="window.nsGo('barcode')"
+              class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl"
+            >
+              🔳 Barcode
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="
+          bg-white
+          border
+          rounded-3xl
+          p-5
+        ">
+
+          <h3 class="font-bold text-lg">
+            ⚠️ Low Stock
+          </h3>
+
+          <div class="mt-3 space-y-2">
+
+            ${
+              low
+                .slice(0, 6)
+                .map(
+                  (p) => `
+                    <div class="
+                      flex
+                      justify-between
+                      p-3
+                      bg-red-50
+                      rounded-xl
+                    ">
+
+                      <span>
+                        ${esc(p.name)}
+                      </span>
+
+                      <b class="text-red-600">
+                        ${stockQty(p)}
+                      </b>
+
+                    </div>
+                  `
+                )
+                .join("") ||
+              `
+                <div class="text-emerald-600 p-3">
+                  Stock ঠিক আছে
+                </div>
+              `
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+    `;
+  }
+
+  /* =======================================================
+     PRODUCTS
+     ======================================================= */
+
+  function productsPage() {
+    return `
+      ${sectionHeader(
+        "Products",
+        "Product, price, stock, barcode এবং inventory management",
+        "নতুন Product",
+        "window.nsAddProduct()"
+      )}
+
+      <div class="
+        bg-white
+        border
+        rounded-2xl
+        overflow-hidden
+      ">
+
+        <div class="
+          p-4
+          border-b
+          flex
+          flex-col
+          md:flex-row
+          gap-3
+        ">
+
+          <input
+            id="product-search"
+            oninput="window.nsFilterProducts()"
+            placeholder="Product / SKU / Barcode খুঁজুন..."
+            class="
+              border
+              rounded-xl
+              px-4 py-3
+              flex-1
+            "
+          >
+
+          <select
+            id="product-category"
+            onchange="window.nsFilterProducts()"
+            class="
+              border
+              rounded-xl
+              px-4 py-3
+            "
+          >
+
+            <option value="">
+              সব Category
+            </option>
+
+            ${categories
+              .map(
+                (c) => `
+                  <option value="${esc(c.name)}">
+                    ${esc(c.name)}
+                  </option>
+                `
+              )
+              .join("")}
+
+          </select>
+
+        </div>
+
+        <div class="overflow-x-auto">
+
+          <table class="w-full text-sm">
+
+            <thead class="bg-slate-50">
+
+              <tr>
+
+                <th class="text-left p-4">
+                  Product
+                </th>
+
+                <th class="text-left p-4">
+                  SKU/Barcode
+                </th>
+
+                <th class="text-right p-4">
+                  Purchase
+                </th>
+
+                <th class="text-right p-4">
+                  Sale
+                </th>
+
+                <th class="text-right p-4">
+                  Stock
+                </th>
+
+                <th class="text-center p-4">
+                  Action
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody id="product-table-body">
+              ${productRows(products)}
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+    `;
+  }
+
+  function productRows(list) {
+
+    if (!list.length) {
+      return `
+        <tr>
+
+          <td
+            colspan="6"
+            class="
+              p-10
+              text-center
+              text-slate-500
+            "
+          >
+            কোনো Product নেই
+          </td>
+
+        </tr>
+      `;
+    }
+
+    return list
+      .map(
+        (p) => `
+          <tr class="
+            border-t
+            hover:bg-slate-50
+          ">
+
+            <td class="p-4">
+
+              <div class="font-semibold">
+                ${esc(p.name)}
+              </div>
+
+              <div class="text-xs text-slate-500">
+                ${esc(p.category || "")}
+              </div>
+
+            </td>
+
+            <td class="p-4">
+
+              ${esc(p.sku || "-")}
+
+              <br>
+
+              <span class="text-xs text-slate-500">
+                ${esc(p.barcode || "")}
+              </span>
+
+            </td>
+
+            <td class="p-4 text-right">
+              ${money(purchasePrice(p))}
+            </td>
+
+            <td class="p-4 text-right font-semibold">
+              ${money(salePrice(p))}
+            </td>
+
+            <td class="p-4 text-right font-bold">
+              ${stockQty(p)}
+            </td>
+
+            <td class="p-4 text-center">
+
+              <button
+                onclick="window.nsEditProduct('${p.id}')"
+                class="
+                  bg-blue-50
+                  text-blue-600
+                  px-3 py-1.5
+                  rounded-lg
+                  mr-1
+                "
+              >
+                Edit
+              </button>
+
+              <button
+                onclick="window.nsDeleteProduct('${p.id}')"
+                class="
+                  bg-red-50
+                  text-red-600
+                  px-3 py-1.5
+                  rounded-lg
+                "
+              >
+                Delete
+              </button>
+
+            </td>
+
+          </tr>
+        `
+      )
+      .join("");
+  }
+
+  window.nsFilterProducts =
+    function () {
+
+      const q =
+        ($("#product-search")?.value || "")
+          .toLowerCase()
+          .trim();
+
+      const category =
+        $("#product-category")?.value || "";
+
+      const list = products.filter((p) => {
+
+        const text =
+          `${p.name || ""} ${p.sku || ""} ${
+            p.barcode || ""
+          }`.toLowerCase();
+
+        const matchSearch =
+          !q ||
+          text.includes(q);
+
+        const matchCategory =
+          !category ||
+          String(p.category || "") === category;
+
+        return (
+          matchSearch &&
+          matchCategory
+        );
+      });
+
+      const body =
+        $("#product-table-body");
+
+      if (body) {
+        body.innerHTML =
+          productRows(list);
+      }
+    };
+
+  /* =======================================================
+     ADD PRODUCT
+     ======================================================= */
+
+  window.nsAddProduct =
+    function () {
+
+      modal(
+        "নতুন Product",
+        `
+          <form
+            onsubmit="window.nsSaveProduct(event)"
+            class="space-y-4"
+          >
+
+            <div>
+
+              <label class="font-semibold text-sm">
+                Product Name *
+              </label>
+
+              <input
+                name="name"
+                required
+                class="
+                  w-full
+                  border
+                  rounded-xl
+                  px-4 py-3
+                  mt-1
+                "
+              >
+
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+
+              <div>
+
+                <label class="font-semibold text-sm">
+                  Category
+                </label>
+
+                <select
+                  name="category"
+                  class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4 py-3
+                    mt-1
+                  "
+                >
+
+                  <option value="">
+                    Select Category
+                  </option>
+
+                  ${categories
+                    .map(
+                      (c) => `
+                        <option value="${esc(c.name)}">
+                          ${esc(c.name)}
+                        </option>
+                      `
+                    )
+                    .join("")}
+
+                </select>
+
+              </div>
+
+              <div>
+
+                <label class="font-semibold text-sm">
+                  Brand
+                </label>
+
+                <select
+                  name="brand"
+                  class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4 py-3
+                    mt-1
+                  "
+                >
+
+                  <option value="">
+                    Select Brand
+                  </option>
+
+                  ${brands
+                    .map(
+                      (b) => `
+                        <option value="${esc(b.name)}">
+                          ${esc(b.name)}
+                        </option>
+                      `
+                    )
+                    .join("")}
+
+                </select>
+
+              </div>
+
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+
+              <div>
+
+                <label class="font-semibold text-sm">
+                  SKU
+                </label>
+
+                <input
+                  name="sku"
+                  class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4 py-3
+                    mt-1
+                  "
+                >
+
+              </div>
+
+              <div>
+
+                <label class="font-semibold text-sm">
+                  Barcode
+                </label>
+
+                <input
+                  name="barcode"
+                  class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4 py-3
+                    mt-1
+                  "
+                >
+
+              </div>
+
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4">
+
+              <div>
+
+                <label class="font-semibold text-sm">
+                  Purchase Price
+                </label>
+
+                <input
+                  name="purchase_price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                  class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4 py-3
+                    mt-1
+                  "
+                >
+
+              </div>
+
+              <div>
+
+                <label class="font-semibold text-sm">
+                  Sale Price *
+                </label>
+
+                <input
+                  name="sale_price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                  required
+                  class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4 py-3
+                    mt-1
+                  "
+                >
+
+              </div>
+
+              <div>
+
+                <label class="font-semibold text-sm">
+                  Opening Stock
+                </label>
+
+                <input
+                  name="stock"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                  class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4 py-3
+                    mt-1
+                  "
+                >
+
+              </div>
+
+            </div>
+
+            <div>
+
+              <label class="font-semibold text-sm">
+                Minimum Stock
+              </label>
+
+              <input
+                name="minimum_stock"
+                type="number"
+                min="0"
+                step="0.01"
+                value="5"
+                class="
+                  w-full
+                  border
+                  rounded-xl
+                  px-4 py-3
+                  mt-1
+                "
+              >
+
+            </div>
+
+            <button
+              class="
+                w-full
+                bg-gradient-to-r
+                from-indigo-600
+                via-violet-600
+                to-fuchsia-600
+                text-white
+                px-6 py-3
+                rounded-xl
+                font-semibold
+              "
+            >
+              Save Product
+            </button>
+
+          </form>
+        `
+      );
+    };
+
+  window.nsSaveProduct =
+    async function (event) {
+
+      event.preventDefault();
+
+      const fd =
+        new FormData(
+          event.target
+        );
+
+      const name =
+        String(
+          fd.get("name") || ""
+        ).trim();
+
+      if (!name) {
+
+        toast(
+          "Product Name দিন",
+          "warning"
+        );
+
+        return;
+      }
+
+      const sale =
+        num(
+          fd.get("sale_price")
+        );
+
+      const payload = {
+        name,
+
+        category:
+          fd.get("category") ||
+          null,
+
+        brand:
+          fd.get("brand") ||
+          null,
+
+        sku:
+          fd.get("sku") ||
+          null,
+
+        barcode:
+          fd.get("barcode") ||
+          null,
+
+        purchase_price:
+          num(
+            fd.get(
+              "purchase_price"
+            )
+          ),
+
+        sale_price:
+          sale,
+
+        price:
+          sale,
+
+        stock:
+          num(
+            fd.get("stock")
+          ),
+
+        minimum_stock:
+          num(
+            fd.get(
+              "minimum_stock"
+            )
+          ),
+
+        is_active:
+          true,
+
+        created_at:
+          dateTime(),
+      };
+
+      const {
+        error
+      } =
+        await db
+          .from("products")
+          .insert(payload);
+
+      if (error) {
+
+        console.error(error);
+
+        toast(
+          "Product Save হয়নি: " +
+          error.message,
+          "error"
+        );
+
+        return;
+      }
+
+      nsCloseModal();
+
+      toast(
+        "Product যোগ হয়েছে"
+      );
+
+      await loadAll();
+    };
+
+  /* =======================================================
+     EDIT PRODUCT
+     ======================================================= */
+
+  window.nsEditProduct =
+    function (id) {
+
+      const p =
+        products.find(
+          (x) =>
+            String(x.id) ===
+            String(id)
+        );
+
+      if (!p) {
+
+        toast(
+          "Product পাওয়া যায়নি",
+          "error"
+        );
+
+        return;
+      }
+
+      modal(
+        "Product Edit",
+        `
+          <form
+            onsubmit="
+              window.nsUpdateProduct(
+                event,
+                '${id}'
+              )
+            "
+            class="space-y-4"
+          >
+
+            <div>
+
+              <label class="font-semibold text-sm">
+                Product Name *
+              </label>
+
+              <input
+                name="name"
+                required
+                value="${esc(p.name)}"
+                class="
+                  w-full
+                  border
+                  rounded-xl
+                  px-4 py-3
+                  mt-1
+                "
+              >
+
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+
+              <div>
+
+                <label class="font-semibold text-sm">
+                  Category
+                </label>
+
+                <select
+                  name="category"
+                  class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4 py-3
+                    mt-1
+                  "
+                >
+
+                  <option value="">
+                    Select Category
+                  </option>
+
+                  ${categories
+                    .map(
+                      (c) => `
+                        <option
+                          value="${esc(c.name)}"
+                          ${
+                            String(
+                              p.category || ""
+                            ) ===
+                            String(c.name)
+                              ? "selected"
+                              : ""
+                          }
+                        >
+                          ${esc(c.name)}
+                        </option>
+                      `
+                    )
+                    .join("")}
+
+                </select>
+
+              </div>
+
+              <div>
+
+                <label class="font-semibold text-sm">
+                  Brand
+                </label>
+
+                <select
+                  name="brand"
+                  class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4 py-3
+                    mt-1
+                  "
+                >
+
+                  <option value="">
+                    Select Brand
+                  </option>
+
+                  ${brands
+                    .map(
+                      (b) => `
+                        <option
+                          value="${esc(b.name)}"
+                          ${
+                            String(
+                              p.brand || ""
+                            ) ===
+                            String(b.name)
+                              ? "selected"
+                              : ""
+                          }
+                        >
+                          ${esc(b.name)}
+                        </option>
+                      `
+                    )
+                    .join("")}
+
+                </select>
+
+              </div>
+
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+
+              <div>
+
+                <label class="font-semibold text-sm">
+                  SKU
+                </label>
+
+                <input
+                  name="sku"
+                  value="${esc(
+                    p.sku || ""
+                  )}"
+                  class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4 py-3
+                    mt-1
+                  "
+                >
+
+              </div>
+
+              <div>
+
+                <label class="font-semibold text-sm">
+                  Barcode
+                </label>
+
+                <input
+                  name="barcode"
+                  value="${esc(
+                    p.barcode || ""
+                  )}"
+                  class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4 py-3
+                    mt-1
+                  "
+                >
+
+              </div>
+
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4">
+
+              <div>
+
+                <label class="font-semibold text-sm">
+                  Purchase Price
+                </label>
+
+                <input
+                  name="purchase_price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value="${num(
+                    p.purchase_price
+                  )}"
+                  class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4 py-3
+                    mt-1
+                  "
+                >
+
+              </div>
+
+              <div>
+
+                <label class="font-semibold text-sm">
+                  Sale Price *
+                </label>
+
+                <input
+                  name="sale_price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  required
+                  value="${num(
+                    salePrice(p)
+                  )}"
+                  class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4 py-3
+                    mt-1
+                  "
+                >
+
+              </div>
+
+              <div>
+
+                <label class="font-semibold text-sm">
+                  Stock
+                </label>
+
+                <input
+                  name="stock"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value="${stockQty(p)}"
+                  class="
+                    w-full
+                    border
+                    rounded-xl
+                    px-4 py-3
+                    mt-1
+                  "
+                >
+
+              </div>
+
+            </div>
+
+            <div>
+
+              <label class="font-semibold text-sm">
+                Minimum Stock
+              </label>
+
+              <input
+                name="minimum_stock"
+                type="number"
+                min="0"
+                step="0.01"
+                value="${num(
+                  p.minimum_stock ?? 5
+                )}"
+                class="
+                  w-full
+                  border
+                  rounded-xl
+                  px-4 py-3
+                  mt-1
+                "
+              >
+
+            </div>
+
+            <button
+              class="
+                w-full
+                bg-blue-600
+                hover:bg-blue-700
+                text-white
+                px-6 py-3
+                rounded-xl
+                font-semibold
+              "
+            >
+              Update Product
+            </button>
+
+          </form>
+        `
+      );
+    };
+
+  window.nsUpdateProduct =
+    async function (
+      event,
+      id
+    ) {
+
+      event.preventDefault();
+
+      const fd =
+        new FormData(
+          event.target
+        );
+
+      const sale =
+        num(
+          fd.get(
+            "sale_price"
+          )
+        );
+
+      const {
+        error
+      } =
+        await db
+          .from("products")
+          .update({
+
+            name:
+              String(
+                fd.get(
+                  "name"
+                ) || ""
+              ).trim(),
+
+            category:
+              fd.get(
+                "category"
+              ) || null,
+
+            brand:
+              fd.get(
+                "brand"
+              ) || null,
+
+            sku:
+              fd.get("sku") ||
+              null,
+
+            barcode:
+              fd.get(
+                "barcode"
+              ) || null,
+
+            purchase_price:
+              num(
+                fd.get(
+                  "purchase_price"
+                )
+              ),
+
+            sale_price:
+              sale,
+
+            price:
+              sale,
+
+            stock:
+              num(
+                fd.get("stock")
+              ),
+
+            minimum_stock:
+              num(
+                fd.get(
+                  "minimum_stock"
+                )
+              ),
+
+          })
+          .eq(
+            "id",
+            id
+          );
+
+      if (error) {
+
+        toast(
+          error.message,
+          "error"
+        );
+
+        return;
+      }
+
+      nsCloseModal();
+
+      toast(
+        "Product Updated"
+      );
+
+      await loadAll();
+    };
+
+  window.nsDeleteProduct =
+    async function (id) {
+
+      const p =
+        products.find(
+          (x) =>
+            String(x.id) ===
+            String(id)
+        );
+
+      if (!p) return;
+
+      const ok =
+        confirm(
+          `Product "${p.name}" Delete করবেন?`
+        );
+
+      if (!ok) return;
+
+      const {
+        error
+      } =
+        await db
+          .from("products")
+          .delete()
+          .eq(
+            "id",
+            id
+          );
+
+      if (error) {
+
+        toast(
+          "Delete হয়নি: " +
+          error.message,
+          "error"
+        );
+
+        return;
+      }
+
+      toast(
+        "Product Delete হয়েছে"
+      );
+
+      await loadAll();
+    };
