@@ -1,8 +1,7 @@
 window.NAMITA_CONFIG = Object.freeze({
   SUPABASE_URL: "https://ekcgmmtusasqziirkohd.supabase.co",
 
-  // এখানে আপনার Supabase ANON/PUBLISHABLE KEY বসাবেন
-  SUPABASE_ANON_KEY: "YOUR_SUPABASE_ANON_KEY",
+  SUPABASE_ANON_KEY: "sb_publishable_A2fNVKm3AGDq25-UroB-4Q_V3mcLrUO",
 
   APP_NAME: "NAMITA STORE",
   CURRENCY: "₹",
