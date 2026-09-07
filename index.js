@@ -1,5 +1,5 @@
 /* =========================================================
-   NAMITA STORE - PHASE 1: INVENTORY & STOCK MANAGEMENT
+   NAMITA STORE - PHASE 2: POS, BILLING, INVOICE & GST
    ========================================================= */
 (function () {
   "use strict";
@@ -26,6 +26,7 @@
   const num = (v) => Number(v || 0);
   const esc = (v) => String(v ?? "").replace(/[&<>'"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#039;", '"': "&quot;" }[c]));
   const dateTime = () => new Date().toISOString();
+  const invNo = () => "INV-" + Date.now().toString().slice(-6);
 
   function toast(msg, type = "success") {
     const old = document.getElementById("ns-toast");
@@ -62,8 +63,9 @@
   };
 
   /* STATE */
-  let currentTab = "products";
-  let products = [], categories = [], brands = [];
+  let currentTab = "pos";
+  let products = [], categories = [], sales = [], cart = [];
+  let posDiscount = 0, posGstRate = 0, paymentMode = "Cash";
 
   async function safeSelect(table) {
     try {
@@ -73,8 +75,8 @@
   }
 
   async function loadAll() {
-    [products, categories, brands] = await Promise.all([
-      safeSelect("products"), safeSelect("categories"), safeSelect("brands")
+    [products, categories, sales] = await Promise.all([
+      safeSelect("products"), safeSelect("categories"), safeSelect("sales")
     ]);
     render();
   }
@@ -85,157 +87,199 @@
   };
 
   /* VIEWS */
-  function productsView() {
-    const lowStockCount = products.filter(p => num(p.stock) <= num(p.min_stock || 5)).length;
+  function posView() {
+    const subtotal = cart.reduce((a, b) => a + (b.qty * b.price), 0);
+    const tax = (subtotal * posGstRate) / 100;
+    const grandTotal = Math.max(0, subtotal + tax - posDiscount);
+
     return `
       <div class="space-y-4">
-        <div class="flex flex-col md:flex-row justify-between md:items-center gap-3 border-b pb-3">
-          <div>
-            <h2 class="text-2xl font-bold text-slate-800">📦 Inventory Management</h2>
-            <p class="text-xs text-slate-500">Low Stock Items: <span class="font-bold text-amber-600">${lowStockCount}</span></p>
-          </div>
+        <div class="flex justify-between items-center border-b pb-3">
+          <h2 class="text-2xl font-bold text-slate-800">🔥 POS & Billing System</h2>
           <div class="flex gap-2">
-            <button onclick="window.nsAddCategory()" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 rounded-xl text-sm font-bold">+ Category</button>
-            <button onclick="window.nsAddProduct()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow">+ Add Product</button>
+            <button onclick="window.switchTab('products')" class="bg-slate-800 text-white px-3 py-2 rounded-xl text-sm font-bold">📦 Inventory Panel</button>
           </div>
         </div>
 
-        <div class="bg-white border rounded-2xl overflow-x-auto shadow-sm">
-          <table class="w-full text-sm text-left text-slate-700">
-            <thead class="bg-slate-50 border-b">
-              <tr>
-                <th class="p-4">SKU / Barcode</th>
-                <th class="p-4">Product Name</th>
-                <th class="p-4">Category</th>
-                <th class="p-4">MRP / Sale Price</th>
-                <th class="p-4">Stock</th>
-                <th class="p-4 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${products.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-400">কোনো প্রোডাক্ট পাওয়া যায়নি</td></tr>' : products.map(p => {
-                const isLow = num(p.stock) <= num(p.min_stock || 5);
-                return `
-                  <tr class="border-b hover:bg-slate-50">
-                    <td class="p-4 font-mono text-xs">${esc(p.sku || p.barcode || "-")}</td>
-                    <td class="p-4 font-bold text-slate-800">${esc(p.name)}</td>
-                    <td class="p-4"><span class="bg-slate-100 text-slate-600 px-2 py-1 rounded-md text-xs">${esc(p.category || "General")}</span></td>
-                    <td class="p-4"><span class="text-xs text-slate-400 line-through">${money(p.mrp)}</span> <b class="text-emerald-600">${money(p.sale_price)}</b></td>
-                    <td class="p-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${isLow ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${num(p.stock)}</span></td>
-                    <td class="p-4 text-center">
-                      <button onclick="window.nsAdjustStock('${p.id}')" class="text-xs bg-amber-500 text-white px-2 py-1 rounded-md font-bold">Stock Adj.</button>
-                    </td>
-                  </tr>`;
-              }).join("")}
-            </tbody>
-          </table>
+        <div class="grid lg:grid-cols-3 gap-6">
+          <!-- Product Selector -->
+          <div class="lg:col-span-2 bg-white p-4 border rounded-2xl shadow-sm">
+            <div class="flex gap-2 mb-4">
+              <input type="text" id="pos-search" oninput="window.nsFilterPos(this.value)" placeholder="Search Name or Scan Barcode/SKU..." class="w-full border p-3 rounded-xl focus:outline-indigo-500 font-mono text-sm">
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[550px] overflow-y-auto" id="pos-grid">
+              ${products.map(p => `
+                <div onclick="window.nsAddToCart('${p.id}')" class="border p-3 rounded-xl cursor-pointer hover:border-indigo-500 hover:shadow-md transition bg-white">
+                  <div class="text-xs font-mono text-slate-400">${esc(p.sku || "NO-SKU")}</div>
+                  <div class="font-bold text-sm text-slate-800 truncate">${esc(p.name)}</div>
+                  <div class="text-xs text-slate-500 mt-1">Stock: <b class="${num(p.stock) <= 5 ? 'text-red-500' : 'text-slate-700'}">${num(p.stock)}</b></div>
+                  <div class="text-indigo-600 font-bold mt-2">${money(p.sale_price)}</div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+
+          <!-- Checkout Cart -->
+          <div class="bg-white p-4 border rounded-2xl shadow-sm flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold border-b pb-2 mb-3 text-slate-800 flex justify-between">
+                <span>Cart Details</span>
+                <button onclick="window.nsClearCart()" class="text-xs text-red-500 font-normal">Clear All</button>
+              </h3>
+              <div id="cart-list" class="space-y-2 max-h-60 overflow-y-auto mb-4">
+                ${cart.length === 0 ? '<div class="text-slate-400 text-center py-10">কার্ট খালি রয়েছে</div>' : cart.map(item => `
+                  <div class="flex justify-between items-center text-sm border-b pb-2">
+                    <div class="flex-1 pr-2">
+                      <div class="font-bold text-slate-800 truncate">${esc(item.name)}</div>
+                      <div class="text-xs text-slate-500">${money(item.price)} x ${item.qty}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button onclick="window.nsChangeQty('${item.id}', -1)" class="w-6 h-6 bg-slate-100 rounded text-slate-600 font-bold">-</button>
+                      <span class="font-bold text-xs">${item.qty}</span>
+                      <button onclick="window.nsChangeQty('${item.id}', 1)" class="w-6 h-6 bg-slate-100 rounded text-slate-600 font-bold">+</button>
+                      <button onclick="window.nsRemoveCart('${item.id}')" class="text-red-500 ml-2 font-bold">✕</button>
+                    </div>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+
+            <!-- Billing Summary & Calculations -->
+            <div class="border-t pt-3 space-y-2">
+              <div class="flex justify-between text-sm text-slate-600"><span>Subtotal:</span><span>${money(subtotal)}</span></div>
+              <div class="flex justify-between items-center text-sm">
+                <span>GST Tax (%):</span>
+                <input type="number" value="${posGstRate}" onchange="window.nsSetGst(this.value)" class="w-16 border rounded p-1 text-right text-xs">
+              </div>
+              <div class="flex justify-between items-center text-sm">
+                <span>Discount (₹):</span>
+                <input type="number" value="${posDiscount}" onchange="window.nsSetDiscount(this.value)" class="w-20 border rounded p-1 text-right text-xs">
+              </div>
+              <div class="flex justify-between items-center text-sm">
+                <span>Payment Mode:</span>
+                <select onchange="window.nsSetPaymentMode(this.value)" class="border rounded p-1 text-xs font-bold">
+                  <option value="Cash">Cash</option>
+                  <option value="UPI">UPI / GPay</option>
+                  <option value="Card">Card</option>
+                  <option value="Credit">Credit (Due)</option>
+                </select>
+              </div>
+              <div class="flex justify-between font-bold text-lg text-slate-800 border-t pt-2">
+                <span>Grand Total:</span>
+                <span class="text-emerald-600">${money(grandTotal)}</span>
+              </div>
+              <button onclick="window.nsCheckout()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold shadow-md transition mt-2">Complete Sale & Print</button>
+            </div>
+          </div>
         </div>
       </div>`;
   }
 
-  /* ACTIONS & MODALS */
-  window.nsAddProduct = () => {
-    modal("নতুন Product যুক্ত করুন (Full Details)", `
-      <form onsubmit="window.nsSaveProduct(event)" class="space-y-4">
-        <div class="grid md:grid-cols-2 gap-4">
-          <div><label class="font-bold text-xs">Product Name *</label><input name="name" required class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500"></div>
-          <div><label class="font-bold text-xs">SKU / Barcode</label><input name="sku" placeholder="Auto / Manual" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500"></div>
-        </div>
-        <div class="grid md:grid-cols-3 gap-4">
-          <div>
-            <label class="font-bold text-xs">Category</label>
-            <select name="category" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500">
-              <option value="General">General</option>
-              ${categories.map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join("")}
-            </select>
-          </div>
-          <div><label class="font-bold text-xs">Rack Location</label><input name="rack" placeholder="Rack A-1" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500"></div>
-          <div><label class="font-bold text-xs">Min Stock Level</label><input name="min_stock" type="number" value="5" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500"></div>
-        </div>
-        <div class="grid md:grid-cols-3 gap-4">
-          <div><label class="font-bold text-xs">Purchase Price</label><input name="purchase_price" type="number" step="0.01" value="0" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500"></div>
-          <div><label class="font-bold text-xs">MRP</label><input name="mrp" type="number" step="0.01" value="0" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500"></div>
-          <div><label class="font-bold text-xs">Sale Price *</label><input name="sale_price" type="number" step="0.01" required class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500"></div>
-        </div>
-        <div><label class="font-bold text-xs">Opening Stock</label><input name="stock" type="number" value="0" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500"></div>
-        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-xl font-bold shadow">Save Product</button>
-      </form>`);
+  /* POS ACTIONS */
+  window.nsFilterPos = (q) => {
+    const grid = document.getElementById("pos-grid");
+    if (!grid) return;
+    const query = q.toLowerCase();
+    const filtered = products.filter(p => p.name.toLowerCase().includes(query) || String(p.sku || "").toLowerCase().includes(query));
+    grid.innerHTML = filtered.map(p => `
+      <div onclick="window.nsAddToCart('${p.id}')" class="border p-3 rounded-xl cursor-pointer hover:border-indigo-500 transition">
+        <div class="text-xs font-mono text-slate-400">${esc(p.sku || "NO-SKU")}</div>
+        <div class="font-bold text-sm text-slate-800 truncate">${esc(p.name)}</div>
+        <div class="text-xs text-slate-500 mt-1">Stock: ${num(p.stock)}</div>
+        <div class="text-indigo-600 font-bold mt-2">${money(p.sale_price)}</div>
+      </div>
+    `).join("");
   };
 
-  window.nsSaveProduct = async (e) => {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    const payload = {
-      name: fd.get("name"),
-      sku: fd.get("sku") || "SKU-" + Date.now().toString(36).toUpperCase(),
-      category: fd.get("category"),
-      rack: fd.get("rack"),
-      min_stock: num(fd.get("min_stock")),
-      purchase_price: num(fd.get("purchase_price")),
-      mrp: num(fd.get("mrp")),
-      sale_price: num(fd.get("sale_price")),
-      stock: num(fd.get("stock")),
-      created_at: dateTime()
-    };
-    const { error } = await db.from("products").insert(payload);
-    if (!error) {
-      nsCloseModal();
-      toast("প্রোডাক্ট সংরক্ষণ করা হয়েছে!");
-      await loadAll();
-    } else {
-      toast("ত্রুটি: " + error.message, "error");
-    }
-  };
-
-  window.nsAddCategory = () => {
-    modal("নতুন Category যুক্ত করুন", `
-      <form onsubmit="window.nsSaveCategory(event)" class="space-y-4">
-        <div><label class="font-bold text-xs">Category Name *</label><input name="name" required class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500"></div>
-        <button type="submit" class="w-full bg-slate-800 text-white p-3 rounded-xl font-bold shadow">Save Category</button>
-      </form>`, "max-w-md");
-  };
-
-  window.nsSaveCategory = async (e) => {
-    e.preventDefault();
-    const name = new FormData(e.target).get("name");
-    const { error } = await db.from("categories").insert({ name, created_at: dateTime() });
-    if (!error) {
-      nsCloseModal();
-      toast("ক্যাটাগরি যুক্ত করা হয়েছে!");
-      await loadAll();
-    } else {
-      toast("ত্রুটি: " + error.message, "error");
-    }
-  };
-
-  window.nsAdjustStock = (id) => {
+  window.nsAddToCart = (id) => {
     const p = products.find(x => String(x.id) === String(id));
     if (!p) return;
-    modal(`Stock Adjustment - ${esc(p.name)}`, `
-      <form onsubmit="window.nsSaveStockAdj(event, '${p.id}')" class="space-y-4">
-        <div><label class="font-bold text-xs">বর্তমান স্টক: ${num(p.stock)}</label></div>
-        <div><label class="font-bold text-xs">নতুন স্টক পরিমাণ *</label><input name="stock" type="number" value="${num(p.stock)}" required class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500"></div>
-        <button type="submit" class="w-full bg-amber-600 text-white p-3 rounded-xl font-bold shadow">Update Stock</button>
-      </form>`, "max-w-md");
+    if (num(p.stock) <= 0) return toast("প্রোডাক্টটি আউট অফ স্টক রয়েছে!", "warning");
+    const existing = cart.find(x => x.id === id);
+    if (existing) {
+      if (existing.qty + 1 > p.stock) return toast("পর্যাপ্ত স্টক নেই", "warning");
+      existing.qty++;
+    } else {
+      cart.push({ id: p.id, name: p.name, price: num(p.sale_price), qty: 1 });
+    }
+    render();
   };
 
-  window.nsSaveStockAdj = async (e, id) => {
-    e.preventDefault();
-    const stock = num(new FormData(e.target).get("stock"));
-    const { error } = await db.from("products").update({ stock }).eq("id", id);
+  window.nsChangeQty = (id, delta) => {
+    const item = cart.find(x => x.id === id);
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) cart = cart.filter(x => x.id !== id);
+    render();
+  };
+
+  window.nsRemoveCart = (id) => { cart = cart.filter(x => x.id !== id); render(); };
+  window.nsClearCart = () => { cart = []; render(); };
+  window.nsSetGst = (v) => { posGstRate = num(v); render(); };
+  window.nsSetDiscount = (v) => { posDiscount = num(v); render(); };
+  window.nsSetPaymentMode = (v) => { paymentMode = v; };
+
+  window.nsCheckout = async () => {
+    if (!cart.length) return toast("কার্টে কোনো প্রোডাক্ট নেই", "warning");
+
+    const invoiceNumber = invNo();
+    const subtotal = cart.reduce((a, b) => a + (b.qty * b.price), 0);
+    const tax = (subtotal * posGstRate) / 100;
+    const totalAmount = Math.max(0, subtotal + tax - posDiscount);
+
+    const salePayload = {
+      invoice_number: invoiceNumber,
+      total_amount: totalAmount,
+      discount: posDiscount,
+      tax_amount: tax,
+      payment_mode: paymentMode,
+      items: cart,
+      created_at: dateTime()
+    };
+
+    const { error } = await db.from("sales").insert(salePayload);
     if (!error) {
-      nsCloseModal();
-      toast("স্টক আপডেট হয়েছে!");
+      for (const item of cart) {
+        const p = products.find(x => String(x.id) === String(item.id));
+        if (p) {
+          await db.from("products").update({ stock: Math.max(0, num(p.stock) - item.qty) }).eq("id", p.id);
+        }
+      }
+      toast("বিক্রি সফল হয়েছে!");
+      window.nsPrintInvoice(invoiceNumber, cart, totalAmount, tax, posDiscount);
+      cart = [];
+      posDiscount = 0;
       await loadAll();
     } else {
       toast("ত্রুটি: " + error.message, "error");
     }
+  };
+
+  window.nsPrintInvoice = (inv, items, total, tax, disc) => {
+    modal(`Invoice: ${inv}`, `
+      <div id="print-area" class="p-4 font-mono text-slate-800 text-sm">
+        <div class="text-center border-b pb-2 mb-2">
+          <h2 class="text-xl font-bold">NAMITA STORE</h2>
+          <p class="text-xs">Main Road, Inventory Branch</p>
+          <p class="text-xs">Invoice: ${inv} | Date: ${new Date().toLocaleDateString()}</p>
+        </div>
+        <table class="w-full text-xs text-left mb-3">
+          <tr class="border-b"><th class="py-1">Item</th><th>Qty</th><th class="text-right">Price</th></tr>
+          ${items.map(i => `<tr><td class="py-1">${esc(i.name)}</td><td>${i.qty}</td><td class="text-right">${money(i.price * i.qty)}</td></tr>`).join("")}
+        </table>
+        <div class="border-t pt-2 text-xs space-y-1">
+          <div class="flex justify-between"><span>Tax/GST:</span><span>${money(tax)}</span></div>
+          <div class="flex justify-between"><span>Discount:</span><span>-${money(disc)}</span></div>
+          <div class="flex justify-between font-bold text-sm"><span>Total Paid:</span><span>${money(total)}</span></div>
+        </div>
+        <button onclick="window.print()" class="w-full bg-slate-800 text-white p-2 rounded-xl mt-4 font-bold">Print Invoice</button>
+      </div>`, "max-w-md");
   };
 
   function render() {
     const main = document.getElementById("main-content");
     if (!main) return;
-    main.innerHTML = productsView();
+    main.innerHTML = posView();
   }
 
   loadAll();
