@@ -1,29 +1,33 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NAMITA STORE</title>
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    @media print {
-      body * { visibility: hidden; }
-      #print-section, #print-section * { visibility: visible; }
-      #print-section { position: absolute; left: 0; top: 0; width: 100%; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAMITA STORE</title>
+    <!-- Tailwind CSS (Styling) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-100 text-slate-800">
-  <div id="app"></div>
-  <div id="print-section" class="hidden"></div>
+<body class="bg-gray-100 flex h-screen">
 
-  <!-- Script File -->
-  <script src="/index.js"></script>
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-slate-900 text-white flex flex-col p-4 space-y-2">
+        <h1 class="text-2xl font-bold border-b border-gray-700 pb-2">NAMITA STORE</h1>
+        <nav class="flex-1 space-y-1">
+            <button onclick="switchTab('dashboard')" class="w-full text-left p-2 hover:bg-slate-800 rounded">📊 Dashboard</button>
+            <button onclick="switchTab('pos')" class="w-full text-left p-2 hover:bg-slate-800 rounded">🔥 POS Billing</button>
+            <button onclick="switchTab('products')" class="w-full text-left p-2 hover:bg-slate-800 rounded">📦 Products</button>
+            <button onclick="switchTab('suppliers')" class="w-full text-left p-2 hover:bg-slate-800 rounded">🚚 Suppliers</button>
+            <button onclick="switchTab('customers')" class="w-full text-left p-2 hover:bg-slate-800 rounded">👥 Customers</button>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-6 overflow-y-auto" id="main-content">
+        <!-- JS dynamically renders content here -->
+    </main>
+
+    <script src="index.js"></script>
 </body>
 </html>
