@@ -20,16 +20,10 @@
 
   <title>NAMITA STORE — Accounting & Inventory</title>
 
-  <!-- =====================================================
-       TAILWIND CSS
-       ===================================================== -->
-
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- =====================================================
-       TAILWIND CONFIG
-       ===================================================== -->
-
+  <!-- Tailwind Configuration -->
   <script>
     tailwind.config = {
       theme: {
@@ -47,36 +41,13 @@
     };
   </script>
 
-  <!-- =====================================================
-       SUPABASE JS
-       ===================================================== -->
-
+  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- =====================================================
-       NAMITA STORE CONFIG
-       ===================================================== -->
-
-  <script src="/src/config/namita-config.js"></script>
-
-  <!-- =====================================================
-       NAMITA STORE CORE
-       ===================================================== -->
-
-  <script src="/src/core/namita-core.js"></script>
-
-  <!-- =====================================================
-       NAMITA STORE STEP 1 LOADER
-       ===================================================== -->
-
-  <script src="/src/core/load-step1.js"></script>
-
-  <!-- =====================================================
-       BASIC APPLICATION STYLE
-       ===================================================== -->
+  <!-- NAMITA STORE CONFIG -->
+  <script src="./namita-config.js"></script>
 
   <style>
-
     * {
       box-sizing: border-box;
     }
@@ -132,14 +103,11 @@
       display: none !important;
     }
 
-    /* Print */
-
     #print-section {
       display: none;
     }
 
     @media print {
-
       body > * {
         display: none !important;
       }
@@ -154,10 +122,7 @@
       }
     }
 
-    /* Mobile */
-
     @media (max-width: 640px) {
-
       body {
         font-size: 14px;
       }
@@ -166,45 +131,41 @@
         font-size: 13px;
       }
     }
-
   </style>
-
 </head>
 
 <body>
 
   <!-- =====================================================
-       MAIN APPLICATION
-       Existing index.js renders the complete application here
+       NAMITA STORE APPLICATION
+       IMPORTANT: index.js expects #main-content
        ===================================================== -->
 
   <div id="app">
 
-    <!-- Initial loading screen -->
-
     <div
-      class="min-h-screen flex items-center justify-center p-6"
+      id="main-content"
+      class="min-h-screen"
     >
+      <!-- Initial Loading Screen -->
 
-      <div
-        class="text-center"
-      >
+      <div class="min-h-screen flex items-center justify-center p-6">
 
-        <div
-          class="mx-auto mb-4 h-12 w-12 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin"
-        ></div>
+        <div class="text-center">
 
-        <h1
-          class="text-xl font-bold text-slate-800"
-        >
-          NAMITA STORE
-        </h1>
+          <div
+            class="mx-auto mb-4 h-12 w-12 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin"
+          ></div>
 
-        <p
-          class="mt-2 text-sm text-slate-500"
-        >
-          Application loading...
-        </p>
+          <h1 class="text-xl font-bold text-slate-800">
+            NAMITA STORE
+          </h1>
+
+          <p class="mt-2 text-sm text-slate-500">
+            Application loading...
+          </p>
+
+        </div>
 
       </div>
 
@@ -212,21 +173,11 @@
 
   </div>
 
-
-  <!-- =====================================================
-       PRINT AREA
-       Invoice / Receipt / Reports / Barcode printing
-       ===================================================== -->
-
+  <!-- Print Area -->
   <div id="print-section"></div>
 
-
-  <!-- =====================================================
-       MAIN APPLICATION JAVASCRIPT
-       IMPORTANT: Keep this LAST
-       ===================================================== -->
-
-  <script src="/index.js"></script>
+  <!-- Main Application -->
+  <script src="./index.js"></script>
 
 </body>
 </html>
