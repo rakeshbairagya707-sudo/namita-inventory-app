@@ -1,33 +1,232 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NAMITA STORE</title>
-    <!-- Tailwind CSS (Styling) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="theme-color"
+    content="#2563eb"
+  >
+
+  <meta
+    name="description"
+    content="NAMITA STORE - Accounting, Billing & Inventory Management"
+  >
+
+  <title>NAMITA STORE — Accounting & Inventory</title>
+
+  <!-- =====================================================
+       TAILWIND CSS
+       ===================================================== -->
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- =====================================================
+       TAILWIND CONFIG
+       ===================================================== -->
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: [
+              "Noto Sans Bengali",
+              "Noto Sans",
+              "Arial",
+              "sans-serif"
+            ]
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- =====================================================
+       SUPABASE JS
+       ===================================================== -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- =====================================================
+       NAMITA STORE CONFIG
+       ===================================================== -->
+
+  <script src="/src/config/namita-config.js"></script>
+
+  <!-- =====================================================
+       NAMITA STORE CORE
+       ===================================================== -->
+
+  <script src="/src/core/namita-core.js"></script>
+
+  <!-- =====================================================
+       NAMITA STORE STEP 1 LOADER
+       ===================================================== -->
+
+  <script src="/src/core/load-step1.js"></script>
+
+  <!-- =====================================================
+       BASIC APPLICATION STYLE
+       ===================================================== -->
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+    }
+
+    body {
+      font-family:
+        "Noto Sans Bengali",
+        "Noto Sans",
+        Arial,
+        sans-serif;
+
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Print */
+
+    #print-section {
+      display: none;
+    }
+
+    @media print {
+
+      body > * {
+        display: none !important;
+      }
+
+      #print-section {
+        display: block !important;
+        width: 100%;
+      }
+
+      @page {
+        margin: 8mm;
+      }
+    }
+
+    /* Mobile */
+
+    @media (max-width: 640px) {
+
+      body {
+        font-size: 14px;
+      }
+
+      table {
+        font-size: 13px;
+      }
+    }
+
+  </style>
+
 </head>
-<body class="bg-gray-100 flex h-screen">
 
-    <!-- Sidebar Navigation -->
-    <aside class="w-64 bg-slate-900 text-white flex flex-col p-4 space-y-2">
-        <h1 class="text-2xl font-bold border-b border-gray-700 pb-2">NAMITA STORE</h1>
-        <nav class="flex-1 space-y-1">
-            <button onclick="switchTab('dashboard')" class="w-full text-left p-2 hover:bg-slate-800 rounded">📊 Dashboard</button>
-            <button onclick="switchTab('pos')" class="w-full text-left p-2 hover:bg-slate-800 rounded">🔥 POS Billing</button>
-            <button onclick="switchTab('products')" class="w-full text-left p-2 hover:bg-slate-800 rounded">📦 Products</button>
-            <button onclick="switchTab('suppliers')" class="w-full text-left p-2 hover:bg-slate-800 rounded">🚚 Suppliers</button>
-            <button onclick="switchTab('customers')" class="w-full text-left p-2 hover:bg-slate-800 rounded">👥 Customers</button>
-        </nav>
-    </aside>
+<body>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 p-6 overflow-y-auto" id="main-content">
-        <!-- JS dynamically renders content here -->
-    </main>
+  <!-- =====================================================
+       MAIN APPLICATION
+       Existing index.js renders the complete application here
+       ===================================================== -->
 
-    <script src="index.js"></script>
+  <div id="app">
+
+    <!-- Initial loading screen -->
+
+    <div
+      class="min-h-screen flex items-center justify-center p-6"
+    >
+
+      <div
+        class="text-center"
+      >
+
+        <div
+          class="mx-auto mb-4 h-12 w-12 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin"
+        ></div>
+
+        <h1
+          class="text-xl font-bold text-slate-800"
+        >
+          NAMITA STORE
+        </h1>
+
+        <p
+          class="mt-2 text-sm text-slate-500"
+        >
+          Application loading...
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       PRINT AREA
+       Invoice / Receipt / Reports / Barcode printing
+       ===================================================== -->
+
+  <div id="print-section"></div>
+
+
+  <!-- =====================================================
+       MAIN APPLICATION JAVASCRIPT
+       IMPORTANT: Keep this LAST
+       ===================================================== -->
+
+  <script src="/index.js"></script>
+
 </body>
 </html>
