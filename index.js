@@ -1,5 +1,5 @@
 /* =========================================================
-   NAMITA STORE - PHASE 3: ACCOUNTS, EXPENSES & DAY BOOK
+   NAMITA STORE - PHASE 4: LEDGER, REPORTS & CUSTOMERS
    ========================================================= */
 (function () {
   "use strict";
@@ -26,7 +26,6 @@
   const num = (v) => Number(v || 0);
   const esc = (v) => String(v ?? "").replace(/[&<>'"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#039;", '"': "&quot;" }[c]));
   const dateTime = () => new Date().toISOString();
-  const today = () => new Date().toISOString().slice(0, 10);
 
   function toast(msg, type = "success") {
     const old = document.getElementById("ns-toast");
@@ -40,7 +39,7 @@
     setTimeout(() => div.remove(), 3000);
   }
 
-  function modal(title, content, size = "max-w-2xl") {
+  function modal(title, content, size = "max-w-3xl") {
     const old = document.getElementById("ns-modal");
     if (old) old.remove();
     const div = document.createElement("div");
@@ -63,8 +62,8 @@
   };
 
   /* STATE */
-  let currentTab = "accounts";
-  let sales = [], expenses = [];
+  let currentTab = "ledger";
+  let customers = [], sales = [];
 
   async function safeSelect(table) {
     try {
@@ -74,8 +73,8 @@
   }
 
   async function loadAll() {
-    [sales, expenses] = await Promise.all([
-      safeSelect("sales"), safeSelect("expenses")
+    [customers, sales] = await Promise.all([
+      safeSelect("customers"), safeSelect("sales")
     ]);
     render();
   }
@@ -86,59 +85,45 @@
   };
 
   /* VIEWS */
-  function accountsView() {
-    const todaySales = sales.filter(s => String(s.created_at).slice(0, 10) === today()).reduce((a, b) => a + num(b.total_amount), 0);
-    const todayExpenses = expenses.filter(e => String(e.created_at).slice(0, 10) === today()).reduce((a, b) => a + num(b.amount), 0);
-    const totalSales = sales.reduce((a, b) => a + num(b.total_amount), 0);
-    const totalExpenses = expenses.reduce((a, b) => a + num(b.amount), 0);
-    const netProfit = totalSales - totalExpenses;
+  function ledgerView() {
+    const totalDue = customers.reduce((a, b) => a + num(b.due_amount), 0);
 
     return `
       <div class="space-y-6">
         <div class="flex justify-between items-center border-b pb-3">
-          <h2 class="text-2xl font-bold text-slate-800">💰 Accounting & Expenses</h2>
-          <button onclick="window.nsAddExpense()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow">+ Add Expense</button>
+          <h2 class="text-2xl font-bold text-slate-800">👥 Customer Ledger & Due Management</h2>
+          <button onclick="window.nsAddCustomer()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow">+ Add Customer</button>
         </div>
 
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white p-5 rounded-2xl border shadow-sm">
-            <div class="text-xs text-slate-500 font-bold uppercase">আজকের বিক্রি</div>
-            <div class="text-2xl font-bold text-emerald-600 mt-1">${money(todaySales)}</div>
-          </div>
-          <div class="bg-white p-5 rounded-2xl border shadow-sm">
-            <div class="text-xs text-slate-500 font-bold uppercase">আজকের খরচ</div>
-            <div class="text-2xl font-bold text-rose-600 mt-1">${money(todayExpenses)}</div>
-          </div>
-          <div class="bg-white p-5 rounded-2xl border shadow-sm">
-            <div class="text-xs text-slate-500 font-bold uppercase">মোট লাভ / ক্ষতি</div>
-            <div class="text-2xl font-bold ${netProfit >= 0 ? 'text-indigo-600' : 'text-red-600'} mt-1">${money(netProfit)}</div>
-          </div>
-          <div class="bg-white p-5 rounded-2xl border shadow-sm">
-            <div class="text-xs text-slate-500 font-bold uppercase">মোট খরচ</div>
-            <div class="text-2xl font-bold text-slate-700 mt-1">${money(totalExpenses)}</div>
+        <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex justify-between items-center">
+          <div>
+            <div class="text-xs font-bold text-amber-800 uppercase">মোট বাজারের বাকি (Total Customer Due)</div>
+            <div class="text-2xl font-bold text-amber-900 mt-1">${money(totalDue)}</div>
           </div>
         </div>
 
-        <!-- Expense History Table -->
         <div class="bg-white border rounded-2xl overflow-x-auto shadow-sm p-4">
-          <h3 class="font-bold text-lg mb-3 text-slate-800 border-b pb-2">Expenses History</h3>
+          <h3 class="font-bold text-lg mb-3 text-slate-800 border-b pb-2">Customer List</h3>
           <table class="w-full text-sm text-left text-slate-700">
             <thead class="bg-slate-50 border-b">
               <tr>
-                <th class="p-3">তারিখ</th>
-                <th class="p-3">খরচের বিবরণ</th>
-                <th class="p-3">ক্যাটাগরি</th>
-                <th class="p-3 text-right">পরিমাণ</th>
+                <th class="p-3">নাম</th>
+                <th class="p-3">ফোন নম্বর</th>
+                <th class="p-3">ঠিকানা</th>
+                <th class="p-3 text-right">বাকি পরিমাণ</th>
+                <th class="p-3 text-center">অ্যাকশন</th>
               </tr>
             </thead>
             <tbody>
-              ${expenses.length === 0 ? '<tr><td colspan="4" class="p-4 text-center text-slate-400">কোনো খরচের রেকর্ড পাওয়া যায়নি</td></tr>' : expenses.map(e => `
+              ${customers.length === 0 ? '<tr><td colspan="5" class="p-4 text-center text-slate-400">কোনো কাস্টমার যুক্ত করা হয়নি</td></tr>' : customers.map(c => `
                 <tr class="border-b hover:bg-slate-50">
-                  <td class="p-3 text-xs text-slate-500">${new Date(e.created_at).toLocaleDateString()}</td>
-                  <td class="p-3 font-bold text-slate-800">${esc(e.title)}</td>
-                  <td class="p-3"><span class="bg-rose-50 text-rose-600 px-2 py-1 rounded text-xs font-bold">${esc(e.category || "General")}</span></td>
-                  <td class="p-3 text-right font-bold text-rose-600">${money(e.amount)}</td>
+                  <td class="p-3 font-bold text-slate-800">${esc(c.name)}</td>
+                  <td class="p-3 text-slate-600">${esc(c.phone || "N/A")}</td>
+                  <td class="p-3 text-slate-500">${esc(c.address || "N/A")}</td>
+                  <td class="p-3 text-right font-bold ${num(c.due_amount) > 0 ? 'text-red-600' : 'text-emerald-600'}">${money(c.due_amount)}</td>
+                  <td class="p-3 text-center">
+                    <button onclick="window.nsCollectDue('${c.id}', '${esc(c.name)}', ${num(c.due_amount)})" class="bg-slate-100 hover:bg-emerald-100 text-slate-800 hover:text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold transition">পেমেন্ট গ্রহণ</button>
+                  </td>
                 </tr>
               `).join("")}
             </tbody>
@@ -148,47 +133,77 @@
   }
 
   /* ACTIONS */
-  window.nsAddExpense = () => {
-    modal("নতুন Expense যুক্ত করুন", `
-      <form onsubmit="window.nsSaveExpense(event)" class="space-y-4">
+  window.nsAddCustomer = () => {
+    modal("নতুন কাস্টমার যুক্ত করুন", `
+      <form onsubmit="window.nsSaveCustomer(event)" class="space-y-4">
         <div>
-          <label class="font-bold text-xs">Expense Title / বিবরণ *</label>
-          <input name="title" required placeholder="যেমন: দোকান ভাড়া, কারেন্ট বিল" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500">
+          <label class="font-bold text-xs">Customer Name *</label>
+          <input name="name" required placeholder="কাস্টমারের নাম" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500">
         </div>
         <div class="grid md:grid-cols-2 gap-4">
           <div>
-            <label class="font-bold text-xs">Category</label>
-            <select name="category" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500">
-              <option value="Rent">Rent (ভাড়া)</option>
-              <option value="Electricity">Electricity (বিদ্যুৎ)</option>
-              <option value="Salary">Salary (বেতন)</option>
-              <option value="Transport">Transport (পরিবহন)</option>
-              <option value="Other">Other Expenses</option>
-            </select>
+            <label class="font-bold text-xs">Phone Number</label>
+            <input name="phone" placeholder="017xxxxxxxx" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500">
           </div>
           <div>
-            <label class="font-bold text-xs">Amount (টাকা) *</label>
-            <input name="amount" type="number" step="0.01" required placeholder="0.00" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500">
+            <label class="font-bold text-xs">Opening Due (বাকি থাকলে)</label>
+            <input name="due_amount" type="number" step="0.01" placeholder="0.00" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500">
           </div>
         </div>
-        <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white p-3 rounded-xl font-bold shadow">Save Expense</button>
+        <div>
+          <label class="font-bold text-xs">Address</label>
+          <textarea name="address" rows="2" placeholder="ঠিকানা" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500"></textarea>
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-xl font-bold shadow">Save Customer</button>
       </form>`);
   };
 
-  window.nsSaveExpense = async (e) => {
+  window.nsSaveCustomer = async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
     const payload = {
-      title: fd.get("title"),
-      category: fd.get("category"),
-      amount: num(fd.get("amount")),
+      name: fd.get("name"),
+      phone: fd.get("phone"),
+      address: fd.get("address"),
+      due_amount: num(fd.get("due_amount")),
       created_at: dateTime()
     };
 
-    const { error } = await db.from("expenses").insert(payload);
+    const { error } = await db.from("customers").insert(payload);
     if (!error) {
       nsCloseModal();
-      toast("খরচের বিবরণ যুক্ত করা হয়েছে!");
+      toast("কাস্টমার যুক্ত হয়েছে!");
+      await loadAll();
+    } else {
+      toast("ত্রুটি: " + error.message, "error");
+    }
+  };
+
+  window.nsCollectDue = (id, name, currentDue) => {
+    modal(`বাকি আদায়: ${name}`, `
+      <form onsubmit="window.nsProcessDuePayment(event, '${id}', ${currentDue})" class="space-y-4">
+        <div class="bg-slate-50 p-3 rounded-xl text-xs space-y-1">
+          <div>কাস্টমার: <b>${name}</b></div>
+          <div>বর্তমান বাকি: <b class="text-red-600">${money(currentDue)}</b></div>
+        </div>
+        <div>
+          <label class="font-bold text-xs">জমা দেওয়ার পরিমাণ (₹) *</label>
+          <input name="amount" type="number" max="${currentDue}" step="0.01" required placeholder="0.00" class="w-full border rounded-xl p-2.5 mt-1 focus:outline-indigo-500">
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-xl font-bold shadow">টাকা জমা নিন</button>
+      </form>`, "max-w-md");
+  };
+
+  window.nsProcessDuePayment = async (e, id, currentDue) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const payAmt = num(fd.get("amount"));
+    const newDue = Math.max(0, currentDue - payAmt);
+
+    const { error } = await db.from("customers").update({ due_amount: newDue }).eq("id", id);
+    if (!error) {
+      nsCloseModal();
+      toast("বাকি পেমেন্ট গ্রহণ করা হয়েছে!");
       await loadAll();
     } else {
       toast("ত্রুটি: " + error.message, "error");
@@ -198,7 +213,7 @@
   function render() {
     const main = document.getElementById("main-content");
     if (!main) return;
-    main.innerHTML = accountsView();
+    main.innerHTML = ledgerView();
   }
 
   loadAll();
